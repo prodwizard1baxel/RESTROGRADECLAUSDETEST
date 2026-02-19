@@ -142,11 +142,13 @@ export async function POST(req: Request) {
       .slice(0, 5)
 
     const sameCuisineNearby = mapped
-      .filter((r) => r.distanceKm <= 5)
+      .filter((r: Restaurant) => r.distanceKm <= 5)
+
       .slice(0, 5)
 
     const newHighRatedRestaurants = mapped
-      .filter((r) => r.rating > 3.5 && r.totalRatings < 120)
+     .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
+
       .slice(0, 5)
 
     // ==============================
