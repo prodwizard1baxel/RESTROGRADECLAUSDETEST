@@ -2,6 +2,23 @@ import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import OpenAI from "openai"
 
+type Restaurant = {
+  name: string
+  address: string
+  rating: number
+  totalRatings: number
+  distanceKm: number
+  cuisine: string[]
+  averagePrice: number
+  threatScore: number
+  sentimentLabel: string
+  sentimentScore: number
+  strengths?: string[]
+  weaknesses?: string[]
+}
+
+
+
 const prisma = new PrismaClient()
 
 const openai = new OpenAI({
@@ -111,7 +128,7 @@ export async function POST(req: Request) {
     )
 
     // Map Google data
-    const mapped = places.map((place: any) => {
+const mapped: Restaurant[] = places.map((place: any) => {
       const distance = getDistanceKm(
         baseLocation.lat,
         baseLocation.lng,
@@ -142,11 +159,12 @@ export async function POST(req: Request) {
       .slice(0, 5)
 
     const sameCuisineNearby = mapped
-      .filter((r) => r.distanceKm <= 5)
-      .slice(0, 5)
+  .filter((r: Restaurant) => r.distanceKm <= 5)
+  .slice(0, 5)
+
 
     const newHighRatedRestaurants = mapped
-      .filter((r) => r.rating > 3.5 && r.totalRatings < 120)
+.filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
       .slice(0, 5)
 
     // ==============================
