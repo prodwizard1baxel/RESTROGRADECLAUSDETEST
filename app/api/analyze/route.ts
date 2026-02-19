@@ -11,13 +11,11 @@ type Restaurant = {
   cuisine: string[]
   averagePrice: number
   threatScore: number
-  sentimentLabel: string
-  sentimentScore: number
+  sentimentLabel?: string
+  sentimentScore?: number
   strengths?: string[]
   weaknesses?: string[]
 }
-
-
 
 const prisma = new PrismaClient()
 
@@ -127,8 +125,10 @@ export async function POST(req: Request) {
       baseLocation.lng
     )
 
-    // Map Google data
-const mapped: Restaurant[] = places.map((place: any) => {
+    // ==============================
+    // Map Google Data
+    // ==============================
+    const mapped: Restaurant[] = places.map((place: any) => {
       const distance = getDistanceKm(
         baseLocation.lat,
         baseLocation.lng,
@@ -159,26 +159,15 @@ const mapped: Restaurant[] = places.map((place: any) => {
       .slice(0, 5)
 
     const sameCuisineNearby = mapped
-<<<<<<< HEAD
-  .filter((r: Restaurant) => r.distanceKm <= 5)
-  .slice(0, 5)
-
-
-    const newHighRatedRestaurants = mapped
-.filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
-=======
-      .filter((r: Restaurant) => r.distanceKm <= 5)
-
+      .filter((r) => r.distanceKm <= 5)
       .slice(0, 5)
 
     const newHighRatedRestaurants = mapped
-     .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
-
->>>>>>> 8d5a5ae134dd45c17153688e43033ca24d5a4af3
+      .filter((r) => r.rating > 3.5 && r.totalRatings < 120)
       .slice(0, 5)
 
     // ==============================
-    // AI ANALYSIS BLOCK
+    // AI ANALYSIS
     // ==============================
     const ai = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -192,9 +181,9 @@ const mapped: Restaurant[] = places.map((place: any) => {
         {
           role: "user",
           content: `
-Analyze the following restaurants:
+Analyze competition.
 
-Base Restaurant: ${name}
+Restaurant: ${name}
 City: ${city}
 
 Competitors:
@@ -230,8 +219,8 @@ Return STRICT JSON:
 
     const aiParsed = JSON.parse(ai.choices[0].message.content!)
 
-    // Merge AI Enhancements
-    topCompetitors.forEach((comp: any) => {
+    // Merge enhancements
+    topCompetitors.forEach((comp) => {
       const enhancement = aiParsed.competitorEnhancements?.find(
         (e: any) => e.restaurant === comp.name
       )
@@ -265,9 +254,6 @@ Return STRICT JSON:
       finalStrategicVerdict:
         aiParsed.finalStrategicVerdict,
     }
-
-    console.log("FINAL DATA SAVED:")
-    console.log(JSON.stringify(finalData, null, 2))
 
     const restaurant = await prisma.restaurant.upsert({
       where: { id: `${name}-${city}` },
