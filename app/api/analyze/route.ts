@@ -159,12 +159,22 @@ const mapped: Restaurant[] = places.map((place: any) => {
       .slice(0, 5)
 
     const sameCuisineNearby = mapped
+<<<<<<< HEAD
   .filter((r: Restaurant) => r.distanceKm <= 5)
   .slice(0, 5)
 
 
     const newHighRatedRestaurants = mapped
 .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
+=======
+      .filter((r: Restaurant) => r.distanceKm <= 5)
+
+      .slice(0, 5)
+
+    const newHighRatedRestaurants = mapped
+     .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
+
+>>>>>>> 8d5a5ae134dd45c17153688e43033ca24d5a4af3
       .slice(0, 5)
 
     // ==============================
