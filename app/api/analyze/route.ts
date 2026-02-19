@@ -1,3 +1,5 @@
+// temp change to trigger commit
+
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import OpenAI from "openai"
@@ -158,13 +160,14 @@ export async function POST(req: Request) {
       .sort((a, b) => b.threatScore - a.threatScore)
       .slice(0, 5)
 
-    const sameCuisineNearby = mapped
-      .filter((r) => r.distanceKm <= 5)
-      .slice(0, 5)
+  const sameCuisineNearby = mapped
+  .filter((r: Restaurant) => r.distanceKm <= 5)
+  .slice(0, 5)
 
-    const newHighRatedRestaurants = mapped
-      .filter((r) => r.rating > 3.5 && r.totalRatings < 120)
-      .slice(0, 5)
+const newHighRatedRestaurants = mapped
+  .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
+  .slice(0, 5)
+
 
     // ==============================
     // AI ANALYSIS
