@@ -12,12 +12,20 @@ export default function Home() {
           Analyze reviews. Beat competitors. Increase ratings.
         </p>
 
-        <a
-          href="/analyze"
-          className="bg-yellow-500 text-black px-8 py-4 rounded-lg font-semibold hover:bg-yellow-400"
-        >
-          Get customized report for your restaurant
-        </a>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/analyze"
+            className="bg-yellow-500 text-black px-8 py-4 rounded-lg font-semibold hover:bg-yellow-400"
+          >
+            Get customized report for your restaurant
+          </a>
+          <a
+            href="/demo"
+            className="bg-transparent border border-yellow-500 text-yellow-400 px-8 py-4 rounded-lg font-semibold hover:bg-yellow-500/10"
+          >
+            Try Demo
+          </a>
+        </div>
       </div>
     </main>
   )
