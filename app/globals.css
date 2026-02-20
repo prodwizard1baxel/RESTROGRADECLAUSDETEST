@@ -19,13 +19,18 @@
   }
 }
 
+/* ── Base ───────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Landing page animations */
+/* ── Keyframes ──────────────────────────────────────────────────────── */
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -53,7 +58,17 @@ body {
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
 }
 
 @keyframes slide-in-left {
@@ -83,8 +98,27 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ── Animation utilities ────────────────────────────────────────────── */
 .animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out both;
+  animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-fade-in {
@@ -96,7 +130,17 @@ body {
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-float-slow {
+  animation: float-slow 12s ease-in-out infinite;
+  animation-delay: 4s;
 }
 
 .animate-slide-in-left {
@@ -111,6 +155,10 @@ body {
   animation: count-up 0.6s ease-out both;
 }
 
+.animate-ping {
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 .animation-delay-100 { animation-delay: 0.1s; }
 .animation-delay-200 { animation-delay: 0.2s; }
 .animation-delay-300 { animation-delay: 0.3s; }
@@ -120,7 +168,7 @@ body {
 .animation-delay-700 { animation-delay: 0.7s; }
 .animation-delay-800 { animation-delay: 0.8s; }
 
-/* Gradient text */
+/* ── Gradient text (static) ─────────────────────────────────────────── */
 .gradient-text {
   background: linear-gradient(135deg, #eab308, #f59e0b, #fbbf24);
   -webkit-background-clip: text;
@@ -128,14 +176,32 @@ body {
   background-clip: text;
 }
 
-/* Glass card */
+/* ── Gradient text (animated shimmer) ───────────────────────────────── */
+.gradient-text-animated {
+  background: linear-gradient(
+    90deg,
+    #eab308 0%,
+    #fbbf24 25%,
+    #f59e0b 50%,
+    #fbbf24 75%,
+    #eab308 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s linear infinite;
+}
+
+/* ── Glass card ─────────────────────────────────────────────────────── */
 .glass-card {
-  background: rgba(23, 23, 23, 0.6);
-  backdrop-filter: blur(12px);
+  background: rgba(23, 23, 23, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Grid background pattern */
+/* ── Grid background pattern ────────────────────────────────────────── */
 .bg-grid-pattern {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
@@ -143,7 +209,90 @@ body {
   background-size: 60px 60px;
 }
 
-/* Radial gradient overlay */
+/* ── Hero gradient ──────────────────────────────────────────────────── */
+.hero-gradient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(234, 179, 8, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 60% 10%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
+}
+
+/* ── Radial gradient overlay ────────────────────────────────────────── */
 .radial-gradient-overlay {
   background: radial-gradient(ellipse at 50% 0%, rgba(234, 179, 8, 0.08) 0%, transparent 60%);
+}
+
+/* ── CTA hover effects ──────────────────────────────────────────────── */
+.cta-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.cta-hero:hover::before {
+  left: 100%;
+}
+
+/* ── CTA primary (nav button) ───────────────────────────────────────── */
+.cta-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.4s ease;
+}
+
+.cta-primary:hover::after {
+  left: 100%;
+}
+
+/* ── Selection ──────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(234, 179, 8, 0.3);
+  color: white;
+}
+
+/* ── Scrollbar (webkit) ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
