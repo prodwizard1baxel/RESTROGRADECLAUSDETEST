@@ -21,11 +21,13 @@ type Restaurant = {
 
 const prisma = new PrismaClient()
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-})
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+}
 
-const GOOGLE_KEY = process.env.GOOGLE_MAPS_API_KEY!
+function getGoogleKey() {
+  return process.env.GOOGLE_MAPS_API_KEY!
+}
 
 // ==============================
 // Distance Formula
@@ -76,7 +78,7 @@ async function getCoordinates(address: string) {
   const res = await fetch(
     `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
       address
-    )}&key=${GOOGLE_KEY}`
+    )}&key=${getGoogleKey()}`
   )
 
   const data = await res.json()
@@ -95,7 +97,7 @@ async function getNearbyRestaurants(lat: number, lng: number) {
   const radius = 7000
 
   const res = await fetch(
-    `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=restaurant&key=${GOOGLE_KEY}`
+    `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=restaurant&key=${getGoogleKey()}`
   )
 
   const data = await res.json()
@@ -172,7 +174,7 @@ const newHighRatedRestaurants = mapped
     // ==============================
     // AI ANALYSIS
     // ==============================
-    const ai = await openai.chat.completions.create({
+    const ai = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       messages: [
