@@ -36,7 +36,7 @@ function useCounter(target: number, duration = 1800, start = false) {
     const tick = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(eased * target));
       if (progress < 1) raf = requestAnimationFrame(tick);
     };
@@ -44,6 +44,21 @@ function useCounter(target: number, duration = 1800, start = false) {
     return () => cancelAnimationFrame(raf);
   }, [target, duration, start]);
   return count;
+}
+
+/* ─── Mouse parallax hook ───────────────────────────────────────────── */
+function useMouseParallax(intensity = 0.02) {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const x = (e.clientX - window.innerWidth / 2) * intensity;
+      const y = (e.clientY - window.innerHeight / 2) * intensity;
+      setOffset({ x, y });
+    };
+    window.addEventListener("mousemove", handler);
+    return () => window.removeEventListener("mousemove", handler);
+  }, [intensity]);
+  return offset;
 }
 
 /* ─── Reveal wrapper ────────────────────────────────────────────────── */
@@ -102,12 +117,32 @@ function StatCard({
 
   return (
     <div ref={ref} className="text-center group" style={{ animationDelay: `${delay}ms` }}>
-      <p className="text-4xl md:text-5xl font-bold text-yellow-400 tabular-nums tracking-tight transition-transform duration-300 group-hover:scale-110">
+      <p className="text-4xl md:text-5xl font-bold text-white tabular-nums tracking-tight transition-transform duration-300 group-hover:scale-110">
         {prefix}
         {count}
         {suffix}
       </p>
       <p className="text-sm text-neutral-500 mt-2 tracking-wide">{label}</p>
+    </div>
+  );
+}
+
+/* ─── Floating particle component ───────────────────────────────────── */
+function FloatingParticles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 bg-green-400/30 rounded-full"
+          style={{
+            left: `${15 + i * 15}%`,
+            bottom: "0",
+            animation: `particle-rise ${8 + i * 2}s linear infinite`,
+            animationDelay: `${i * 1.5}s`,
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -118,6 +153,7 @@ function StatCard({
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mouseOffset = useMouseParallax(0.015);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -125,7 +161,6 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* smooth scroll for anchor links */
   const scrollTo = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     setMobileNavOpen(false);
@@ -138,17 +173,17 @@ export default function Home() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-neutral-950/90 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/20"
+            ? "bg-neutral-950/90 backdrop-blur-2xl border-b border-green-500/10 shadow-2xl shadow-black/20"
             : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-yellow-500/20 group-hover:shadow-yellow-500/40 transition-shadow duration-300">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-green-500/20 group-hover:shadow-green-500/40 transition-shadow duration-300">
               R
             </div>
             <span className="font-semibold text-lg tracking-tight">
-              Retro<span className="text-yellow-500">Grade</span>
+              Retro<span className="text-green-400">Grade</span>
             </span>
           </a>
 
@@ -163,7 +198,7 @@ export default function Home() {
                 key={link.id}
                 href={`#${link.id}`}
                 onClick={(e) => scrollTo(e, link.id)}
-                className="relative hover:text-white transition-colors duration-200 py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-yellow-500 after:transition-all after:duration-300 hover:after:w-full"
+                className="relative hover:text-white transition-colors duration-200 py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-green-400 after:transition-all after:duration-300 hover:after:w-full"
               >
                 {link.label}
               </a>
@@ -179,7 +214,7 @@ export default function Home() {
             </a>
             <a
               href="/analyze"
-              className="cta-primary bg-gradient-to-r from-yellow-500 to-amber-500 text-black px-5 py-2 rounded-lg text-sm font-semibold hover:from-yellow-400 hover:to-amber-400 transition-all duration-300 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:-translate-y-px"
+              className="cta-primary bg-gradient-to-r from-green-500 to-emerald-500 text-black px-5 py-2 rounded-lg text-sm font-semibold hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-px"
             >
               Get Report
             </a>
@@ -204,7 +239,7 @@ export default function Home() {
         {/* mobile nav dropdown */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 ${
-            mobileNavOpen ? "max-h-64 border-b border-white/5" : "max-h-0"
+            mobileNavOpen ? "max-h-64 border-b border-green-500/10" : "max-h-0"
           }`}
         >
           <div className="px-6 py-4 flex flex-col gap-3 bg-neutral-950/95 backdrop-blur-2xl">
@@ -227,21 +262,31 @@ export default function Home() {
         {/* Background effects */}
         <div className="hero-gradient absolute inset-0 pointer-events-none" />
         <div className="bg-grid-pattern absolute inset-0 pointer-events-none opacity-40" />
+        <FloatingParticles />
 
-        {/* Floating orbs */}
-        <div className="absolute top-20 left-[10%] w-72 h-72 bg-yellow-500/5 rounded-full blur-[100px] animate-float" />
-        <div className="absolute top-40 right-[5%] w-96 h-96 bg-amber-500/5 rounded-full blur-[120px] animate-float-delayed" />
-        <div className="absolute bottom-0 left-[40%] w-80 h-80 bg-yellow-600/3 rounded-full blur-[100px] animate-float-slow" />
+        {/* Morphing blob orbs with parallax */}
+        <div
+          className="absolute top-20 left-[10%] w-72 h-72 bg-green-500/8 rounded-full blur-[100px] animate-float animate-morph-blob"
+          style={{ transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)` }}
+        />
+        <div
+          className="absolute top-40 right-[5%] w-96 h-96 bg-emerald-400/5 rounded-full blur-[120px] animate-float-delayed animate-morph-blob"
+          style={{ transform: `translate(${-mouseOffset.x}px, ${-mouseOffset.y}px)`, animationDelay: "3s" }}
+        />
+        <div
+          className="absolute bottom-0 left-[40%] w-80 h-80 bg-white/[0.02] rounded-full blur-[100px] animate-float-slow"
+          style={{ transform: `translate(${mouseOffset.x * 0.5}px, ${mouseOffset.y * 0.5}px)` }}
+        />
 
         <div className="relative max-w-5xl mx-auto px-6 text-center">
           {/* Badge */}
-          <div className="animate-fade-in-up inline-flex items-center gap-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full px-5 py-2 mb-8 hover:bg-yellow-500/15 transition-colors duration-300 cursor-default">
+          <div className="animate-fade-in-up inline-flex items-center gap-2.5 bg-green-500/10 border border-green-500/20 rounded-full px-5 py-2 mb-8 hover:bg-green-500/15 transition-colors duration-300 cursor-default">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
             </span>
-            <span className="text-sm text-yellow-400 font-medium tracking-wide">
-              AI-Powered Competitive Intelligence
+            <span className="text-sm text-white/80 font-medium tracking-wide">
+              AI Restaurant Growth Engine
             </span>
           </div>
 
@@ -263,7 +308,7 @@ export default function Home() {
           <div className="animate-fade-in-up animation-delay-300 flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/analyze"
-              className="cta-hero group bg-gradient-to-r from-yellow-500 to-amber-500 text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-yellow-400 hover:to-amber-400 transition-all duration-300 inline-flex items-center justify-center gap-2.5 shadow-2xl shadow-yellow-500/25 hover:shadow-yellow-500/40 hover:-translate-y-0.5"
+              className="cta-hero group bg-gradient-to-r from-green-500 to-emerald-500 text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-green-400 hover:to-emerald-400 transition-all duration-300 inline-flex items-center justify-center gap-2.5 shadow-2xl shadow-green-500/25 hover:shadow-green-500/40 hover:-translate-y-0.5"
             >
               <span>Get Your Free Report</span>
               <svg
@@ -278,10 +323,10 @@ export default function Home() {
             </a>
             <a
               href="/demo"
-              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-neutral-500 hover:text-white hover:bg-white/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2.5"
+              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-green-500/30 hover:text-white hover:bg-green-500/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2.5"
             >
               <svg
-                className="w-5 h-5 text-yellow-500 transition-transform duration-300 group-hover:scale-110"
+                className="w-5 h-5 text-green-400 transition-transform duration-300 group-hover:scale-110"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -313,7 +358,7 @@ export default function Home() {
       </section>
 
       {/* ── Trusted By Logos Strip ──────────────────────────────────── */}
-      <section className="border-y border-white/[0.04] bg-neutral-900/30 py-10">
+      <section className="border-y border-green-500/[0.06] bg-gradient-to-r from-neutral-950 via-neutral-900/40 to-neutral-950 py-10">
         <Reveal>
           <div className="max-w-6xl mx-auto px-6">
             <p className="text-center text-xs uppercase tracking-[0.2em] text-neutral-600 mb-8 font-medium">
@@ -321,7 +366,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-40">
               {["Zomato Partner", "Google Maps", "GPT-4 Powered", "Swiggy Listed", "TripAdvisor"].map((name, i) => (
-                <span key={i} className="text-sm md:text-base font-semibold text-neutral-400 tracking-wider whitespace-nowrap">
+                <span key={i} className="text-sm md:text-base font-semibold text-neutral-400 tracking-wider whitespace-nowrap hover:text-green-400/60 transition-colors duration-500">
                   {name}
                 </span>
               ))}
@@ -331,7 +376,7 @@ export default function Home() {
       </section>
 
       {/* ── Stats Strip ─────────────────────────────────────────────── */}
-      <section className="py-16 md:py-20">
+      <section className="py-16 md:py-20 section-gradient-1">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
           <StatCard value={500} suffix="+" label="Restaurants Analyzed" delay={0} />
           <StatCard value={15} suffix="K+" label="Competitors Tracked" delay={100} />
@@ -342,12 +387,14 @@ export default function Home() {
 
       {/* ── How It Works ────────────────────────────────────────────── */}
       <section id="how-it-works" className="py-20 md:py-32 relative">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="absolute inset-0 section-gradient-2 pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-20">
-            <p className="text-sm uppercase tracking-[0.2em] text-yellow-500 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
               Simple Process
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
               Three Steps to <span className="gradient-text">Market Dominance</span>
             </h2>
             <p className="text-neutral-400 mt-5 max-w-xl mx-auto">
@@ -357,7 +404,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* connecting line (desktop) */}
-            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-yellow-500/20 to-transparent" />
+            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-green-500/20 to-transparent" />
 
             {[
               {
@@ -395,17 +442,16 @@ export default function Home() {
               },
             ].map((item, i) => (
               <Reveal key={i} delay={i * 150}>
-                <div className="glass-card rounded-2xl p-8 hover:border-yellow-500/20 transition-all duration-500 group relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-yellow-500/5">
-                  {/* Step number circle */}
+                <div className="glass-card-green rounded-2xl p-8 group relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-green-500/5">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500/20 group-hover:border-yellow-500/30 transition-all duration-500 group-hover:scale-110">
+                    <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 group-hover:bg-green-500/20 group-hover:border-green-500/30 transition-all duration-500 group-hover:scale-110">
                       {item.icon}
                     </div>
                     <span className="text-xs font-bold text-neutral-600 uppercase tracking-[0.15em]">
                       Step {item.step}
                     </span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 group-hover:text-yellow-400 transition-colors duration-300">{item.title}</h3>
+                  <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-green-300 transition-colors duration-300">{item.title}</h3>
                   <p className="text-neutral-400 leading-relaxed text-sm">{item.description}</p>
                 </div>
               </Reveal>
@@ -416,7 +462,7 @@ export default function Home() {
           <Reveal delay={450} className="text-center mt-14">
             <a
               href="/analyze"
-              className="inline-flex items-center gap-2 text-yellow-500 font-semibold hover:text-yellow-400 transition-colors duration-200 group"
+              className="inline-flex items-center gap-2 text-green-400 font-semibold hover:text-green-300 transition-colors duration-200 group"
             >
               <span>Start your analysis now</span>
               <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -428,16 +474,21 @@ export default function Home() {
       </section>
 
       {/* ── Features ────────────────────────────────────────────────── */}
-      <section id="features" className="py-20 md:py-32 bg-neutral-900/30 relative">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      <section id="features" className="py-20 md:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 section-gradient-3 pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
 
-        <div className="max-w-6xl mx-auto px-6">
+        {/* Ambient background glow */}
+        <div className="absolute top-1/3 -left-40 w-80 h-80 bg-green-500/[0.04] rounded-full blur-[120px] animate-glow-pulse pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-40 w-80 h-80 bg-emerald-500/[0.03] rounded-full blur-[120px] animate-glow-pulse pointer-events-none" style={{ animationDelay: "2s" }} />
+
+        <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-yellow-500 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
               What You Get
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
               Everything You Need to <span className="gradient-text">Win</span>
             </h2>
             <p className="text-neutral-400 mt-5 max-w-xl mx-auto leading-relaxed">
@@ -504,9 +555,9 @@ export default function Home() {
                 title: "Revenue Impact Analysis",
                 description:
                   "Estimated monthly revenue at risk and recovery opportunity based on your competitive position.",
-                color: "text-yellow-400",
-                bgColor: "bg-yellow-500/10 border-yellow-500/20",
-                hoverBorder: "hover:border-yellow-500/30",
+                color: "text-green-400",
+                bgColor: "bg-green-500/10 border-green-500/20",
+                hoverBorder: "hover:border-green-500/30",
                 icon: (
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -529,14 +580,14 @@ export default function Home() {
             ].map((feature, i) => (
               <Reveal key={i} delay={i * 100}>
                 <div
-                  className={`glass-card rounded-2xl p-7 ${feature.hoverBorder} transition-all duration-500 group hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20 h-full`}
+                  className={`glass-card-green rounded-2xl p-7 ${feature.hoverBorder} transition-all duration-500 group hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20 h-full`}
                 >
                   <div
                     className={`w-12 h-12 rounded-xl ${feature.bgColor} border flex items-center justify-center ${feature.color} mb-5 transition-all duration-500 group-hover:scale-110`}
                   >
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-white transition-colors duration-300">{feature.title}</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-white group-hover:text-green-300 transition-colors duration-300">{feature.title}</h3>
                   <p className="text-neutral-400 text-sm leading-relaxed">{feature.description}</p>
                 </div>
               </Reveal>
@@ -547,14 +598,14 @@ export default function Home() {
 
       {/* ── Report Preview ──────────────────────────────────────────── */}
       <section id="preview" className="py-20 md:py-32 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-yellow-500/[0.03] rounded-full blur-[150px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/[0.03] rounded-full blur-[150px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-yellow-500 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
               Sample Output
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
               See What a Report <span className="gradient-text">Looks Like</span>
             </h2>
             <p className="text-neutral-400 mt-5 max-w-xl mx-auto">
@@ -565,28 +616,28 @@ export default function Home() {
 
           {/* Mock report preview */}
           <Reveal>
-            <div className="glass-card rounded-2xl p-1.5 max-w-4xl mx-auto shadow-2xl shadow-black/40">
+            <div className="glass-card-green rounded-2xl p-1.5 max-w-4xl mx-auto shadow-2xl shadow-black/40">
               <div className="rounded-xl bg-neutral-950 p-6 md:p-10 space-y-6">
                 {/* Mock header */}
                 <div className="flex items-end justify-between border-b border-neutral-800/80 pb-6">
                   <div>
-                    <p className="text-xs text-yellow-500 font-semibold uppercase tracking-[0.15em] mb-1.5">
+                    <p className="text-xs text-green-400 font-semibold uppercase tracking-[0.15em] mb-1.5">
                       Competitive Intelligence Report
                     </p>
-                    <h3 className="text-2xl md:text-3xl font-bold">Spice Garden</h3>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white">Spice Garden</h3>
                     <p className="text-neutral-500 text-sm mt-1">Bandra West, Mumbai</p>
                   </div>
                   <div className="text-right hidden sm:block">
                     <p className="text-xs text-neutral-500 mb-1">Overall Threat Level</p>
-                    <p className="text-xl font-semibold text-yellow-400">Moderate-High</p>
+                    <p className="text-xl font-semibold text-white">Moderate-High</p>
                   </div>
                 </div>
 
                 {/* Mock KPIs */}
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-neutral-900/80 border border-neutral-800/60 rounded-xl p-4 hover:border-yellow-500/20 transition-colors duration-300">
+                  <div className="bg-neutral-900/80 border border-neutral-800/60 rounded-xl p-4 hover:border-green-500/20 transition-colors duration-300">
                     <p className="text-xs text-neutral-500 mb-1">Threat Index</p>
-                    <p className="text-2xl font-bold text-yellow-400">
+                    <p className="text-2xl font-bold text-white">
                       71<span className="text-sm text-neutral-600">/100</span>
                     </p>
                   </div>
@@ -608,7 +659,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/95 to-transparent z-10 flex items-end justify-center pb-6">
                     <a
                       href="/demo"
-                      className="group bg-gradient-to-r from-yellow-500 to-amber-500 text-black px-8 py-3.5 rounded-xl font-semibold hover:from-yellow-400 hover:to-amber-400 transition-all duration-300 text-sm shadow-xl shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:-translate-y-px inline-flex items-center gap-2"
+                      className="group bg-gradient-to-r from-green-500 to-emerald-500 text-black px-8 py-3.5 rounded-xl font-semibold hover:from-green-400 hover:to-emerald-400 transition-all duration-300 text-sm shadow-xl shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-px inline-flex items-center gap-2"
                     >
                       <span>View Full Demo Report</span>
                       <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -631,16 +682,17 @@ export default function Home() {
       </section>
 
       {/* ── Testimonials / Social Proof ─────────────────────────────── */}
-      <section id="testimonials" className="py-20 md:py-32 bg-neutral-900/30 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      <section id="testimonials" className="py-20 md:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 section-gradient-2 pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
 
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-yellow-500 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
               Trusted by Restaurateurs
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
               What Restaurant Owners <span className="gradient-text">Say</span>
             </h2>
           </Reveal>
@@ -670,12 +722,12 @@ export default function Home() {
               },
             ].map((testimonial, i) => (
               <Reveal key={i} delay={i * 150}>
-                <div className="glass-card rounded-2xl p-8 hover:border-white/10 transition-all duration-500 group hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20 h-full flex flex-col">
+                <div className="glass-card-green rounded-2xl p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20 h-full flex flex-col">
                   <div className="flex gap-1 mb-5">
                     {[...Array(5)].map((_, j) => (
                       <svg
                         key={j}
-                        className="w-4 h-4 text-yellow-500"
+                        className="w-4 h-4 text-green-400"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -687,11 +739,11 @@ export default function Home() {
                     &quot;{testimonial.quote}&quot;
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-500/20 flex items-center justify-center text-yellow-500 font-semibold text-sm">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20 flex items-center justify-center text-green-400 font-semibold text-sm">
                       {testimonial.name[0]}
                     </div>
                     <div>
-                      <p className="font-semibold text-sm">{testimonial.name}</p>
+                      <p className="font-semibold text-sm text-white">{testimonial.name}</p>
                       <p className="text-xs text-neutral-500">
                         {testimonial.role} &mdash; {testimonial.city}
                       </p>
@@ -708,10 +760,11 @@ export default function Home() {
       <section className="py-24 md:py-36 relative overflow-hidden">
         <div className="hero-gradient absolute inset-0 pointer-events-none" />
         <div className="bg-grid-pattern absolute inset-0 pointer-events-none opacity-30" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-yellow-500/[0.04] rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/[0.04] rounded-full blur-[120px] pointer-events-none" />
+        <FloatingParticles />
 
         <Reveal className="relative max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight text-white">
             Ready to Outsmart
             <br />
             <span className="gradient-text-animated">Your Competition?</span>
@@ -723,7 +776,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/analyze"
-              className="cta-hero group bg-gradient-to-r from-yellow-500 to-amber-500 text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-yellow-400 hover:to-amber-400 transition-all duration-300 shadow-2xl shadow-yellow-500/25 hover:shadow-yellow-500/40 hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
+              className="cta-hero group bg-gradient-to-r from-green-500 to-emerald-500 text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-2xl shadow-green-500/25 hover:shadow-green-500/40 hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
             >
               <span>Generate My Report</span>
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -732,7 +785,7 @@ export default function Home() {
             </a>
             <a
               href="/demo"
-              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-neutral-500 hover:text-white hover:bg-white/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2"
+              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-green-500/30 hover:text-white hover:bg-green-500/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2"
             >
               <span>See Demo First</span>
             </a>
@@ -744,17 +797,17 @@ export default function Home() {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/5 py-14 bg-neutral-950">
+      <footer className="border-t border-green-500/[0.06] py-14 bg-neutral-950">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-10 mb-12">
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center font-bold text-black text-sm">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-black text-sm">
                   R
                 </div>
                 <span className="font-semibold text-lg tracking-tight">
-                  Retro<span className="text-yellow-500">Grade</span>
+                  Retro<span className="text-green-400">Grade</span>
                 </span>
               </div>
               <p className="text-neutral-500 text-sm leading-relaxed max-w-sm">
@@ -767,16 +820,16 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold mb-4 text-neutral-300">Product</p>
               <div className="flex flex-col gap-2.5">
-                <a href="/analyze" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="/analyze" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   Get Report
                 </a>
-                <a href="/demo" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="/demo" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   Demo
                 </a>
-                <a href="#features" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="#features" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   Features
                 </a>
-                <a href="#how-it-works" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="#how-it-works" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   How It Works
                 </a>
               </div>
@@ -785,13 +838,13 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold mb-4 text-neutral-300">Company</p>
               <div className="flex flex-col gap-2.5">
-                <a href="#testimonials" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="#testimonials" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   Testimonials
                 </a>
-                <a href="#" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="#" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   Privacy Policy
                 </a>
-                <a href="#" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">
+                <a href="#" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
                   Terms of Service
                 </a>
               </div>
@@ -819,9 +872,9 @@ function PreviewBars() {
   const competitors = [
     { name: "The Bombay Canteen", score: 88, color: "from-red-500 to-red-600" },
     { name: "Bastian", score: 83, color: "from-red-500 to-red-600" },
-    { name: "Pali Village Cafe", score: 74, color: "from-yellow-500 to-amber-500" },
-    { name: "Smoke House Deli", score: 63, color: "from-yellow-500 to-amber-500" },
-    { name: "Sequel", score: 58, color: "from-green-500 to-emerald-500" },
+    { name: "Pali Village Cafe", score: 74, color: "from-green-400 to-emerald-500" },
+    { name: "Smoke House Deli", score: 63, color: "from-green-400 to-emerald-500" },
+    { name: "Sequel", score: 58, color: "from-emerald-400 to-green-500" },
   ];
 
   return (
