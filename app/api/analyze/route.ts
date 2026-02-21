@@ -181,41 +181,59 @@ const newHighRatedRestaurants = mapped
         {
           role: "system",
           content:
-            "You are a senior restaurant competitive intelligence strategist.",
+            "You are a senior restaurant competitive intelligence strategist. You write detailed, actionable, and easy-to-understand analyses. Your executive summaries are structured with clear sections that any restaurant owner can follow.",
         },
         {
           role: "user",
           content: `
-Analyze competition.
+Analyze the competitive landscape for a restaurant.
 
 Restaurant: ${name}
 City: ${city}
 
-Competitors:
+Top Competitors (with their data):
 ${JSON.stringify(topCompetitors)}
 
-Return STRICT JSON:
+Return STRICT JSON with these fields:
 
 {
-  "executiveSummary": "",
+  "executiveSummary": {
+    "overview": "A 2-3 sentence high-level overview of the competitive landscape. What is the overall situation?",
+    "keyFindings": ["Finding 1", "Finding 2", "Finding 3", "Finding 4"],
+    "immediateThreats": "1-2 sentences about the most urgent competitive threats to address right now.",
+    "growthOpportunities": "1-2 sentences about the biggest opportunities for growth based on competitor weaknesses.",
+    "recommendation": "A clear, actionable 1-2 sentence recommendation for what the restaurant owner should do first."
+  },
   "finalStrategicVerdict": "",
-  "yourKeywordCluster": [],
+  "yourKeywordCluster": {
+    "primary": ["5-8 primary SEO/brand keywords that define this restaurant"],
+    "positive": ["5-8 positive sentiment keywords - words customers associate with good experiences at this type of restaurant"],
+    "negative": ["5-8 negative sentiment keywords - words customers use when leaving bad reviews for this type of restaurant, things to avoid"]
+  },
   "competitorKeywordClusters": [
     {
-      "restaurant": "",
-      "keywords": []
+      "restaurant": "competitor name",
+      "keywords": ["their top keywords"]
     }
   ],
   "competitorEnhancements": [
     {
-      "restaurant": "",
-      "strengths": [],
-      "weaknesses": [],
-      "sentimentLabel": "",
-      "sentimentScore": 0
+      "restaurant": "competitor name",
+      "strengths": ["strength 1", "strength 2", "strength 3"],
+      "weaknesses": ["weakness 1", "weakness 2", "weakness 3"],
+      "sentimentLabel": "Positive/Negative/Mixed",
+      "sentimentScore": 0.0,
+      "whatTheyDoBetter": ["specific thing this competitor does better than ${name}", "another thing"],
+      "whereYouWin": ["specific area where ${name} has an advantage over this competitor", "another area"]
     }
   ]
 }
+
+IMPORTANT:
+- Make executiveSummary.keyFindings exactly 4 items, each a specific insight (not generic)
+- Make yourKeywordCluster.primary, .positive, and .negative each have 5-8 keywords
+- For each competitor in competitorEnhancements, include 2-3 items in whatTheyDoBetter and whereYouWin
+- Be specific to the actual restaurants, not generic advice
 `
         },
       ],
@@ -238,7 +256,13 @@ Return STRICT JSON:
       }
     })
 
+    const avgScore = Math.round(
+      topCompetitors.reduce((sum, c) => sum + c.threatScore, 0) / topCompetitors.length
+    ) || 0
+
     const finalData = {
+      restaurantName: name,
+      restaurantCity: city,
       executiveSummary: aiParsed.executiveSummary,
       yourKeywordCluster: aiParsed.yourKeywordCluster,
       competitorKeywordClusters:
@@ -247,14 +271,8 @@ Return STRICT JSON:
         topCompetitors,
         sameCuisineNearby,
         newHighRatedRestaurants,
-        overallThreatLevel: "Moderate",
-        averageThreatScore:
-          Math.round(
-            topCompetitors.reduce(
-              (sum, c) => sum + c.threatScore,
-              0
-            ) / topCompetitors.length
-          ) || 0,
+        overallThreatLevel: avgScore >= 70 ? "High" : avgScore >= 45 ? "Moderate" : "Low",
+        averageThreatScore: avgScore,
       },
       finalStrategicVerdict:
         aiParsed.finalStrategicVerdict,
