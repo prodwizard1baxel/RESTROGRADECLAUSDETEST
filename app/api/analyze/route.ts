@@ -13,10 +13,15 @@ type Restaurant = {
   cuisine: string[]
   averagePrice: number
   threatScore: number
+  sameCuisineThreatScore: number
+  photoCount: number
+  priceLevel: number
   sentimentLabel?: string
   sentimentScore?: number
   strengths?: string[]
   weaknesses?: string[]
+  whatTheyDoBetter?: string[]
+  whereYouWin?: string[]
 }
 
 const prisma = new PrismaClient()
@@ -52,7 +57,7 @@ function getDistanceKm(
 }
 
 // ==============================
-// Threat Score Formula
+// Threat Score Formula (General)
 // ==============================
 function calculateThreatScore(
   rating: number,
@@ -67,6 +72,37 @@ function calculateThreatScore(
     ratingImpact * 0.4 +
     reviewImpact * 0.3 +
     proximityImpact * 0.3
+
+  return Math.min(100, Math.round(finalScore))
+}
+
+// ==============================
+// Same Cuisine Threat Score
+// Prioritizes: within 5km + same cuisine + higher ratings + more reviews
+// ==============================
+function calculateSameCuisineThreatScore(
+  rating: number,
+  totalRatings: number,
+  distanceKm: number,
+  isSameCuisine: boolean
+) {
+  // Proximity is heavily weighted - within 5km gets massive boost
+  const proximityScore = distanceKm <= 1 ? 40 :
+    distanceKm <= 2 ? 35 :
+    distanceKm <= 3 ? 28 :
+    distanceKm <= 5 ? 20 :
+    Math.max(0, 10 - distanceKm)
+
+  // Higher rating = higher threat
+  const ratingScore = rating * 12
+
+  // More reviews = more established = higher threat
+  const reviewScore = Math.min(20, Math.log(totalRatings + 1) * 5)
+
+  // Same cuisine bonus: +15 if same cuisine type
+  const cuisineBonus = isSameCuisine ? 15 : 0
+
+  const finalScore = proximityScore + ratingScore + reviewScore + cuisineBonus
 
   return Math.min(100, Math.round(finalScore))
 }
@@ -130,6 +166,16 @@ export async function POST(req: Request) {
     )
 
     // ==============================
+    // Identify base restaurant cuisine types
+    // ==============================
+    const baseRestaurant = places.find(
+      (p: any) => p.name?.toLowerCase().includes(name.toLowerCase())
+    )
+    const baseCuisineTypes: string[] = baseRestaurant?.types?.filter(
+      (t: string) => !["point_of_interest", "establishment"].includes(t)
+    ) || ["restaurant"]
+
+    // ==============================
     // Map Google Data
     // ==============================
     const mapped: Restaurant[] = places.map((place: any) => {
@@ -140,10 +186,20 @@ export async function POST(req: Request) {
         place.geometry.location.lng
       )
 
+      const placeTypes: string[] = place.types || []
+      const isSameCuisine = baseCuisineTypes.some((t: string) => placeTypes.includes(t))
+
       const threatScore = calculateThreatScore(
         place.rating || 0,
         place.user_ratings_total || 0,
         distance
+      )
+
+      const sameCuisineThreatScore = calculateSameCuisineThreatScore(
+        place.rating || 0,
+        place.user_ratings_total || 0,
+        distance,
+        isSameCuisine
       )
 
       return {
@@ -152,9 +208,14 @@ export async function POST(req: Request) {
         rating: place.rating || 0,
         totalRatings: place.user_ratings_total || 0,
         distanceKm: Number(distance.toFixed(2)),
-        cuisine: place.types?.slice(0, 3) || ["Restaurant"],
-        averagePrice: 400,
+        cuisine: placeTypes.filter(
+          (t: string) => !["point_of_interest", "establishment"].includes(t)
+        ).slice(0, 3),
+        averagePrice: place.price_level ? place.price_level * 200 : 400,
         threatScore,
+        sameCuisineThreatScore,
+        photoCount: place.photos?.length || 0,
+        priceLevel: place.price_level || 0,
       }
     })
 
@@ -162,13 +223,63 @@ export async function POST(req: Request) {
       .sort((a, b) => b.threatScore - a.threatScore)
       .slice(0, 5)
 
-  const sameCuisineNearby = mapped
-  .filter((r: Restaurant) => r.distanceKm <= 5)
-  .slice(0, 5)
+    // Same cuisine within 5km - sorted by the new cuisine-specific threat score
+    const sameCuisineNearby = mapped
+      .filter((r: Restaurant) => r.distanceKm <= 5)
+      .sort((a, b) => b.sameCuisineThreatScore - a.sameCuisineThreatScore)
+      .slice(0, 5)
 
-const newHighRatedRestaurants = mapped
-  .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
-  .slice(0, 5)
+    const newHighRatedRestaurants = mapped
+      .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
+      .slice(0, 5)
+
+    // ==============================
+    // Cuisine-level analysis
+    // ==============================
+    const cuisineAnalysis = mapped
+      .filter((r) => r.distanceKm <= 5)
+      .reduce((acc: any, r) => {
+        const cuisineKey = r.cuisine[0] || "restaurant"
+        if (!acc[cuisineKey]) {
+          acc[cuisineKey] = {
+            cuisine: cuisineKey,
+            count: 0,
+            withPhotos: 0,
+            totalPhotos: 0,
+            highestRating: 0,
+            highestRatingName: "",
+            lowestRating: 5,
+            lowestRatingName: "",
+            mostReviews: 0,
+            mostReviewsName: "",
+            avgRating: 0,
+            totalRatingSum: 0,
+          }
+        }
+        const c = acc[cuisineKey]
+        c.count++
+        if (r.photoCount > 0) c.withPhotos++
+        c.totalPhotos += r.photoCount
+        c.totalRatingSum += r.rating
+        c.avgRating = Number((c.totalRatingSum / c.count).toFixed(1))
+        if (r.rating > c.highestRating) {
+          c.highestRating = r.rating
+          c.highestRatingName = r.name
+        }
+        if (r.rating < c.lowestRating && r.rating > 0) {
+          c.lowestRating = r.rating
+          c.lowestRatingName = r.name
+        }
+        if (r.totalRatings > c.mostReviews) {
+          c.mostReviews = r.totalRatings
+          c.mostReviewsName = r.name
+        }
+        return acc
+      }, {})
+
+    const cuisineBreakdown = Object.values(cuisineAnalysis)
+      .sort((a: any, b: any) => b.count - a.count)
+      .slice(0, 6) as Record<string, unknown>[]
 
 
     // ==============================
@@ -253,6 +364,8 @@ IMPORTANT:
         comp.weaknesses = enhancement.weaknesses
         comp.sentimentLabel = enhancement.sentimentLabel
         comp.sentimentScore = enhancement.sentimentScore
+        comp.whatTheyDoBetter = enhancement.whatTheyDoBetter
+        comp.whereYouWin = enhancement.whereYouWin
       }
     })
 
@@ -271,6 +384,8 @@ IMPORTANT:
         topCompetitors,
         sameCuisineNearby,
         newHighRatedRestaurants,
+        cuisineBreakdown,
+        baseCuisineTypes,
         overallThreatLevel: avgScore >= 70 ? "High" : avgScore >= 45 ? "Moderate" : "Low",
         averageThreatScore: avgScore,
       },
@@ -291,7 +406,7 @@ IMPORTANT:
     const savedReport = await prisma.report.create({
       data: {
         restaurantId: restaurant.id,
-        data: finalData,
+        data: JSON.parse(JSON.stringify(finalData)),
       },
     })
 

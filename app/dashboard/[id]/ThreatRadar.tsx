@@ -23,12 +23,12 @@ function getThreatLabel(score: number) {
   return "Low"
 }
 
-export default function ThreatRadar({ competitors }: any) {
+export default function ThreatRadar({ competitors, scoreKey = "threatScore" }: { competitors: any, scoreKey?: string }) {
   const barData = (competitors || [])
     .map((c: any) => ({
       name: c.name?.length > 18 ? c.name.substring(0, 18) + "..." : c.name,
       fullName: c.name,
-      threat: Number(c.threatScore),
+      threat: Number(c[scoreKey] || c.threatScore),
       rating: c.rating,
       distance: c.distanceKm,
     }))
