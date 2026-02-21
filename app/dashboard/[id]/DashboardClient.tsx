@@ -116,6 +116,34 @@ function KpiCard({
   )
 }
 
+/* ─── Keyword Tag ───────────────────────────────────────────────────── */
+function KeywordTag({
+  keyword,
+  color,
+  index,
+}: {
+  keyword: string
+  color: "blue" | "green" | "red"
+  index: number
+}) {
+  const colors = {
+    blue: "bg-blue-500/10 border-blue-500/20 text-blue-300 hover:bg-blue-500/20",
+    green: "bg-emerald-500/10 border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/20",
+    red: "bg-red-500/10 border-red-500/20 text-red-300 hover:bg-red-500/20",
+  }
+
+  return (
+    <span
+      className={`${colors[color]} border px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 cursor-default`}
+      style={{
+        animation: `fade-in-up 0.5s cubic-bezier(0.16,1,0.3,1) ${index * 50}ms both`,
+      }}
+    >
+      {keyword}
+    </span>
+  )
+}
+
 export default function DashboardClient({ data }: any) {
   const competitors =
     data?.competitorAnalysis?.topCompetitors || []
@@ -129,11 +157,25 @@ export default function DashboardClient({ data }: any) {
   const avgThreat =
     data?.competitorAnalysis?.averageThreatScore || 0
 
+  const threatLevel =
+    data?.competitorAnalysis?.overallThreatLevel || "Moderate"
+
   const revenueLoss =
     data?.revenueInsights?.estimatedMonthlyRevenueLoss || 0
 
   const revenueGain =
     data?.revenueInsights?.estimatedMonthlyRevenueGain || 0
+
+  /* ─── Handle both old (string) and new (object) executiveSummary format ── */
+  const execSummary = data?.executiveSummary
+  const isStructuredSummary = typeof execSummary === "object" && execSummary !== null
+
+  /* ─── Handle both old (array) and new (object) keyword format ── */
+  const keywords = data?.yourKeywordCluster
+  const isStructuredKeywords = typeof keywords === "object" && !Array.isArray(keywords) && keywords !== null
+
+  const restaurantName = data?.restaurantName || "Your Restaurant"
+  const restaurantCity = data?.restaurantCity || ""
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white relative overflow-hidden">
@@ -146,33 +188,65 @@ export default function DashboardClient({ data }: any) {
       {/* Grid pattern overlay */}
       <div className="fixed inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
 
-      {/* HEADER */}
+      {/* ═══════ HEADER with Restaurant Name ═══════ */}
       <div className="relative px-6 md:px-10 py-10 md:py-14 border-b border-green-500/10">
         <div className="max-w-7xl mx-auto">
           <Reveal>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-green-500/20">
                 R
               </div>
               <span className="text-sm text-green-400 font-medium tracking-wide uppercase">RetroGrade AI</span>
             </div>
           </Reveal>
+
+          {/* Restaurant identity - prominent at top */}
           <Reveal delay={100}>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Competitive Intelligence Dashboard
-            </h1>
-          </Reveal>
-          <Reveal delay={200}>
-            <p className="text-neutral-400 mt-2 text-sm md:text-base">
-              AI-Powered Market Intelligence Report
-            </p>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <p className="text-xs text-green-400 font-semibold uppercase tracking-[0.15em] mb-2">
+                  Competitive Intelligence Report For
+                </p>
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+                  {restaurantName}
+                </h1>
+                {restaurantCity && (
+                  <p className="text-neutral-400 mt-2 text-base md:text-lg flex items-center gap-2">
+                    <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    {restaurantCity}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3 bg-neutral-900/60 border border-white/[0.06] rounded-xl px-5 py-3">
+                <div className="text-right">
+                  <p className="text-xs text-neutral-500 mb-0.5">Overall Threat Level</p>
+                  <p className={`text-lg font-bold ${
+                    threatLevel === "High" ? "text-red-400" :
+                    threatLevel === "Moderate" ? "text-amber-400" : "text-green-400"
+                  }`}>
+                    {threatLevel}
+                  </p>
+                </div>
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2 ${
+                    threatLevel === "High" ? "border-red-500 text-red-400" :
+                    threatLevel === "Moderate" ? "border-amber-500 text-amber-400" : "border-green-500 text-green-400"
+                  }`}
+                >
+                  {avgThreat}
+                </div>
+              </div>
+            </div>
           </Reveal>
         </div>
       </div>
 
       <div className="relative p-6 md:p-10 max-w-7xl mx-auto space-y-12 md:space-y-16">
 
-        {/* KPI STRIP */}
+        {/* ═══════ KPI STRIP ═══════ */}
         <div className="grid md:grid-cols-3 gap-5">
           <KpiCard
             label="Threat Index"
@@ -203,10 +277,10 @@ export default function DashboardClient({ data }: any) {
           />
         </div>
 
-        {/* EXECUTIVE SUMMARY */}
+        {/* ═══════ EXECUTIVE SUMMARY (Structured) ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -214,58 +288,270 @@ export default function DashboardClient({ data }: any) {
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-white">Executive Summary</h2>
             </div>
-            <p className="text-neutral-300 leading-relaxed">
-              {data?.executiveSummary}
-            </p>
+
+            {isStructuredSummary ? (
+              <div className="space-y-6">
+                {/* Overview */}
+                <div>
+                  <p className="text-neutral-300 leading-relaxed text-base">
+                    {execSummary.overview}
+                  </p>
+                </div>
+
+                {/* Key Findings */}
+                {execSummary.keyFindings?.length > 0 && (
+                  <div className="bg-neutral-800/20 border border-white/[0.04] rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                      </svg>
+                      Key Findings
+                    </h3>
+                    <ul className="space-y-2.5">
+                      {execSummary.keyFindings.map((finding: string, i: number) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <span className="w-6 h-6 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400 shrink-0 mt-0.5">
+                            {i + 1}
+                          </span>
+                          <span className="text-neutral-300 text-sm leading-relaxed">{finding}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Threats & Opportunities side by side */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  {execSummary.immediateThreats && (
+                    <div className="bg-red-950/15 border border-red-500/10 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-red-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        Immediate Threats
+                      </h3>
+                      <p className="text-neutral-300 text-sm leading-relaxed">{execSummary.immediateThreats}</p>
+                    </div>
+                  )}
+                  {execSummary.growthOpportunities && (
+                    <div className="bg-emerald-950/15 border border-emerald-500/10 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                        </svg>
+                        Growth Opportunities
+                      </h3>
+                      <p className="text-neutral-300 text-sm leading-relaxed">{execSummary.growthOpportunities}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Recommendation */}
+                {execSummary.recommendation && (
+                  <div className="bg-green-500/[0.06] border border-green-500/15 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-green-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Our Recommendation
+                    </h3>
+                    <p className="text-white text-sm leading-relaxed font-medium">{execSummary.recommendation}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Fallback for old string-format summaries */
+              <p className="text-neutral-300 leading-relaxed">
+                {execSummary}
+              </p>
+            )}
           </div>
         </Reveal>
 
-        {/* YOUR KEYWORDS */}
+        {/* ═══════ KEYWORD CLUSTER (Bifurcated) ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Your Keyword Cluster</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-white">Your Keyword Strategy</h2>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {data?.yourKeywordCluster?.map(
-                (kw: string, i: number) => (
-                  <span
-                    key={i}
-                    className="bg-blue-500/10 border border-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-500/20 hover:border-blue-500/30 transition-all duration-300 cursor-default"
-                    style={{
-                      animation: `fade-in-up 0.5s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms both`,
-                    }}
-                  >
-                    {kw}
-                  </span>
-                )
-              )}
-            </div>
+
+            {isStructuredKeywords ? (
+              <div className="space-y-6">
+                {/* Primary Keywords */}
+                <div>
+                  <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                    </svg>
+                    Your Brand Keywords
+                  </h3>
+                  <p className="text-xs text-neutral-500 mb-3">Keywords that define your restaurant identity and should be present in your online profiles</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(keywords.primary || []).map((kw: string, i: number) => (
+                      <KeywordTag key={i} keyword={kw} color="blue" index={i} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Positive Keywords */}
+                <div className="bg-emerald-950/10 border border-emerald-500/10 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 10.203 4.167 9.75 5 9.75h1.053c.472 0 .745.556.5.96a8.958 8.958 0 00-1.302 4.665c0 1.194.232 2.333.654 3.375z" />
+                    </svg>
+                    Positive Keywords
+                  </h3>
+                  <p className="text-xs text-neutral-500 mb-3">Keywords customers associate with great experiences - aim to trigger these in reviews</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(keywords.positive || []).map((kw: string, i: number) => (
+                      <KeywordTag key={i} keyword={kw} color="green" index={i} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Negative Keywords */}
+                <div className="bg-red-950/10 border border-red-500/10 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 15h2.25m8.024-9.75c.011.05.028.1.052.148.591 1.2.924 2.55.924 3.977a8.96 8.96 0 01-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398-.306.774-1.086 1.227-1.918 1.227h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 00.303-.54m.023-8.25H16.48a4.5 4.5 0 01-1.423-.23l-3.114-1.04a4.5 4.5 0 00-1.423-.23H6.504c-.618 0-1.217.247-1.605.729A11.95 11.95 0 002.25 12c0 .434.023.863.068 1.285C2.427 14.306 3.346 15 4.372 15h3.126c.618 0 .991.724.725 1.282A7.471 7.471 0 007.5 19.5a2.25 2.25 0 002.25 2.25.75.75 0 00.75-.75v-.633c0-.573.11-1.14.322-1.672.304-.76.93-1.33 1.653-1.715a9.04 9.04 0 002.86-2.4c.498-.634 1.226-1.08 2.032-1.08h.384" />
+                    </svg>
+                    Negative Keywords to Avoid
+                  </h3>
+                  <p className="text-xs text-neutral-500 mb-3">Common complaints in your market - make sure these never appear in your reviews</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(keywords.negative || []).map((kw: string, i: number) => (
+                      <KeywordTag key={i} keyword={kw} color="red" index={i} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Fallback for old array format */
+              <div className="flex flex-wrap gap-3">
+                {(Array.isArray(keywords) ? keywords : []).map(
+                  (kw: string, i: number) => (
+                    <KeywordTag key={i} keyword={kw} color="blue" index={i} />
+                  )
+                )}
+              </div>
+            )}
           </div>
         </Reveal>
 
-        {/* RADAR */}
+        {/* ═══════ COMPETITION THREAT MAP (Clearer) ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Competitive Threat Map</h2>
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold text-white">Competitive Threat Map</h2>
+                <p className="text-xs text-neutral-500 mt-0.5">How each competitor ranks against {restaurantName} on a 0-100 threat scale</p>
+              </div>
             </div>
             <ThreatRadar competitors={competitors} />
           </div>
         </Reveal>
 
-        {/* TOP COMPETITORS */}
+        {/* ═══════ COMPETITOR COMPARISON TABLE (NEW) ═══════ */}
+        <Reveal>
+          <div className="dashboard-card rounded-2xl p-6 md:p-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold text-white">Where Competition Beats You</h2>
+                <p className="text-xs text-neutral-500 mt-0.5">What competitors do better and where you have the advantage</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto mt-6">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left pb-3 text-neutral-400 font-medium pr-4">Competitor</th>
+                    <th className="text-left pb-3 text-neutral-400 font-medium pr-4">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-400" />
+                        They Do Better
+                      </span>
+                    </th>
+                    <th className="text-left pb-3 text-neutral-400 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-green-400" />
+                        You Win Here
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {competitors.map((comp: any, i: number) => (
+                    <tr
+                      key={i}
+                      className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors duration-200"
+                    >
+                      <td className="py-4 pr-4 align-top">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold border shrink-0"
+                            style={{
+                              borderColor: comp.threatScore >= 75 ? "#ef4444" : comp.threatScore >= 50 ? "#f59e0b" : "#22c55e",
+                              color: comp.threatScore >= 75 ? "#ef4444" : comp.threatScore >= 50 ? "#f59e0b" : "#22c55e",
+                            }}
+                          >
+                            {comp.threatScore}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{comp.name}</p>
+                            <p className="text-xs text-neutral-500">{comp.distanceKm} km away</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 pr-4 align-top">
+                        <ul className="space-y-1.5">
+                          {(comp.whatTheyDoBetter || comp.strengths || []).map((item: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-neutral-300">
+                              <svg className="w-4 h-4 text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                              </svg>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td className="py-4 align-top">
+                        <ul className="space-y-1.5">
+                          {(comp.whereYouWin || comp.weaknesses || []).map((item: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-neutral-300">
+                              <svg className="w-4 h-4 text-green-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* ═══════ TOP COMPETITORS ═══════ */}
         <div>
           <Reveal>
             <div className="flex items-center gap-3 mb-6">
@@ -339,7 +625,7 @@ export default function DashboardClient({ data }: any) {
           </div>
         </div>
 
-        {/* COMPETITOR KEYWORDS */}
+        {/* ═══════ COMPETITOR KEYWORDS ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
@@ -378,7 +664,7 @@ export default function DashboardClient({ data }: any) {
           </div>
         </Reveal>
 
-        {/* SAME CUISINE TABLE */}
+        {/* ═══════ SAME CUISINE TABLE ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8 overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
@@ -428,7 +714,7 @@ export default function DashboardClient({ data }: any) {
           </div>
         </Reveal>
 
-        {/* NEW RESTAURANTS */}
+        {/* ═══════ NEW RESTAURANTS ═══════ */}
         <div>
           <Reveal>
             <div className="flex items-center gap-3 mb-6">
@@ -465,10 +751,9 @@ export default function DashboardClient({ data }: any) {
           )}
         </div>
 
-        {/* FINAL VERDICT */}
+        {/* ═══════ FINAL VERDICT ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8 border-green-500/15 relative overflow-hidden">
-            {/* Green accent glow */}
             <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/[0.05] rounded-full blur-[60px] pointer-events-none" />
 
             <div className="flex items-center gap-3 mb-5 relative">

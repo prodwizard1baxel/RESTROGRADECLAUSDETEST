@@ -16,11 +16,19 @@ export default async function Page({
 
   const report = await prisma.report.findUnique({
     where: { id },
+    include: { restaurant: true },
   })
 
   if (!report) {
     return <div className="p-10 text-xl">Invalid Report ID</div>
   }
 
-  return <DashboardClient data={report.data} />
+  /* Inject restaurant name/city into data if not already present (backwards compat) */
+  const data: any = report.data || {}
+  if (!data.restaurantName && report.restaurant) {
+    data.restaurantName = report.restaurant.name
+    data.restaurantCity = report.restaurant.city
+  }
+
+  return <DashboardClient data={data} />
 }
