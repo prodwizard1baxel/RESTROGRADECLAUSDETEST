@@ -161,11 +161,16 @@ export default function Analyze() {
       setLoading(true)
       setError("")
 
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 90000) // 90s timeout
+
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, city }),
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
@@ -178,7 +183,11 @@ export default function Analyze() {
       router.push(`/dashboard/${data.reportId}`)
     } catch (err: any) {
       console.error("Error:", err)
-      setError(err.message || "Something went wrong")
+      if (err.name === "AbortError") {
+        setError("Request timed out. Please try again.")
+      } else {
+        setError(err.message || "Something went wrong")
+      }
     } finally {
       setLoading(false)
     }

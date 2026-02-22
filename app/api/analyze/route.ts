@@ -138,12 +138,21 @@ async function getNearbyRestaurants(lat: number, lng: number) {
 
   const data = await res.json()
 
+  if (data.status === "ZERO_RESULTS") {
+    return []
+  }
+
   if (data.status !== "OK") {
     throw new Error("Places API failed: " + data.status)
   }
 
   return data.results
 }
+
+// ==============================
+// Vercel function config - extend timeout for external API calls
+// ==============================
+export const maxDuration = 60
 
 // ==============================
 // MAIN API
@@ -159,11 +168,25 @@ export async function POST(req: Request) {
       )
     }
 
-    const baseLocation = await getCoordinates(`${name}, ${city}`)
+    let baseLocation
+    try {
+      baseLocation = await getCoordinates(`${name}, ${city}`)
+    } catch (geoErr: any) {
+      // Fallback: try with just the city
+      baseLocation = await getCoordinates(city)
+    }
+
     const places = await getNearbyRestaurants(
       baseLocation.lat,
       baseLocation.lng
     )
+
+    if (!places || places.length === 0) {
+      return NextResponse.json(
+        { error: "No restaurants found near this location. Please check the restaurant name and city." },
+        { status: 400 }
+      )
+    }
 
     // ==============================
     // Identify base restaurant cuisine types
