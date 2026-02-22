@@ -160,6 +160,12 @@ export default function DashboardClient({ data }: any) {
   const threatLevel =
     data?.competitorAnalysis?.overallThreatLevel || "Moderate"
 
+  const cuisineBreakdown =
+    data?.competitorAnalysis?.cuisineBreakdown || []
+
+  const baseCuisineTypes =
+    data?.competitorAnalysis?.baseCuisineTypes || []
+
   const revenueLoss =
     data?.revenueInsights?.estimatedMonthlyRevenueLoss || 0
 
@@ -462,6 +468,112 @@ export default function DashboardClient({ data }: any) {
           </div>
         </Reveal>
 
+        {/* ═══════ SAME CUISINE THREAT MAP (within 5km) ═══════ */}
+        {sameCuisine.length > 0 && (
+          <Reveal>
+            <div className="dashboard-card rounded-2xl p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Same Cuisine Threat Map (within 5km)</h2>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Competitors in your cuisine category nearby — scored by proximity, ratings, reviews, and cuisine match
+                    {baseCuisineTypes.length > 0 && (
+                      <span className="text-green-400/60"> — your cuisine: {baseCuisineTypes.slice(0, 2).join(", ")}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <ThreatRadar competitors={sameCuisine} scoreKey="sameCuisineThreatScore" />
+            </div>
+          </Reveal>
+        )}
+
+        {/* ═══════ CUISINE BREAKDOWN ANALYSIS ═══════ */}
+        {cuisineBreakdown.length > 0 && (
+          <Reveal>
+            <div className="dashboard-card rounded-2xl p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Cuisine Breakdown (within 5km)</h2>
+                  <p className="text-xs text-neutral-500 mt-0.5">Restaurant count, photo presence, and rating analysis by cuisine type</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.08]">
+                      <th className="text-left pb-3 text-neutral-400 font-medium">Cuisine Type</th>
+                      <th className="text-center pb-3 text-neutral-400 font-medium">Count</th>
+                      <th className="text-center pb-3 text-neutral-400 font-medium">With Photos</th>
+                      <th className="text-center pb-3 text-neutral-400 font-medium">Avg Rating</th>
+                      <th className="text-left pb-3 text-neutral-400 font-medium">Highest Rated</th>
+                      <th className="text-left pb-3 text-neutral-400 font-medium">Most Reviews</th>
+                      <th className="text-left pb-3 text-neutral-400 font-medium">Lowest Rated</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cuisineBreakdown.map((c: any, i: number) => (
+                      <tr
+                        key={i}
+                        className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors duration-200"
+                      >
+                        <td className="py-3.5 text-white font-medium capitalize">
+                          {c.cuisine?.replace(/_/g, " ")}
+                        </td>
+                        <td className="text-center">
+                          <span className="bg-blue-500/10 text-blue-400 px-2.5 py-0.5 rounded-full text-xs font-medium">
+                            {c.count}
+                          </span>
+                        </td>
+                        <td className="text-center">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            c.withPhotos > c.count / 2
+                              ? "bg-green-500/10 text-green-400"
+                              : "bg-amber-500/10 text-amber-400"
+                          }`}>
+                            {c.withPhotos}/{c.count}
+                          </span>
+                        </td>
+                        <td className="text-center text-neutral-300">{c.avgRating}</td>
+                        <td className="text-left">
+                          <div>
+                            <span className="text-white text-xs font-medium">{c.highestRatingName}</span>
+                            <span className="text-green-400 text-xs ml-1.5">({c.highestRating})</span>
+                          </div>
+                        </td>
+                        <td className="text-left">
+                          <div>
+                            <span className="text-white text-xs font-medium">{c.mostReviewsName}</span>
+                            <span className="text-blue-400 text-xs ml-1.5">({c.mostReviews?.toLocaleString()})</span>
+                          </div>
+                        </td>
+                        <td className="text-left">
+                          <div>
+                            <span className="text-white text-xs font-medium">{c.lowestRatingName}</span>
+                            <span className="text-red-400 text-xs ml-1.5">({c.lowestRating})</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
         {/* ═══════ COMPETITOR COMPARISON TABLE (NEW) ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8">
@@ -664,7 +776,7 @@ export default function DashboardClient({ data }: any) {
           </div>
         </Reveal>
 
-        {/* ═══════ SAME CUISINE TABLE ═══════ */}
+        {/* ═══════ SAME CUISINE TABLE (Enhanced) ═══════ */}
         <Reveal>
           <div className="dashboard-card rounded-2xl p-6 md:p-8 overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
@@ -673,7 +785,7 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Top 5 Same Cuisine (&#8804;5km)</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-white">Competition in Same Cuisine (&#8804;5km)</h2>
             </div>
 
             <div className="overflow-x-auto">
@@ -682,7 +794,10 @@ export default function DashboardClient({ data }: any) {
                   <tr className="border-b border-white/[0.06]">
                     <th className="text-left pb-3 text-neutral-400 font-medium">Name</th>
                     <th className="text-center pb-3 text-neutral-400 font-medium">Rating</th>
+                    <th className="text-center pb-3 text-neutral-400 font-medium">Reviews</th>
                     <th className="text-center pb-3 text-neutral-400 font-medium">Distance</th>
+                    <th className="text-center pb-3 text-neutral-400 font-medium">Photos</th>
+                    <th className="text-center pb-3 text-neutral-400 font-medium">Cuisine</th>
                     <th className="text-center pb-3 text-neutral-400 font-medium">Threat</th>
                   </tr>
                 </thead>
@@ -695,15 +810,36 @@ export default function DashboardClient({ data }: any) {
                       <td className="py-3.5 text-white font-medium">
                         {r.name}
                       </td>
+                      <td className="text-center">
+                        <span className={`font-medium ${r.rating >= 4.5 ? "text-green-400" : r.rating >= 4 ? "text-white" : "text-amber-400"}`}>
+                          {r.rating}
+                        </span>
+                      </td>
                       <td className="text-center text-neutral-300">
-                        {r.rating}
+                        {r.totalRatings?.toLocaleString() || "-"}
                       </td>
                       <td className="text-center text-neutral-300">
                         {r.distanceKm} km
                       </td>
                       <td className="text-center">
-                        <span className="bg-red-500/10 text-red-400 px-2.5 py-0.5 rounded-full text-xs font-medium">
-                          {r.threatScore}
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          r.photoCount > 0 ? "bg-green-500/10 text-green-400" : "bg-neutral-800 text-neutral-500"
+                        }`}>
+                          {r.photoCount > 0 ? `${r.photoCount}` : "None"}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <span className="text-xs text-neutral-400 capitalize">
+                          {(r.cuisine?.[0] || "restaurant").replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                          (r.sameCuisineThreatScore || r.threatScore) >= 75 ? "bg-red-500/15 text-red-400" :
+                          (r.sameCuisineThreatScore || r.threatScore) >= 50 ? "bg-amber-500/15 text-amber-400" :
+                          "bg-green-500/15 text-green-400"
+                        }`}>
+                          {r.sameCuisineThreatScore || r.threatScore}
                         </span>
                       </td>
                     </tr>
