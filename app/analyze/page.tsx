@@ -167,7 +167,10 @@ export default function Analyze() {
         body: JSON.stringify({ name, city }),
       })
 
-      if (!res.ok) throw new Error("API request failed")
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || `API request failed (${res.status})`)
+      }
 
       const data = await res.json()
       if (!data.reportId) throw new Error("No reportId returned")

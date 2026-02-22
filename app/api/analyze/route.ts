@@ -416,8 +416,9 @@ IMPORTANT:
   } catch (error: any) {
     console.error("FULL ERROR:", error)
 
+    const message = error?.message || "Unknown error"
     return NextResponse.json(
-      { error: "Failed to generate report" },
+      { error: `Failed to generate report: ${message}` },
       { status: 500 }
     )
   }
