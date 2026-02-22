@@ -164,8 +164,8 @@ export default function DashboardClient({ data }: any) {
   const cuisineBreakdown =
     data?.competitorAnalysis?.cuisineBreakdown || []
 
-  const baseCuisineTypes =
-    data?.competitorAnalysis?.baseCuisineTypes || []
+  const baseRestaurantCuisine: string =
+    data?.competitorAnalysis?.baseRestaurantCuisine || ""
 
   /* ─── Handle both old (string) and new (object) executiveSummary format ── */
   const execSummary = data?.executiveSummary
@@ -475,11 +475,16 @@ export default function DashboardClient({ data }: any) {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl md:text-2xl font-bold gradient-text">Same Cuisine Threat Map (within 5km)</h2>
+                  <h2 className="text-xl md:text-2xl font-bold gradient-text">
+                    {baseRestaurantCuisine ? `${baseRestaurantCuisine} Competition` : "Same Cuisine Threat Map"} (within 5km)
+                  </h2>
                   <p className="text-xs text-neutral-500 mt-0.5">
-                    Competitors in your cuisine category nearby — scored by proximity, ratings, reviews, and cuisine match
-                    {baseCuisineTypes.length > 0 && (
-                      <span className="text-green-400/60"> — your cuisine: {baseCuisineTypes.slice(0, 2).join(", ")}</span>
+                    {baseRestaurantCuisine
+                      ? `Only ${baseRestaurantCuisine} restaurants near you — scored by proximity, ratings, and reviews`
+                      : "Competitors in your cuisine category nearby — scored by proximity, ratings, reviews, and cuisine match"
+                    }
+                    {baseRestaurantCuisine && (
+                      <span className="text-green-400/60"> — {sameCuisine.length} direct competitors found</span>
                     )}
                   </p>
                 </div>
@@ -814,7 +819,9 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold gradient-text">Competition in Same Cuisine (&#8804;5km)</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">
+                {baseRestaurantCuisine ? `${baseRestaurantCuisine} Competitors` : "Competition in Same Cuisine"} (&#8804;5km)
+              </h2>
             </div>
 
             <div className="overflow-x-auto">
@@ -859,7 +866,7 @@ export default function DashboardClient({ data }: any) {
                       </td>
                       <td className="text-center">
                         <span className="text-xs text-neutral-400 capitalize">
-                          {(r.cuisine?.[0] || "restaurant").replace(/_/g, " ")}
+                          {r.foodCuisine || (r.cuisine?.[0] || "restaurant").replace(/_/g, " ")}
                         </span>
                       </td>
                       <td className="text-center">
