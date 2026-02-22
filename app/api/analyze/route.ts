@@ -57,28 +57,36 @@ function getDistanceKm(
 }
 
 // ==============================
+// Excluded place types (lodges, hotels, etc.)
+// ==============================
+const EXCLUDED_TYPES = ["lodging", "hotel", "motel", "campground", "rv_park"]
+const EXCLUDED_NAME_PATTERN = /\b(lodge|lodging|hotel|motel|resort|inn|hostel|dharamshala|guest\s*house|paying\s*guest|pg)\b/i
+
+// ==============================
 // Threat Score Formula (General)
+// Rating (40%) + Review volume (30%) + Proximity (30%) = max 100
 // ==============================
 function calculateThreatScore(
   rating: number,
   totalRatings: number,
   distanceKm: number
 ) {
-  const ratingImpact = rating * 20
-  const reviewImpact = Math.log(totalRatings + 1) * 8
-  const proximityImpact = Math.max(0, 40 - distanceKm * 6)
+  // Rating (40 pts): Direct quality signal
+  const ratingScore = (rating / 5) * 40
 
-  const finalScore =
-    ratingImpact * 0.4 +
-    reviewImpact * 0.3 +
-    proximityImpact * 0.3
+  // Reviews (30 pts): Social proof & popularity
+  // 100 reviews ≈ 15, 1000 ≈ 22, 5000 ≈ 28, 10000+ ≈ 30
+  const reviewScore = Math.min(30, (Math.log10(Math.max(1, totalRatings)) / 4) * 30)
 
-  return Math.min(100, Math.round(finalScore))
+  // Proximity (30 pts): Linear decay over 7km
+  const proximityScore = Math.max(0, 30 * (1 - distanceKm / 7))
+
+  return Math.min(100, Math.round(ratingScore + reviewScore + proximityScore))
 }
 
 // ==============================
 // Same Cuisine Threat Score
-// Prioritizes: within 5km + same cuisine + higher ratings + more reviews
+// Proximity (35%) + Rating (25%) + Reviews (20%) + Cuisine match (20%) = max 100
 // ==============================
 function calculateSameCuisineThreatScore(
   rating: number,
@@ -86,25 +94,24 @@ function calculateSameCuisineThreatScore(
   distanceKm: number,
   isSameCuisine: boolean
 ) {
-  // Proximity is heavily weighted - within 5km gets massive boost
-  const proximityScore = distanceKm <= 1 ? 40 :
-    distanceKm <= 2 ? 35 :
-    distanceKm <= 3 ? 28 :
-    distanceKm <= 5 ? 20 :
-    Math.max(0, 10 - distanceKm)
+  // Proximity (35 pts): Step function - very close = very threatening
+  const proximityScore = distanceKm <= 0.5 ? 35 :
+    distanceKm <= 1 ? 32 :
+    distanceKm <= 2 ? 27 :
+    distanceKm <= 3 ? 20 :
+    distanceKm <= 5 ? 12 :
+    Math.max(0, 5 - distanceKm)
 
-  // Higher rating = higher threat
-  const ratingScore = rating * 12
+  // Rating (25 pts): Quality signal
+  const ratingScore = (rating / 5) * 25
 
-  // More reviews = more established = higher threat
-  const reviewScore = Math.min(20, Math.log(totalRatings + 1) * 5)
+  // Reviews (20 pts): Social proof
+  const reviewScore = Math.min(20, (Math.log10(Math.max(1, totalRatings)) / 4) * 20)
 
-  // Same cuisine bonus: +15 if same cuisine type
-  const cuisineBonus = isSameCuisine ? 15 : 0
+  // Cuisine match (20 pts): Same food type = direct competition
+  const cuisineBonus = isSameCuisine ? 20 : 0
 
-  const finalScore = proximityScore + ratingScore + reviewScore + cuisineBonus
-
-  return Math.min(100, Math.round(finalScore))
+  return Math.min(100, Math.round(proximityScore + ratingScore + reviewScore + cuisineBonus))
 }
 
 // ==============================
@@ -189,9 +196,27 @@ export async function POST(req: Request) {
     }
 
     // ==============================
+    // Filter out lodges, hotels, and non-restaurant places
+    // ==============================
+    const filteredPlaces = places.filter((place: any) => {
+      const types: string[] = place.types || []
+      const placeName = place.name || ""
+      if (types.some((t: string) => EXCLUDED_TYPES.includes(t))) return false
+      if (EXCLUDED_NAME_PATTERN.test(placeName)) return false
+      return true
+    })
+
+    if (filteredPlaces.length === 0) {
+      return NextResponse.json(
+        { error: "No restaurants found near this location (only lodges/hotels were found)." },
+        { status: 400 }
+      )
+    }
+
+    // ==============================
     // Identify base restaurant cuisine types
     // ==============================
-    const baseRestaurant = places.find(
+    const baseRestaurant = filteredPlaces.find(
       (p: any) => p.name?.toLowerCase().includes(name.toLowerCase())
     )
     const baseCuisineTypes: string[] = baseRestaurant?.types?.filter(
@@ -199,9 +224,9 @@ export async function POST(req: Request) {
     ) || ["restaurant"]
 
     // ==============================
-    // Map Google Data
+    // Map Google Data (restaurants only, no lodges/hotels)
     // ==============================
-    const mapped: Restaurant[] = places.map((place: any) => {
+    const mapped: Restaurant[] = filteredPlaces.map((place: any) => {
       const distance = getDistanceKm(
         baseLocation.lat,
         baseLocation.lng,
@@ -257,52 +282,9 @@ export async function POST(req: Request) {
       .slice(0, 5)
 
     // ==============================
-    // Cuisine-level analysis
+    // Prepare restaurant names within 5km for cuisine classification
     // ==============================
-    const cuisineAnalysis = mapped
-      .filter((r) => r.distanceKm <= 5)
-      .reduce((acc: any, r) => {
-        const cuisineKey = r.cuisine[0] || "restaurant"
-        if (!acc[cuisineKey]) {
-          acc[cuisineKey] = {
-            cuisine: cuisineKey,
-            count: 0,
-            withPhotos: 0,
-            totalPhotos: 0,
-            highestRating: 0,
-            highestRatingName: "",
-            lowestRating: 5,
-            lowestRatingName: "",
-            mostReviews: 0,
-            mostReviewsName: "",
-            avgRating: 0,
-            totalRatingSum: 0,
-          }
-        }
-        const c = acc[cuisineKey]
-        c.count++
-        if (r.photoCount > 0) c.withPhotos++
-        c.totalPhotos += r.photoCount
-        c.totalRatingSum += r.rating
-        c.avgRating = Number((c.totalRatingSum / c.count).toFixed(1))
-        if (r.rating > c.highestRating) {
-          c.highestRating = r.rating
-          c.highestRatingName = r.name
-        }
-        if (r.rating < c.lowestRating && r.rating > 0) {
-          c.lowestRating = r.rating
-          c.lowestRatingName = r.name
-        }
-        if (r.totalRatings > c.mostReviews) {
-          c.mostReviews = r.totalRatings
-          c.mostReviewsName = r.name
-        }
-        return acc
-      }, {})
-
-    const cuisineBreakdown = Object.values(cuisineAnalysis)
-      .sort((a: any, b: any) => b.count - a.count)
-      .slice(0, 6) as Record<string, unknown>[]
+    const within5km = mapped.filter((r) => r.distanceKm <= 5)
 
 
     // ==============================
@@ -327,6 +309,9 @@ City: ${city}
 
 Top Competitors (with their data):
 ${JSON.stringify(topCompetitors)}
+
+All nearby restaurants within 5km (classify each by food cuisine type):
+${JSON.stringify(within5km.map(r => ({ name: r.name, rating: r.rating, reviews: r.totalRatings })))}
 
 Return STRICT JSON with these fields:
 
@@ -360,7 +345,11 @@ Return STRICT JSON with these fields:
       "whatTheyDoBetter": ["specific thing this competitor does better than ${name}", "another thing"],
       "whereYouWin": ["specific area where ${name} has an advantage over this competitor", "another area"]
     }
-  ]
+  ],
+  "cuisineClassification": {
+    "restaurant name 1": "Biryani",
+    "restaurant name 2": "Pizza"
+  }
 }
 
 IMPORTANT:
@@ -368,6 +357,7 @@ IMPORTANT:
 - Make yourKeywordCluster.primary, .positive, and .negative each have 5-8 keywords
 - For each competitor in competitorEnhancements, include 2-3 items in whatTheyDoBetter and whereYouWin
 - Be specific to the actual restaurants, not generic advice
+- For cuisineClassification: classify EVERY restaurant in the nearby list into a specific food cuisine type like Biryani, Pizza, Chinese, North Indian, South Indian, Italian, Continental, Cafe, Fast Food, Street Food, Seafood, Bakery, Multi-cuisine, Japanese, Thai, etc. Use the restaurant name to infer the food type. Map each restaurant name to exactly one cuisine.
 `
         },
       ],
@@ -375,6 +365,54 @@ IMPORTANT:
     })
 
     const aiParsed = JSON.parse(ai.choices[0].message.content!)
+
+    // ==============================
+    // Build cuisine breakdown from GPT classification
+    // ==============================
+    const cuisineMap = aiParsed.cuisineClassification || {}
+    const cuisineAgg: Record<string, any> = {}
+
+    within5km.forEach((r) => {
+      const foodCuisine = cuisineMap[r.name] || "Multi-cuisine"
+      if (!cuisineAgg[foodCuisine]) {
+        cuisineAgg[foodCuisine] = {
+          cuisine: foodCuisine,
+          count: 0,
+          totalVotes: 0,
+          withPhotos: 0,
+          totalRatingSum: 0,
+          avgRating: 0,
+          highestRating: 0,
+          highestRatingName: "",
+          lowestRating: 5,
+          lowestRatingName: "",
+          mostReviews: 0,
+          mostReviewsName: "",
+        }
+      }
+      const c = cuisineAgg[foodCuisine]
+      c.count++
+      c.totalVotes += r.totalRatings
+      if (r.photoCount > 0) c.withPhotos++
+      c.totalRatingSum += r.rating
+      c.avgRating = Number((c.totalRatingSum / c.count).toFixed(1))
+      if (r.rating > c.highestRating) {
+        c.highestRating = r.rating
+        c.highestRatingName = r.name
+      }
+      if (r.rating < c.lowestRating && r.rating > 0) {
+        c.lowestRating = r.rating
+        c.lowestRatingName = r.name
+      }
+      if (r.totalRatings > c.mostReviews) {
+        c.mostReviews = r.totalRatings
+        c.mostReviewsName = r.name
+      }
+    })
+
+    const cuisineBreakdown = Object.values(cuisineAgg)
+      .sort((a: any, b: any) => b.totalVotes - a.totalVotes)
+      .slice(0, 8) as Record<string, unknown>[]
 
     // Merge enhancements
     topCompetitors.forEach((comp) => {

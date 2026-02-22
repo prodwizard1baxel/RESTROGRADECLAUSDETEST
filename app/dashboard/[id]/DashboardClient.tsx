@@ -101,15 +101,16 @@ function KpiCard({
   return (
     <div
       ref={ref}
-      className={`${bgColor} p-6 rounded-2xl border ${borderColor} dashboard-card`}
+      className={`${bgColor} p-6 rounded-2xl border ${borderColor} dashboard-card relative overflow-hidden`}
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(30px)",
         transition: `all 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
       }}
     >
-      <p className="text-sm text-neutral-400 mb-2">{label}</p>
-      <h2 className={`text-3xl font-bold ${color} tabular-nums`}>
+      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-white/[0.02] to-transparent rounded-bl-full" />
+      <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider mb-3">{label}</p>
+      <h2 className={`text-3xl font-bold ${color} tabular-nums tracking-tight`}>
         {prefix}{count.toLocaleString()}{suffix}
       </h2>
     </div>
@@ -166,12 +167,6 @@ export default function DashboardClient({ data }: any) {
   const baseCuisineTypes =
     data?.competitorAnalysis?.baseCuisineTypes || []
 
-  const revenueLoss =
-    data?.revenueInsights?.estimatedMonthlyRevenueLoss || 0
-
-  const revenueGain =
-    data?.revenueInsights?.estimatedMonthlyRevenueGain || 0
-
   /* ─── Handle both old (string) and new (object) executiveSummary format ── */
   const execSummary = data?.executiveSummary
   const isStructuredSummary = typeof execSummary === "object" && execSummary !== null
@@ -210,10 +205,10 @@ export default function DashboardClient({ data }: any) {
           <Reveal delay={100}>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
-                <p className="text-xs text-green-400 font-semibold uppercase tracking-[0.15em] mb-2">
-                  Competitive Intelligence Report For
+                <p className="text-xs text-green-400 font-semibold uppercase tracking-[0.2em] mb-3">
+                  Competitive Intelligence Report
                 </p>
-                <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tight gradient-text-animated">
                   {restaurantName}
                 </h1>
                 {restaurantCity && (
@@ -264,21 +259,21 @@ export default function DashboardClient({ data }: any) {
             delay={0}
           />
           <KpiCard
-            label="Estimated Monthly Revenue Loss"
-            value={revenueLoss}
-            prefix="₹"
-            color="text-red-400"
-            borderColor="border-red-500/20"
-            bgColor="bg-red-950/20"
+            label="Competitors Analyzed"
+            value={competitors.length}
+            suffix=" found"
+            color="text-blue-400"
+            borderColor="border-blue-500/20"
+            bgColor="bg-blue-950/20"
             delay={100}
           />
           <KpiCard
-            label="Revenue Recovery Opportunity"
-            value={revenueGain}
-            prefix="₹"
-            color="text-emerald-400"
-            borderColor="border-emerald-500/20"
-            bgColor="bg-emerald-950/20"
+            label="Same Cuisine Nearby"
+            value={sameCuisine.length}
+            suffix=" within 5km"
+            color="text-amber-400"
+            borderColor="border-amber-500/20"
+            bgColor="bg-amber-950/20"
             delay={200}
           />
         </div>
@@ -292,14 +287,14 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Executive Summary</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Executive Summary</h2>
             </div>
 
             {isStructuredSummary ? (
               <div className="space-y-6">
                 {/* Overview */}
-                <div>
-                  <p className="text-neutral-300 leading-relaxed text-base">
+                <div className="bg-neutral-800/15 border-l-2 border-green-500/40 rounded-r-xl pl-5 pr-5 py-4">
+                  <p className="text-neutral-200 leading-relaxed text-base">
                     {execSummary.overview}
                   </p>
                 </div>
@@ -384,7 +379,7 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Your Keyword Strategy</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Your Keyword Strategy</h2>
             </div>
 
             {isStructuredKeywords ? (
@@ -460,7 +455,7 @@ export default function DashboardClient({ data }: any) {
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-white">Competitive Threat Map</h2>
+                <h2 className="text-xl md:text-2xl font-bold gradient-text">Competitive Threat Map</h2>
                 <p className="text-xs text-neutral-500 mt-0.5">How each competitor ranks against {restaurantName} on a 0-100 threat scale</p>
               </div>
             </div>
@@ -480,7 +475,7 @@ export default function DashboardClient({ data }: any) {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-white">Same Cuisine Threat Map (within 5km)</h2>
+                  <h2 className="text-xl md:text-2xl font-bold gradient-text">Same Cuisine Threat Map (within 5km)</h2>
                   <p className="text-xs text-neutral-500 mt-0.5">
                     Competitors in your cuisine category nearby — scored by proximity, ratings, reviews, and cuisine match
                     {baseCuisineTypes.length > 0 && (
@@ -498,77 +493,81 @@ export default function DashboardClient({ data }: any) {
         {cuisineBreakdown.length > 0 && (
           <Reveal>
             <div className="dashboard-card rounded-2xl p-6 md:p-8">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.38a48.474 48.474 0 00-6-.37c-2.032 0-4.034.125-6 .37" />
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-white">Cuisine Breakdown (within 5km)</h2>
-                  <p className="text-xs text-neutral-500 mt-0.5">Restaurant count, photo presence, and rating analysis by cuisine type</p>
+                  <h2 className="text-xl md:text-2xl font-bold gradient-text">Food Cuisine Breakdown</h2>
+                  <p className="text-xs text-neutral-500 mt-0.5">What people are eating within 5km — restaurants, total votes, and ratings by cuisine</p>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/[0.08]">
-                      <th className="text-left pb-3 text-neutral-400 font-medium">Cuisine Type</th>
-                      <th className="text-center pb-3 text-neutral-400 font-medium">Count</th>
-                      <th className="text-center pb-3 text-neutral-400 font-medium">With Photos</th>
-                      <th className="text-center pb-3 text-neutral-400 font-medium">Avg Rating</th>
-                      <th className="text-left pb-3 text-neutral-400 font-medium">Highest Rated</th>
-                      <th className="text-left pb-3 text-neutral-400 font-medium">Most Reviews</th>
-                      <th className="text-left pb-3 text-neutral-400 font-medium">Lowest Rated</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cuisineBreakdown.map((c: any, i: number) => (
-                      <tr
-                        key={i}
-                        className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors duration-200"
-                      >
-                        <td className="py-3.5 text-white font-medium capitalize">
-                          {c.cuisine?.replace(/_/g, " ")}
-                        </td>
-                        <td className="text-center">
-                          <span className="bg-blue-500/10 text-blue-400 px-2.5 py-0.5 rounded-full text-xs font-medium">
-                            {c.count}
-                          </span>
-                        </td>
-                        <td className="text-center">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            c.withPhotos > c.count / 2
-                              ? "bg-green-500/10 text-green-400"
-                              : "bg-amber-500/10 text-amber-400"
-                          }`}>
-                            {c.withPhotos}/{c.count}
-                          </span>
-                        </td>
-                        <td className="text-center text-neutral-300">{c.avgRating}</td>
-                        <td className="text-left">
-                          <div>
-                            <span className="text-white text-xs font-medium">{c.highestRatingName}</span>
-                            <span className="text-green-400 text-xs ml-1.5">({c.highestRating})</span>
-                          </div>
-                        </td>
-                        <td className="text-left">
-                          <div>
-                            <span className="text-white text-xs font-medium">{c.mostReviewsName}</span>
-                            <span className="text-blue-400 text-xs ml-1.5">({c.mostReviews?.toLocaleString()})</span>
-                          </div>
-                        </td>
-                        <td className="text-left">
-                          <div>
-                            <span className="text-white text-xs font-medium">{c.lowestRatingName}</span>
-                            <span className="text-red-400 text-xs ml-1.5">({c.lowestRating})</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {/* Cuisine cards grid */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                {cuisineBreakdown.map((c: any, i: number) => (
+                  <div
+                    key={i}
+                    className="bg-neutral-800/30 border border-white/[0.06] rounded-xl p-5 hover:border-orange-500/20 transition-all duration-300 group"
+                  >
+                    {/* Cuisine name + count */}
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-base font-bold text-white group-hover:text-orange-300 transition-colors duration-300">
+                        {c.cuisine}
+                      </h3>
+                      <span className="bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-lg text-xs font-bold">
+                        {c.count} {c.count === 1 ? "place" : "places"}
+                      </span>
+                    </div>
+
+                    {/* Total votes - prominent */}
+                    <div className="bg-neutral-900/60 rounded-lg p-3 mb-3">
+                      <p className="text-xs text-neutral-500 mb-0.5">Total Votes / Reviews</p>
+                      <p className="text-xl font-bold text-white tabular-nums">{c.totalVotes?.toLocaleString() || 0}</p>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-neutral-900/40 rounded-lg p-2">
+                        <p className="text-neutral-500 mb-0.5">Avg Rating</p>
+                        <p className="text-white font-semibold">{c.avgRating} <span className="text-yellow-500">&#9733;</span></p>
+                      </div>
+                      <div className="bg-neutral-900/40 rounded-lg p-2">
+                        <p className="text-neutral-500 mb-0.5">With Photos</p>
+                        <p className={`font-semibold ${c.withPhotos > c.count / 2 ? "text-green-400" : "text-amber-400"}`}>
+                          {c.withPhotos}/{c.count}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Top & bottom */}
+                    <div className="mt-3 space-y-1.5 text-xs">
+                      {c.highestRatingName && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-400 shrink-0">&#9650;</span>
+                          <span className="text-neutral-400 truncate">{c.highestRatingName}</span>
+                          <span className="text-green-400 font-semibold ml-auto shrink-0">{c.highestRating}</span>
+                        </div>
+                      )}
+                      {c.mostReviewsName && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-400 shrink-0">&#9679;</span>
+                          <span className="text-neutral-400 truncate">{c.mostReviewsName}</span>
+                          <span className="text-blue-400 font-semibold ml-auto shrink-0">{c.mostReviews?.toLocaleString()}</span>
+                        </div>
+                      )}
+                      {c.lowestRatingName && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-red-400 shrink-0">&#9660;</span>
+                          <span className="text-neutral-400 truncate">{c.lowestRatingName}</span>
+                          <span className="text-red-400 font-semibold ml-auto shrink-0">{c.lowestRating}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </Reveal>
@@ -584,7 +583,7 @@ export default function DashboardClient({ data }: any) {
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-white">Where Competition Beats You</h2>
+                <h2 className="text-xl md:text-2xl font-bold gradient-text">Where Competition Beats You</h2>
                 <p className="text-xs text-neutral-500 mt-0.5">What competitors do better and where you have the advantage</p>
               </div>
             </div>
@@ -672,60 +671,90 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Top 5 Competitors</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Top 5 Competitors</h2>
             </div>
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-5">
             {competitors.map((comp: any, i: number) => (
               <Reveal key={i} delay={i * 100}>
-                <div className="dashboard-card rounded-2xl p-6 h-full">
+                <div className="dashboard-card rounded-2xl p-6 h-full relative overflow-hidden">
+                  {/* Threat color accent bar */}
+                  <div
+                    className="absolute top-0 left-0 right-0 h-0.5"
+                    style={{
+                      background: comp.threatScore >= 75 ? "linear-gradient(90deg, #ef4444, #f97316)" :
+                        comp.threatScore >= 50 ? "linear-gradient(90deg, #f59e0b, #eab308)" :
+                        "linear-gradient(90deg, #22c55e, #10b981)",
+                    }}
+                  />
+
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-bold text-white">
                       {comp.name}
                     </h3>
-                    <span className="text-xs font-bold bg-red-500/15 text-red-400 border border-red-500/20 px-3 py-1 rounded-full">
-                      {comp.threatScore}
+                    <span
+                      className="text-xs font-bold px-3 py-1 rounded-full border"
+                      style={{
+                        borderColor: comp.threatScore >= 75 ? "rgba(239,68,68,0.3)" : comp.threatScore >= 50 ? "rgba(245,158,11,0.3)" : "rgba(34,197,94,0.3)",
+                        color: comp.threatScore >= 75 ? "#ef4444" : comp.threatScore >= 50 ? "#f59e0b" : "#22c55e",
+                        backgroundColor: comp.threatScore >= 75 ? "rgba(239,68,68,0.1)" : comp.threatScore >= 50 ? "rgba(245,158,11,0.1)" : "rgba(34,197,94,0.1)",
+                      }}
+                    >
+                      {comp.threatScore}/100
                     </span>
                   </div>
 
-                  <p className="text-sm text-neutral-500 mb-3">
+                  <p className="text-sm text-neutral-500 mb-4 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
                     {comp.address}
                   </p>
 
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="bg-neutral-800/40 rounded-lg p-2 text-center">
-                      <p className="text-xs text-neutral-500">Rating</p>
-                      <p className="text-sm font-semibold text-white">{comp.rating}</p>
+                  <div className="grid grid-cols-3 gap-2.5 mb-5">
+                    <div className="bg-neutral-800/40 rounded-xl p-2.5 text-center border border-white/[0.03]">
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Rating</p>
+                      <p className="text-sm font-bold text-white">{comp.rating} <span className="text-yellow-500 text-xs">&#9733;</span></p>
                     </div>
-                    <div className="bg-neutral-800/40 rounded-lg p-2 text-center">
-                      <p className="text-xs text-neutral-500">Distance</p>
-                      <p className="text-sm font-semibold text-white">{comp.distanceKm} km</p>
+                    <div className="bg-neutral-800/40 rounded-xl p-2.5 text-center border border-white/[0.03]">
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Distance</p>
+                      <p className="text-sm font-bold text-white">{comp.distanceKm} km</p>
                     </div>
-                    <div className="bg-neutral-800/40 rounded-lg p-2 text-center">
-                      <p className="text-xs text-neutral-500">Sentiment</p>
-                      <p className="text-sm font-semibold text-white">{comp.sentimentLabel}</p>
+                    <div className="bg-neutral-800/40 rounded-xl p-2.5 text-center border border-white/[0.03]">
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Sentiment</p>
+                      <p className={`text-sm font-bold ${
+                        comp.sentimentLabel === "Positive" ? "text-green-400" :
+                        comp.sentimentLabel === "Negative" ? "text-red-400" : "text-amber-400"
+                      }`}>{comp.sentimentLabel || "—"}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div>
-                      <p className="font-semibold text-sm text-green-400 mb-1.5">Strengths</p>
-                      <ul className="list-disc ml-5 text-sm text-neutral-300 space-y-0.5">
+                      <p className="font-semibold text-xs text-green-400 uppercase tracking-wider mb-2">Strengths</p>
+                      <ul className="space-y-1.5">
                         {comp.strengths?.map(
                           (s: string, idx: number) => (
-                            <li key={idx}>{s}</li>
+                            <li key={idx} className="flex items-start gap-2 text-sm text-neutral-300">
+                              <span className="text-green-500 mt-0.5 text-xs">&#9679;</span>
+                              <span>{s}</span>
+                            </li>
                           )
                         )}
                       </ul>
                     </div>
 
                     <div>
-                      <p className="font-semibold text-sm text-red-400 mb-1.5">Weaknesses</p>
-                      <ul className="list-disc ml-5 text-sm text-neutral-300 space-y-0.5">
+                      <p className="font-semibold text-xs text-red-400 uppercase tracking-wider mb-2">Weaknesses</p>
+                      <ul className="space-y-1.5">
                         {comp.weaknesses?.map(
                           (w: string, idx: number) => (
-                            <li key={idx}>{w}</li>
+                            <li key={idx} className="flex items-start gap-2 text-sm text-neutral-300">
+                              <span className="text-red-500 mt-0.5 text-xs">&#9679;</span>
+                              <span>{w}</span>
+                            </li>
                           )
                         )}
                       </ul>
@@ -747,7 +776,7 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Competitor Keyword Clusters</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Competitor Keyword Clusters</h2>
             </div>
 
             <div className="space-y-6">
@@ -785,7 +814,7 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Competition in Same Cuisine (&#8804;5km)</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Competition in Same Cuisine (&#8804;5km)</h2>
             </div>
 
             <div className="overflow-x-auto">
@@ -859,7 +888,7 @@ export default function DashboardClient({ data }: any) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Top 5 Newly Opened</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Top 5 Newly Opened</h2>
             </div>
           </Reveal>
 
@@ -889,20 +918,23 @@ export default function DashboardClient({ data }: any) {
 
         {/* ═══════ FINAL VERDICT ═══════ */}
         <Reveal>
-          <div className="dashboard-card rounded-2xl p-6 md:p-8 border-green-500/15 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/[0.05] rounded-full blur-[60px] pointer-events-none" />
+          <div className="dashboard-card rounded-2xl p-6 md:p-8 border-green-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-60 h-60 bg-green-500/[0.04] rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-500/[0.03] rounded-full blur-[60px] pointer-events-none" />
 
             <div className="flex items-center gap-3 mb-5 relative">
-              <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center text-green-400">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-white">Final Strategic Verdict</h2>
+              <h2 className="text-xl md:text-2xl font-bold gradient-text">Final Strategic Verdict</h2>
             </div>
-            <p className="text-neutral-300 leading-relaxed relative">
-              {data?.finalStrategicVerdict}
-            </p>
+            <div className="relative bg-neutral-800/15 border-l-2 border-green-500/40 rounded-r-xl pl-5 pr-5 py-4">
+              <p className="text-neutral-200 leading-relaxed text-base">
+                {data?.finalStrategicVerdict}
+              </p>
+            </div>
           </div>
         </Reveal>
 
