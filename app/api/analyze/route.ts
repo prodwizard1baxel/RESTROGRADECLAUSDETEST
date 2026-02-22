@@ -11,6 +11,7 @@ type Restaurant = {
   totalRatings: number
   distanceKm: number
   cuisine: string[]
+  foodCuisine: string
   averagePrice: number
   threatScore: number
   sameCuisineThreatScore: number
@@ -214,17 +215,8 @@ export async function POST(req: Request) {
     }
 
     // ==============================
-    // Identify base restaurant cuisine types
-    // ==============================
-    const baseRestaurant = filteredPlaces.find(
-      (p: any) => p.name?.toLowerCase().includes(name.toLowerCase())
-    )
-    const baseCuisineTypes: string[] = baseRestaurant?.types?.filter(
-      (t: string) => !["point_of_interest", "establishment"].includes(t)
-    ) || ["restaurant"]
-
-    // ==============================
     // Map Google Data (restaurants only, no lodges/hotels)
+    // foodCuisine and sameCuisineThreatScore will be set after GPT call
     // ==============================
     const mapped: Restaurant[] = filteredPlaces.map((place: any) => {
       const distance = getDistanceKm(
@@ -235,19 +227,11 @@ export async function POST(req: Request) {
       )
 
       const placeTypes: string[] = place.types || []
-      const isSameCuisine = baseCuisineTypes.some((t: string) => placeTypes.includes(t))
 
       const threatScore = calculateThreatScore(
         place.rating || 0,
         place.user_ratings_total || 0,
         distance
-      )
-
-      const sameCuisineThreatScore = calculateSameCuisineThreatScore(
-        place.rating || 0,
-        place.user_ratings_total || 0,
-        distance,
-        isSameCuisine
       )
 
       return {
@@ -259,9 +243,10 @@ export async function POST(req: Request) {
         cuisine: placeTypes.filter(
           (t: string) => !["point_of_interest", "establishment"].includes(t)
         ).slice(0, 3),
+        foodCuisine: "Multi-cuisine",
         averagePrice: place.price_level ? place.price_level * 200 : 400,
         threatScore,
-        sameCuisineThreatScore,
+        sameCuisineThreatScore: 0,
         photoCount: place.photos?.length || 0,
         priceLevel: place.price_level || 0,
       }
@@ -271,19 +256,11 @@ export async function POST(req: Request) {
       .sort((a, b) => b.threatScore - a.threatScore)
       .slice(0, 5)
 
-    // Same cuisine within 5km - sorted by the new cuisine-specific threat score
-    const sameCuisineNearby = mapped
-      .filter((r: Restaurant) => r.distanceKm <= 5)
-      .sort((a, b) => b.sameCuisineThreatScore - a.sameCuisineThreatScore)
-      .slice(0, 5)
-
     const newHighRatedRestaurants = mapped
       .filter((r: Restaurant) => r.rating > 3.5 && r.totalRatings < 120)
       .slice(0, 5)
 
-    // ==============================
-    // Prepare restaurant names within 5km for cuisine classification
-    // ==============================
+    // All restaurants within 5km (for cuisine classification + same cuisine filtering)
     const within5km = mapped.filter((r) => r.distanceKm <= 5)
 
 
@@ -310,12 +287,13 @@ City: ${city}
 Top Competitors (with their data):
 ${JSON.stringify(topCompetitors)}
 
-All nearby restaurants within 5km (classify each by food cuisine type):
+All nearby restaurants within 5km (for cuisine classification):
 ${JSON.stringify(within5km.map(r => ({ name: r.name, rating: r.rating, reviews: r.totalRatings })))}
 
 Return STRICT JSON with these fields:
 
 {
+  "baseRestaurantCuisine": "The PRIMARY food cuisine type of ${name} - e.g. Biryani, North Indian, South Indian, Chinese, Pizza, Italian, Cafe, Fast Food, etc.",
   "executiveSummary": {
     "overview": "A 2-3 sentence high-level overview of the competitive landscape. What is the overall situation?",
     "keyFindings": ["Finding 1", "Finding 2", "Finding 3", "Finding 4"],
@@ -348,16 +326,25 @@ Return STRICT JSON with these fields:
   ],
   "cuisineClassification": {
     "restaurant name 1": "Biryani",
-    "restaurant name 2": "Pizza"
+    "restaurant name 2": "Pizza",
+    "restaurant name 3": "North Indian"
   }
 }
 
-IMPORTANT:
+CRITICAL RULES for cuisineClassification:
+- You MUST classify EVERY single restaurant from the "nearby restaurants within 5km" list above
+- Use the EXACT restaurant name as the key (copy it precisely, character for character)
+- Classify into SPECIFIC food cuisine types. Use these categories:
+  Biryani, North Indian, South Indian, Chinese, Pizza, Italian, Continental, Mughlai, Tandoori, Cafe/Coffee, Fast Food, Burger, Street Food, Seafood, Bakery/Desserts, Japanese, Thai, Korean, Mexican, Arabian/Lebanese, Ice Cream, Multi-cuisine, Vegetarian, BBQ/Grill, Kebab
+- Do NOT use generic labels like "Restaurant" or "Food" - always pick the most specific cuisine
+- For restaurants with multiple cuisines, pick the PRIMARY one they are most known for
+- "baseRestaurantCuisine" must be the specific food type of ${name} (e.g. "Biryani" not "Indian")
+
+OTHER RULES:
 - Make executiveSummary.keyFindings exactly 4 items, each a specific insight (not generic)
 - Make yourKeywordCluster.primary, .positive, and .negative each have 5-8 keywords
 - For each competitor in competitorEnhancements, include 2-3 items in whatTheyDoBetter and whereYouWin
 - Be specific to the actual restaurants, not generic advice
-- For cuisineClassification: classify EVERY restaurant in the nearby list into a specific food cuisine type like Biryani, Pizza, Chinese, North Indian, South Indian, Italian, Continental, Cafe, Fast Food, Street Food, Seafood, Bakery, Multi-cuisine, Japanese, Thai, etc. Use the restaurant name to infer the food type. Map each restaurant name to exactly one cuisine.
 `
         },
       ],
@@ -367,13 +354,47 @@ IMPORTANT:
     const aiParsed = JSON.parse(ai.choices[0].message.content!)
 
     // ==============================
-    // Build cuisine breakdown from GPT classification
+    // Apply GPT cuisine classification to all restaurants
     // ==============================
     const cuisineMap = aiParsed.cuisineClassification || {}
+    const baseRestaurantCuisine: string = aiParsed.baseRestaurantCuisine || "Multi-cuisine"
+
+    // Assign food cuisine to each mapped restaurant
+    mapped.forEach((r) => {
+      r.foodCuisine = cuisineMap[r.name] || "Multi-cuisine"
+    })
+
+    // ==============================
+    // Now calculate same-cuisine threat scores with REAL cuisine data
+    // ==============================
+    mapped.forEach((r) => {
+      const isSameCuisine = r.foodCuisine.toLowerCase() === baseRestaurantCuisine.toLowerCase()
+      r.sameCuisineThreatScore = calculateSameCuisineThreatScore(
+        r.rating,
+        r.totalRatings,
+        r.distanceKm,
+        isSameCuisine
+      )
+    })
+
+    // ==============================
+    // Build same cuisine competition list (ONLY restaurants with matching food cuisine)
+    // ==============================
+    const sameCuisineNearby = mapped
+      .filter((r) => {
+        if (r.distanceKm > 5) return false
+        return r.foodCuisine.toLowerCase() === baseRestaurantCuisine.toLowerCase()
+      })
+      .sort((a, b) => b.sameCuisineThreatScore - a.sameCuisineThreatScore)
+      .slice(0, 8)
+
+    // ==============================
+    // Build cuisine breakdown from GPT classification
+    // ==============================
     const cuisineAgg: Record<string, any> = {}
 
     within5km.forEach((r) => {
-      const foodCuisine = cuisineMap[r.name] || "Multi-cuisine"
+      const foodCuisine = r.foodCuisine || cuisineMap[r.name] || "Multi-cuisine"
       if (!cuisineAgg[foodCuisine]) {
         cuisineAgg[foodCuisine] = {
           cuisine: foodCuisine,
@@ -412,7 +433,7 @@ IMPORTANT:
 
     const cuisineBreakdown = Object.values(cuisineAgg)
       .sort((a: any, b: any) => b.totalVotes - a.totalVotes)
-      .slice(0, 8) as Record<string, unknown>[]
+      .slice(0, 10) as Record<string, unknown>[]
 
     // Merge enhancements
     topCompetitors.forEach((comp) => {
@@ -446,7 +467,7 @@ IMPORTANT:
         sameCuisineNearby,
         newHighRatedRestaurants,
         cuisineBreakdown,
-        baseCuisineTypes,
+        baseRestaurantCuisine,
         overallThreatLevel: avgScore >= 70 ? "High" : avgScore >= 45 ? "Moderate" : "Low",
         averageThreatScore: avgScore,
       },
