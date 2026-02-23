@@ -476,13 +476,9 @@ OTHER RULES:
     }
 
     const restaurant = await prisma.restaurant.upsert({
-      where: { id: `${name}-${city}` },
+      where: { name_city: { name, city } },
       update: {},
-      create: {
-        id: `${name}-${city}`,
-        name,
-        city,
-      },
+      create: { name, city },
     })
 
     const savedReport = await prisma.report.create({

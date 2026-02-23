@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -7,19 +7,67 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  phone         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  reports       Report[]
+  createdAt     DateTime  @default(now())
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Restaurant {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   city      String
   createdAt DateTime @default(now())
   reports   Report[]
+  @@unique([name, city])
 }
 
 model Report {
-  id            String   @id @default(uuid())
-  restaurantId  String
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId  String     @db.ObjectId
+  userId        String?    @db.ObjectId
   data          Json
-  createdAt     DateTime @default(now())
-
+  createdAt     DateTime   @default(now())
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  user          User?      @relation(fields: [userId], references: [id])
+}
+
+model Otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  phone     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
