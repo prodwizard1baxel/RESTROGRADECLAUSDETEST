@@ -194,21 +194,21 @@ export default function Analyze() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white relative overflow-hidden flex items-center justify-center">
+    <div className="min-h-screen bg-[#080B1A] text-white relative overflow-hidden flex items-center justify-center">
       {/* Background effects */}
       <div className="absolute inset-0 hero-gradient pointer-events-none" />
       <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
 
       {/* Floating orbs */}
-      <div className="absolute top-1/4 left-[15%] w-64 h-64 bg-green-500/[0.05] rounded-full blur-[100px] animate-float pointer-events-none" />
-      <div className="absolute bottom-1/4 right-[10%] w-80 h-80 bg-emerald-500/[0.04] rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
+      <div className="absolute top-1/4 left-[15%] w-64 h-64 bg-[#FF7A45]/[0.05] rounded-full blur-[100px] animate-float pointer-events-none" />
+      <div className="absolute bottom-1/4 right-[10%] w-80 h-80 bg-[#FF9D6E]/[0.04] rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
 
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-green-400/20 rounded-full"
+            className="absolute w-1 h-1 bg-[#FF7A45]/20 rounded-full"
             style={{
               left: `${20 + i * 15}%`,
               bottom: "0",
@@ -224,7 +224,7 @@ export default function Analyze() {
         {/* Back link */}
         <a
           href="/"
-          className="inline-flex items-center gap-2 text-neutral-400 hover:text-green-400 transition-colors duration-200 text-sm mb-6 group"
+          className="inline-flex items-center gap-2 text-neutral-400 hover:text-[#FF7A45] transition-colors duration-200 text-sm mb-6 group"
         >
           <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
@@ -235,10 +235,10 @@ export default function Analyze() {
         <div className="glass-card-green rounded-2xl p-8 md:p-10 shadow-2xl shadow-black/40">
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-green-500/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF9D6E] to-[#E5602A] flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-[#FF7A45]/20">
               R
             </div>
-            <span className="text-sm text-green-400 font-medium tracking-wide">RetroGrade AI</span>
+            <span className="text-sm text-[#FF7A45] font-medium tracking-wide">RetroGrade AI</span>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-white mt-4 mb-2">
@@ -258,7 +258,7 @@ export default function Analyze() {
               <input
                 placeholder="Search restaurant..."
                 value={nameQuery}
-                className="w-full bg-neutral-900/60 border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 focus:outline-none focus:border-green-500/40 focus:ring-1 focus:ring-green-500/20 transition-all duration-300"
+                className="w-full bg-neutral-900/60 border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#FF7A45]/40 focus:ring-1 focus:ring-[#FF7A45]/20 transition-all duration-300"
                 onChange={(e) => {
                   setNameQuery(e.target.value)
                   setName(e.target.value)
@@ -275,7 +275,7 @@ export default function Analyze() {
                 {placeSuggestions.map((place) => (
                   <button
                     key={place.place_id}
-                    className="w-full text-left px-4 py-3 hover:bg-green-500/10 transition-colors duration-200 border-b border-white/[0.04] last:border-0"
+                    className="w-full text-left px-4 py-3 hover:bg-[#FF7A45]/10 transition-colors duration-200 border-b border-white/[0.04] last:border-0"
                     onClick={() => {
                       const mainText = place.structured_formatting.main_text
                       setName(mainText)
@@ -306,7 +306,7 @@ export default function Analyze() {
               <input
                 placeholder="Enter city name..."
                 value={cityQuery}
-                className="w-full bg-neutral-900/60 border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 focus:outline-none focus:border-green-500/40 focus:ring-1 focus:ring-green-500/20 transition-all duration-300"
+                className="w-full bg-neutral-900/60 border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#FF7A45]/40 focus:ring-1 focus:ring-[#FF7A45]/20 transition-all duration-300"
                 onChange={(e) => {
                   setCityQuery(e.target.value)
                   setCity(e.target.value)
@@ -323,7 +323,7 @@ export default function Analyze() {
                 {citySuggestions.map((suggestion) => (
                   <button
                     key={suggestion}
-                    className="w-full text-left px-4 py-3 hover:bg-green-500/10 transition-colors duration-200 border-b border-white/[0.04] last:border-0 text-sm text-neutral-200"
+                    className="w-full text-left px-4 py-3 hover:bg-[#FF7A45]/10 transition-colors duration-200 border-b border-white/[0.04] last:border-0 text-sm text-neutral-200"
                     onClick={() => {
                       setCity(suggestion)
                       setCityQuery(suggestion)
@@ -348,7 +348,7 @@ export default function Analyze() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="cta-hero w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black py-4 rounded-xl font-bold text-lg hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl shadow-green-500/20 hover:shadow-green-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            className="cta-hero w-full bg-gradient-to-r from-[#FF7A45] to-[#FF9D6E] text-black py-4 rounded-xl font-bold text-lg hover:from-[#FF9D6E] hover:to-[#FFB584] transition-all duration-300 shadow-xl shadow-[#FF7A45]/20 hover:shadow-[#FF7A45]/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             {loading ? (
               <>

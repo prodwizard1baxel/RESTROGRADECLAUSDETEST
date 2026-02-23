@@ -134,7 +134,7 @@ function FloatingParticles() {
       {[...Array(6)].map((_, i) => (
         <div
           key={i}
-          className="absolute w-1 h-1 bg-green-400/30 rounded-full"
+          className="absolute w-1 h-1 bg-[#FF7A45]/30 rounded-full"
           style={{
             left: `${15 + i * 15}%`,
             bottom: "0",
@@ -168,22 +168,22 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white overflow-hidden">
+    <main className="min-h-screen bg-[#080B1A] text-white overflow-hidden">
       {/* ── Navigation ──────────────────────────────────────────────── */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-neutral-950/90 backdrop-blur-2xl border-b border-green-500/10 shadow-2xl shadow-black/20"
+            ? "bg-[#080B1A]/90 backdrop-blur-2xl border-b border-[#FF7A45]/10 shadow-2xl shadow-black/20"
             : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-green-500/20 group-hover:shadow-green-500/40 transition-shadow duration-300">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF7A45] to-[#E5602A] flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-[#FF7A45]/20 group-hover:shadow-[#FF7A45]/40 transition-shadow duration-300">
               R
             </div>
             <span className="font-semibold text-lg tracking-tight">
-              Retro<span className="text-green-400">Grade</span>
+              Retro<span className="text-[#FF7A45]">Grade</span>
             </span>
           </a>
 
@@ -198,7 +198,7 @@ export default function Home() {
                 key={link.id}
                 href={`#${link.id}`}
                 onClick={(e) => scrollTo(e, link.id)}
-                className="relative hover:text-white transition-colors duration-200 py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-green-400 after:transition-all after:duration-300 hover:after:w-full"
+                className="relative hover:text-white transition-colors duration-200 py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#FF7A45] after:transition-all after:duration-300 hover:after:w-full"
               >
                 {link.label}
               </a>
@@ -214,7 +214,7 @@ export default function Home() {
             </a>
             <a
               href="/analyze"
-              className="cta-primary bg-gradient-to-r from-green-500 to-emerald-500 text-black px-5 py-2 rounded-lg text-sm font-semibold hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-px"
+              className="cta-primary bg-gradient-to-r from-[#FF7A45] to-[#FF9D6E] text-black px-5 py-2 rounded-lg text-sm font-semibold hover:from-[#FF9D6E] hover:to-[#FFB584] transition-all duration-300 shadow-lg shadow-[#FF7A45]/20 hover:shadow-[#FF7A45]/40 hover:-translate-y-px"
             >
               Get Report
             </a>
@@ -239,10 +239,10 @@ export default function Home() {
         {/* mobile nav dropdown */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 ${
-            mobileNavOpen ? "max-h-64 border-b border-green-500/10" : "max-h-0"
+            mobileNavOpen ? "max-h-64 border-b border-[#FF7A45]/10" : "max-h-0"
           }`}
         >
-          <div className="px-6 py-4 flex flex-col gap-3 bg-neutral-950/95 backdrop-blur-2xl">
+          <div className="px-6 py-4 flex flex-col gap-3 bg-[#080B1A]/95 backdrop-blur-2xl">
             {["how-it-works", "features", "preview", "testimonials"].map((id) => (
               <a
                 key={id}
@@ -266,11 +266,11 @@ export default function Home() {
 
         {/* Morphing blob orbs with parallax */}
         <div
-          className="absolute top-20 left-[10%] w-72 h-72 bg-green-500/8 rounded-full blur-[100px] animate-float animate-morph-blob"
+          className="absolute top-20 left-[10%] w-72 h-72 bg-[#FF7A45]/8 rounded-full blur-[100px] animate-float animate-morph-blob"
           style={{ transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)` }}
         />
         <div
-          className="absolute top-40 right-[5%] w-96 h-96 bg-emerald-400/5 rounded-full blur-[120px] animate-float-delayed animate-morph-blob"
+          className="absolute top-40 right-[5%] w-96 h-96 bg-[#FF9D6E]/5 rounded-full blur-[120px] animate-float-delayed animate-morph-blob"
           style={{ transform: `translate(${-mouseOffset.x}px, ${-mouseOffset.y}px)`, animationDelay: "3s" }}
         />
         <div
@@ -280,10 +280,10 @@ export default function Home() {
 
         <div className="relative max-w-5xl mx-auto px-6 text-center">
           {/* Badge */}
-          <div className="animate-fade-in-up inline-flex items-center gap-2.5 bg-green-500/10 border border-green-500/20 rounded-full px-5 py-2 mb-8 hover:bg-green-500/15 transition-colors duration-300 cursor-default">
+          <div className="animate-fade-in-up inline-flex items-center gap-2.5 bg-[#FF7A45]/10 border border-[#FF7A45]/20 rounded-full px-5 py-2 mb-8 hover:bg-[#FF7A45]/15 transition-colors duration-300 cursor-default">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF7A45] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF7A45]" />
             </span>
             <span className="text-sm text-white/80 font-medium tracking-wide">
               AI Restaurant Growth Engine
@@ -308,7 +308,7 @@ export default function Home() {
           <div className="animate-fade-in-up animation-delay-300 flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/analyze"
-              className="cta-hero group bg-gradient-to-r from-green-500 to-emerald-500 text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-green-400 hover:to-emerald-400 transition-all duration-300 inline-flex items-center justify-center gap-2.5 shadow-2xl shadow-green-500/25 hover:shadow-green-500/40 hover:-translate-y-0.5"
+              className="cta-hero group bg-gradient-to-r from-[#FF7A45] to-[#FF9D6E] text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-[#FF9D6E] hover:to-[#FFB584] transition-all duration-300 inline-flex items-center justify-center gap-2.5 shadow-2xl shadow-[#FF7A45]/25 hover:shadow-[#FF7A45]/40 hover:-translate-y-0.5"
             >
               <span>Get Your Free Report</span>
               <svg
@@ -323,10 +323,10 @@ export default function Home() {
             </a>
             <a
               href="/demo"
-              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-green-500/30 hover:text-white hover:bg-green-500/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2.5"
+              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-[#FF7A45]/30 hover:text-white hover:bg-[#FF7A45]/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2.5"
             >
               <svg
-                className="w-5 h-5 text-green-400 transition-transform duration-300 group-hover:scale-110"
+                className="w-5 h-5 text-[#FF7A45] transition-transform duration-300 group-hover:scale-110"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -358,7 +358,7 @@ export default function Home() {
       </section>
 
       {/* ── Trusted By Logos Strip ──────────────────────────────────── */}
-      <section className="border-y border-green-500/[0.06] bg-gradient-to-r from-neutral-950 via-neutral-900/40 to-neutral-950 py-10">
+      <section className="border-y border-[#FF7A45]/[0.06] bg-gradient-to-r from-neutral-950 via-neutral-900/40 to-neutral-950 py-10">
         <Reveal>
           <div className="max-w-6xl mx-auto px-6">
             <p className="text-center text-xs uppercase tracking-[0.2em] text-neutral-600 mb-8 font-medium">
@@ -366,7 +366,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-40">
               {["Zomato Partner", "Google Maps", "GPT-4 Powered", "Swiggy Listed", "TripAdvisor"].map((name, i) => (
-                <span key={i} className="text-sm md:text-base font-semibold text-neutral-400 tracking-wider whitespace-nowrap hover:text-green-400/60 transition-colors duration-500">
+                <span key={i} className="text-sm md:text-base font-semibold text-neutral-400 tracking-wider whitespace-nowrap hover:text-[#FF7A45]/60 transition-colors duration-500">
                   {name}
                 </span>
               ))}
@@ -391,7 +391,7 @@ export default function Home() {
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-20">
-            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#FF7A45] font-semibold mb-4">
               Simple Process
             </p>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
@@ -404,7 +404,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* connecting line (desktop) */}
-            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-green-500/20 to-transparent" />
+            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-[#FF7A45]/20 to-transparent" />
 
             {[
               {
@@ -442,16 +442,16 @@ export default function Home() {
               },
             ].map((item, i) => (
               <Reveal key={i} delay={i * 150}>
-                <div className="glass-card-green rounded-2xl p-8 group relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-green-500/5">
+                <div className="glass-card-green rounded-2xl p-8 group relative hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#FF7A45]/5">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 group-hover:bg-green-500/20 group-hover:border-green-500/30 transition-all duration-500 group-hover:scale-110">
+                    <div className="w-14 h-14 rounded-2xl bg-[#FF7A45]/10 border border-[#FF7A45]/20 flex items-center justify-center text-[#FF7A45] group-hover:bg-[#FF7A45]/20 group-hover:border-[#FF7A45]/30 transition-all duration-500 group-hover:scale-110">
                       {item.icon}
                     </div>
                     <span className="text-xs font-bold text-neutral-600 uppercase tracking-[0.15em]">
                       Step {item.step}
                     </span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-green-300 transition-colors duration-300">{item.title}</h3>
+                  <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-[#FF9D6E] transition-colors duration-300">{item.title}</h3>
                   <p className="text-neutral-400 leading-relaxed text-sm">{item.description}</p>
                 </div>
               </Reveal>
@@ -462,7 +462,7 @@ export default function Home() {
           <Reveal delay={450} className="text-center mt-14">
             <a
               href="/analyze"
-              className="inline-flex items-center gap-2 text-green-400 font-semibold hover:text-green-300 transition-colors duration-200 group"
+              className="inline-flex items-center gap-2 text-[#FF7A45] font-semibold hover:text-[#FF9D6E] transition-colors duration-200 group"
             >
               <span>Start your analysis now</span>
               <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -476,16 +476,16 @@ export default function Home() {
       {/* ── Features ────────────────────────────────────────────────── */}
       <section id="features" className="py-20 md:py-32 relative overflow-hidden">
         <div className="absolute inset-0 section-gradient-3 pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF7A45]/10 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF7A45]/10 to-transparent" />
 
         {/* Ambient background glow */}
-        <div className="absolute top-1/3 -left-40 w-80 h-80 bg-green-500/[0.04] rounded-full blur-[120px] animate-glow-pulse pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-40 w-80 h-80 bg-emerald-500/[0.03] rounded-full blur-[120px] animate-glow-pulse pointer-events-none" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/3 -left-40 w-80 h-80 bg-[#FF7A45]/[0.04] rounded-full blur-[120px] animate-glow-pulse pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-40 w-80 h-80 bg-[#1A2B6D]/[0.03] rounded-full blur-[120px] animate-glow-pulse pointer-events-none" style={{ animationDelay: "2s" }} />
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#FF7A45] font-semibold mb-4">
               What You Get
             </p>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
@@ -530,8 +530,8 @@ export default function Home() {
                 description:
                   "AI-generated keyword clusters to help you dominate local search and drive organic discovery.",
                 color: "text-emerald-400",
-                bgColor: "bg-emerald-500/10 border-emerald-500/20",
-                hoverBorder: "hover:border-emerald-500/30",
+                bgColor: "bg-[#1A2B6D]/10 border-[#1A2B6D]/20",
+                hoverBorder: "hover:border-[#1A2B6D]/30",
                 icon: (
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
@@ -555,9 +555,9 @@ export default function Home() {
                 title: "Revenue Impact Analysis",
                 description:
                   "Estimated monthly revenue at risk and recovery opportunity based on your competitive position.",
-                color: "text-green-400",
-                bgColor: "bg-green-500/10 border-green-500/20",
-                hoverBorder: "hover:border-green-500/30",
+                color: "text-[#FF7A45]",
+                bgColor: "bg-[#FF7A45]/10 border-[#FF7A45]/20",
+                hoverBorder: "hover:border-[#FF7A45]/30",
                 icon: (
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -587,7 +587,7 @@ export default function Home() {
                   >
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-white group-hover:text-green-300 transition-colors duration-300">{feature.title}</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-white group-hover:text-[#FF9D6E] transition-colors duration-300">{feature.title}</h3>
                   <p className="text-neutral-400 text-sm leading-relaxed">{feature.description}</p>
                 </div>
               </Reveal>
@@ -598,11 +598,11 @@ export default function Home() {
 
       {/* ── Report Preview ──────────────────────────────────────────── */}
       <section id="preview" className="py-20 md:py-32 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/[0.03] rounded-full blur-[150px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF7A45]/[0.03] rounded-full blur-[150px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#FF7A45] font-semibold mb-4">
               Sample Output
             </p>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
@@ -617,11 +617,11 @@ export default function Home() {
           {/* Mock report preview */}
           <Reveal>
             <div className="glass-card-green rounded-2xl p-1.5 max-w-4xl mx-auto shadow-2xl shadow-black/40">
-              <div className="rounded-xl bg-neutral-950 p-6 md:p-10 space-y-6">
+              <div className="rounded-xl bg-[#080B1A] p-6 md:p-10 space-y-6">
                 {/* Mock header */}
                 <div className="flex items-end justify-between border-b border-neutral-800/80 pb-6">
                   <div>
-                    <p className="text-xs text-green-400 font-semibold uppercase tracking-[0.15em] mb-1.5">
+                    <p className="text-xs text-[#FF7A45] font-semibold uppercase tracking-[0.15em] mb-1.5">
                       Competitive Intelligence Report
                     </p>
                     <h3 className="text-2xl md:text-3xl font-bold text-white">Spice Garden</h3>
@@ -635,7 +635,7 @@ export default function Home() {
 
                 {/* Mock KPIs */}
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-neutral-900/80 border border-neutral-800/60 rounded-xl p-4 hover:border-green-500/20 transition-colors duration-300">
+                  <div className="bg-neutral-900/80 border border-neutral-800/60 rounded-xl p-4 hover:border-[#FF7A45]/20 transition-colors duration-300">
                     <p className="text-xs text-neutral-500 mb-1">Threat Index</p>
                     <p className="text-2xl font-bold text-white">
                       71<span className="text-sm text-neutral-600">/100</span>
@@ -645,7 +645,7 @@ export default function Home() {
                     <p className="text-xs text-neutral-500 mb-1">Revenue at Risk</p>
                     <p className="text-2xl font-bold text-red-400">$48K</p>
                   </div>
-                  <div className="bg-emerald-950/20 border border-emerald-800/20 rounded-xl p-4 hover:border-emerald-500/30 transition-colors duration-300">
+                  <div className="bg-emerald-950/20 border border-emerald-800/20 rounded-xl p-4 hover:border-[#1A2B6D]/30 transition-colors duration-300">
                     <p className="text-xs text-neutral-500 mb-1">Recovery Opp.</p>
                     <p className="text-2xl font-bold text-emerald-400">$85K</p>
                   </div>
@@ -659,7 +659,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/95 to-transparent z-10 flex items-end justify-center pb-6">
                     <a
                       href="/demo"
-                      className="group bg-gradient-to-r from-green-500 to-emerald-500 text-black px-8 py-3.5 rounded-xl font-semibold hover:from-green-400 hover:to-emerald-400 transition-all duration-300 text-sm shadow-xl shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-px inline-flex items-center gap-2"
+                      className="group bg-gradient-to-r from-[#FF7A45] to-[#FF9D6E] text-black px-8 py-3.5 rounded-xl font-semibold hover:from-[#FF9D6E] hover:to-[#FFB584] transition-all duration-300 text-sm shadow-xl shadow-[#FF7A45]/20 hover:shadow-[#FF7A45]/40 hover:-translate-y-px inline-flex items-center gap-2"
                     >
                       <span>View Full Demo Report</span>
                       <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -684,12 +684,12 @@ export default function Home() {
       {/* ── Testimonials / Social Proof ─────────────────────────────── */}
       <section id="testimonials" className="py-20 md:py-32 relative overflow-hidden">
         <div className="absolute inset-0 section-gradient-2 pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/10 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF7A45]/10 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF7A45]/10 to-transparent" />
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-green-400 font-semibold mb-4">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#FF7A45] font-semibold mb-4">
               Trusted by Restaurateurs
             </p>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
@@ -727,7 +727,7 @@ export default function Home() {
                     {[...Array(5)].map((_, j) => (
                       <svg
                         key={j}
-                        className="w-4 h-4 text-green-400"
+                        className="w-4 h-4 text-[#FF7A45]"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -739,7 +739,7 @@ export default function Home() {
                     &quot;{testimonial.quote}&quot;
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20 flex items-center justify-center text-green-400 font-semibold text-sm">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF7A45]/20 to-[#1A2B6D]/20 border border-[#FF7A45]/20 flex items-center justify-center text-[#FF7A45] font-semibold text-sm">
                       {testimonial.name[0]}
                     </div>
                     <div>
@@ -760,7 +760,7 @@ export default function Home() {
       <section className="py-24 md:py-36 relative overflow-hidden">
         <div className="hero-gradient absolute inset-0 pointer-events-none" />
         <div className="bg-grid-pattern absolute inset-0 pointer-events-none opacity-30" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-500/[0.04] rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#FF7A45]/[0.04] rounded-full blur-[120px] pointer-events-none" />
         <FloatingParticles />
 
         <Reveal className="relative max-w-3xl mx-auto px-6 text-center">
@@ -776,7 +776,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/analyze"
-              className="cta-hero group bg-gradient-to-r from-green-500 to-emerald-500 text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-2xl shadow-green-500/25 hover:shadow-green-500/40 hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
+              className="cta-hero group bg-gradient-to-r from-[#FF7A45] to-[#FF9D6E] text-black px-10 py-4 rounded-xl font-bold text-lg hover:from-[#FF9D6E] hover:to-[#FFB584] transition-all duration-300 shadow-2xl shadow-[#FF7A45]/25 hover:shadow-[#FF7A45]/40 hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
             >
               <span>Generate My Report</span>
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -785,7 +785,7 @@ export default function Home() {
             </a>
             <a
               href="/demo"
-              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-green-500/30 hover:text-white hover:bg-green-500/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2"
+              className="group border border-neutral-700 text-neutral-300 px-10 py-4 rounded-xl font-semibold text-lg hover:border-[#FF7A45]/30 hover:text-white hover:bg-[#FF7A45]/[0.03] transition-all duration-300 inline-flex items-center justify-center gap-2"
             >
               <span>See Demo First</span>
             </a>
@@ -797,17 +797,17 @@ export default function Home() {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────────── */}
-      <footer className="border-t border-green-500/[0.06] py-14 bg-neutral-950">
+      <footer className="border-t border-[#FF7A45]/[0.06] py-14 bg-[#080B1A]">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-10 mb-12">
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-black text-sm">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF7A45] to-[#E5602A] flex items-center justify-center font-bold text-black text-sm">
                   R
                 </div>
                 <span className="font-semibold text-lg tracking-tight">
-                  Retro<span className="text-green-400">Grade</span>
+                  Retro<span className="text-[#FF7A45]">Grade</span>
                 </span>
               </div>
               <p className="text-neutral-500 text-sm leading-relaxed max-w-sm">
@@ -820,16 +820,16 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold mb-4 text-neutral-300">Product</p>
               <div className="flex flex-col gap-2.5">
-                <a href="/analyze" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="/analyze" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   Get Report
                 </a>
-                <a href="/demo" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="/demo" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   Demo
                 </a>
-                <a href="#features" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="#features" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   Features
                 </a>
-                <a href="#how-it-works" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="#how-it-works" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   How It Works
                 </a>
               </div>
@@ -838,13 +838,13 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold mb-4 text-neutral-300">Company</p>
               <div className="flex flex-col gap-2.5">
-                <a href="#testimonials" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="#testimonials" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   Testimonials
                 </a>
-                <a href="#" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="#" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   Privacy Policy
                 </a>
-                <a href="#" className="text-sm text-neutral-500 hover:text-green-400 transition-colors">
+                <a href="#" className="text-sm text-neutral-500 hover:text-[#FF7A45] transition-colors">
                   Terms of Service
                 </a>
               </div>
@@ -872,9 +872,9 @@ function PreviewBars() {
   const competitors = [
     { name: "The Bombay Canteen", score: 88, color: "from-red-500 to-red-600" },
     { name: "Bastian", score: 83, color: "from-red-500 to-red-600" },
-    { name: "Pali Village Cafe", score: 74, color: "from-green-400 to-emerald-500" },
-    { name: "Smoke House Deli", score: 63, color: "from-green-400 to-emerald-500" },
-    { name: "Sequel", score: 58, color: "from-emerald-400 to-green-500" },
+    { name: "Pali Village Cafe", score: 74, color: "from-[#FF9D6E] to-[#FF7A45]" },
+    { name: "Smoke House Deli", score: 63, color: "from-[#FF9D6E] to-[#FF7A45]" },
+    { name: "Sequel", score: 58, color: "from-[#27AE60] to-[#2ECC71]" },
   ];
 
   return (
