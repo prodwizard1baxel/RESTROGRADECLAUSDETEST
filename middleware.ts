@@ -5,5 +5,5 @@ export default withAuth({
 })
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/analyze"],
+  matcher: ["/dashboard/:path*"],
 }
