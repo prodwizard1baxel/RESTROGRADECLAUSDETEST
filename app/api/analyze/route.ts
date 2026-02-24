@@ -301,6 +301,16 @@ Return STRICT JSON with these fields:
     "growthOpportunities": "1-2 sentences about the biggest opportunities for growth based on competitor weaknesses.",
     "recommendation": "A clear, actionable 1-2 sentence recommendation for what the restaurant owner should do first."
   },
+  "googleProfileChecks": {
+    "websiteAvailable": { "pass": true, "note": "Brief note about website presence" },
+    "googlePageUpdated": { "pass": true, "note": "Brief note about Google Business Profile activity" },
+    "seoOptimised": { "pass": true, "note": "Brief note about SEO signals" },
+    "timingsUpdated": { "pass": true, "note": "Brief note about business hours" },
+    "ownerPhotosAdded": { "pass": true, "note": "Brief note about owner-uploaded photos" },
+    "respondingToReviews": { "pass": true, "note": "Brief note about review response rate" },
+    "menuAvailable": { "pass": true, "note": "Brief note about online menu" },
+    "contactInfoComplete": { "pass": true, "note": "Brief note about phone/address" }
+  },
   "finalStrategicVerdict": "",
   "yourKeywordCluster": {
     "primary": ["5-8 primary SEO/brand keywords that define this restaurant"],
@@ -339,6 +349,12 @@ CRITICAL RULES for cuisineClassification:
 - Do NOT use generic labels like "Restaurant" or "Food" - always pick the most specific cuisine
 - For restaurants with multiple cuisines, pick the PRIMARY one they are most known for
 - "baseRestaurantCuisine" must be the specific food type of ${name} (e.g. "Biryani" not "Indian")
+
+GOOGLE PROFILE CHECKS RULES:
+- For googleProfileChecks, evaluate each item realistically based on the restaurant data
+- Set "pass" to true if the check likely passes, false if it likely fails
+- The "note" should be a brief 5-15 word explanation
+- Be realistic — many small restaurants fail several of these checks
 
 OTHER RULES:
 - Make executiveSummary.keyFindings exactly 4 items, each a specific insight (not generic)
@@ -455,10 +471,43 @@ OTHER RULES:
       topCompetitors.reduce((sum, c) => sum + c.threatScore, 0) / topCompetitors.length
     ) || 0
 
+    // ==============================
+    // Compute review metrics for the restaurant's area
+    // ==============================
+    const allReviewCounts = mapped.map(r => r.totalRatings).sort((a, b) => a - b)
+    const totalReviewsInArea = allReviewCounts.reduce((s, v) => s + v, 0)
+    const negativeEstimate = mapped
+      .filter(r => r.rating < 3.5)
+      .reduce((s, r) => s + Math.round(r.totalRatings * (1 - r.rating / 5)), 0)
+
+    // Percentile rank of the base restaurant among all nearby
+    const baseRestaurantData = mapped.find(
+      r => r.name.toLowerCase().includes(name.toLowerCase().split(" ")[0])
+    )
+    const baseReviews = baseRestaurantData?.totalRatings || 0
+    const baseRating = baseRestaurantData?.rating || 0
+    const reviewPercentile = Math.round(
+      (allReviewCounts.filter(c => c <= baseReviews).length / Math.max(1, allReviewCounts.length)) * 100
+    )
+    const allRatings = mapped.map(r => r.rating).sort((a, b) => a - b)
+    const ratingPercentile = Math.round(
+      (allRatings.filter(r => r <= baseRating).length / Math.max(1, allRatings.length)) * 100
+    )
+
     const finalData = {
       restaurantName: name,
       restaurantCity: city,
       executiveSummary: aiParsed.executiveSummary,
+      googleProfileChecks: aiParsed.googleProfileChecks,
+      reviewMetrics: {
+        totalReviews: baseReviews,
+        totalReviewsInArea: totalReviewsInArea,
+        estimatedNegativeReviews: negativeEstimate,
+        reviewPercentile,
+        ratingPercentile,
+        rating: baseRating,
+        totalCompetitors: mapped.length,
+      },
       yourKeywordCluster: aiParsed.yourKeywordCluster,
       competitorKeywordClusters:
         aiParsed.competitorKeywordClusters,

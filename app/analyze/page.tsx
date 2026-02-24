@@ -66,8 +66,11 @@ export default function Analyze() {
       const existing = document.querySelector('script[src*="maps.googleapis.com"]')
       if (existing) return
 
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      if (!apiKey) return
+
       const script = document.createElement("script")
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
       script.async = true
       script.defer = true
       script.onload = () => {
@@ -162,7 +165,7 @@ export default function Analyze() {
       setError("")
 
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 90000) // 90s timeout
+      const timeout = setTimeout(() => controller.abort(), 90000)
 
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -194,37 +197,17 @@ export default function Analyze() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080B1A] text-white relative overflow-hidden flex items-center justify-center">
-      {/* Background effects */}
-      <div className="absolute inset-0 hero-gradient pointer-events-none" />
-      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
-
-      {/* Floating orbs */}
-      <div className="absolute top-1/4 left-[15%] w-64 h-64 bg-[#FF7A45]/[0.05] rounded-full blur-[100px] animate-float pointer-events-none" />
-      <div className="absolute bottom-1/4 right-[10%] w-80 h-80 bg-[#FF9D6E]/[0.04] rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
-
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-[#FF7A45]/20 rounded-full"
-            style={{
-              left: `${20 + i * 15}%`,
-              bottom: "0",
-              animation: `particle-rise ${8 + i * 2}s linear infinite`,
-              animationDelay: `${i * 1.5}s`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden flex items-center justify-center">
+      {/* Background */}
+      <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
+      <div className="absolute top-1/4 left-[15%] w-64 h-64 bg-indigo-100/40 rounded-full blur-[100px] animate-float pointer-events-none" />
+      <div className="absolute bottom-1/4 right-[10%] w-80 h-80 bg-violet-100/30 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
 
       {/* Main card */}
       <div className="relative z-10 w-full max-w-lg mx-4">
-        {/* Back link */}
         <a
           href="/"
-          className="inline-flex items-center gap-2 text-neutral-400 hover:text-[#FF7A45] transition-colors duration-200 text-sm mb-6 group"
+          className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors duration-200 text-sm mb-6 group"
         >
           <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
@@ -232,33 +215,33 @@ export default function Analyze() {
           <span>Back to Home</span>
         </a>
 
-        <div className="glass-card-green rounded-2xl p-8 md:p-10 shadow-2xl shadow-black/40">
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-10 shadow-xl shadow-slate-200/50">
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF9D6E] to-[#E5602A] flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-[#FF7A45]/20">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-indigo-200">
               R
             </div>
-            <span className="text-sm text-[#FF7A45] font-medium tracking-wide">RetroGrade AI</span>
+            <span className="text-sm text-indigo-600 font-medium tracking-wide">RetroGrade AI</span>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold text-white mt-4 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mt-4 mb-2">
             Generate AI Report
           </h1>
-          <p className="text-neutral-400 text-sm mb-8">
+          <p className="text-slate-500 text-sm mb-8">
             Enter your restaurant details and we&apos;ll analyze your competitive landscape in under 2 minutes.
           </p>
 
           {/* Restaurant Name Input with Google Places Autocomplete */}
           <div ref={placeRef} className="relative mb-5">
-            <label className="block text-sm text-neutral-300 font-medium mb-2">Restaurant Name</label>
+            <label className="block text-sm text-slate-700 font-medium mb-2">Restaurant Name</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               <input
                 placeholder="Search restaurant..."
                 value={nameQuery}
-                className="w-full bg-neutral-900/60 border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#FF7A45]/40 focus:ring-1 focus:ring-[#FF7A45]/20 transition-all duration-300"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all duration-300"
                 onChange={(e) => {
                   setNameQuery(e.target.value)
                   setName(e.target.value)
@@ -271,11 +254,11 @@ export default function Analyze() {
 
             {/* Place suggestions dropdown */}
             {showPlaceDropdown && placeSuggestions.length > 0 && (
-              <div className="absolute z-20 mt-1.5 w-full bg-neutral-900 border border-white/[0.08] rounded-xl overflow-hidden shadow-2xl shadow-black/50 max-h-60 overflow-y-auto">
+              <div className="absolute z-20 mt-1.5 w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl shadow-slate-200/50 max-h-60 overflow-y-auto">
                 {placeSuggestions.map((place) => (
                   <button
                     key={place.place_id}
-                    className="w-full text-left px-4 py-3 hover:bg-[#FF7A45]/10 transition-colors duration-200 border-b border-white/[0.04] last:border-0"
+                    className="w-full text-left px-4 py-3 hover:bg-indigo-50 transition-colors duration-200 border-b border-slate-100 last:border-0"
                     onClick={() => {
                       const mainText = place.structured_formatting.main_text
                       setName(mainText)
@@ -283,30 +266,30 @@ export default function Analyze() {
                       setShowPlaceDropdown(false)
                     }}
                   >
-                    <p className="text-sm text-white font-medium">{place.structured_formatting.main_text}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{place.structured_formatting.secondary_text}</p>
+                    <p className="text-sm text-slate-800 font-medium">{place.structured_formatting.main_text}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{place.structured_formatting.secondary_text}</p>
                   </button>
                 ))}
               </div>
             )}
 
             {!mapsLoaded && nameQuery.length >= 2 && (
-              <p className="text-xs text-neutral-600 mt-1.5">Loading Google Places...</p>
+              <p className="text-xs text-slate-400 mt-1.5">Type your restaurant name manually</p>
             )}
           </div>
 
           {/* City Input with Autofill */}
           <div ref={cityRef} className="relative mb-6">
-            <label className="block text-sm text-neutral-300 font-medium mb-2">City</label>
+            <label className="block text-sm text-slate-700 font-medium mb-2">City</label>
             <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
               </svg>
               <input
                 placeholder="Enter city name..."
                 value={cityQuery}
-                className="w-full bg-neutral-900/60 border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-white placeholder:text-neutral-600 focus:outline-none focus:border-[#FF7A45]/40 focus:ring-1 focus:ring-[#FF7A45]/20 transition-all duration-300"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all duration-300"
                 onChange={(e) => {
                   setCityQuery(e.target.value)
                   setCity(e.target.value)
@@ -319,11 +302,11 @@ export default function Analyze() {
 
             {/* City suggestions dropdown */}
             {showCityDropdown && citySuggestions.length > 0 && (
-              <div className="absolute z-20 mt-1.5 w-full bg-neutral-900 border border-white/[0.08] rounded-xl overflow-hidden shadow-2xl shadow-black/50 max-h-52 overflow-y-auto">
+              <div className="absolute z-20 mt-1.5 w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl shadow-slate-200/50 max-h-52 overflow-y-auto">
                 {citySuggestions.map((suggestion) => (
                   <button
                     key={suggestion}
-                    className="w-full text-left px-4 py-3 hover:bg-[#FF7A45]/10 transition-colors duration-200 border-b border-white/[0.04] last:border-0 text-sm text-neutral-200"
+                    className="w-full text-left px-4 py-3 hover:bg-indigo-50 transition-colors duration-200 border-b border-slate-100 last:border-0 text-sm text-slate-700"
                     onClick={() => {
                       setCity(suggestion)
                       setCityQuery(suggestion)
@@ -337,18 +320,18 @@ export default function Analyze() {
             )}
           </div>
 
-          {/* Error message */}
+          {/* Error */}
           {error && (
-            <div className="mb-5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm">
+            <div className="mb-5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm">
               {error}
             </div>
           )}
 
-          {/* Submit button */}
+          {/* Submit */}
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="cta-hero w-full bg-gradient-to-r from-[#FF7A45] to-[#FF9D6E] text-black py-4 rounded-xl font-bold text-lg hover:from-[#FF9D6E] hover:to-[#FFB584] transition-all duration-300 shadow-xl shadow-[#FF7A45]/20 hover:shadow-[#FF7A45]/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            className="cta-hero w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all duration-300 shadow-xl shadow-indigo-200 hover:shadow-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
@@ -368,8 +351,7 @@ export default function Analyze() {
             )}
           </button>
 
-          {/* Trust signal */}
-          <p className="text-center text-xs text-neutral-600 mt-5">
+          <p className="text-center text-xs text-slate-400 mt-5">
             No sign-up required &bull; Free &bull; Results in under 2 minutes
           </p>
         </div>
