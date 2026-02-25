@@ -162,6 +162,12 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <a
+              href="/login"
+              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
+            >
+              Sign In
+            </a>
+            <a
               href="/demo"
               className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
             >
@@ -206,6 +212,12 @@ export default function Home() {
                 {id.replace(/-/g, " ")}
               </a>
             ))}
+            <a
+              href="/login"
+              className="text-emerald-600 hover:text-emerald-800 transition-colors text-sm font-semibold py-1 border-t border-slate-100 pt-3 mt-1"
+            >
+              Sign In
+            </a>
           </div>
         </div>
       </nav>
