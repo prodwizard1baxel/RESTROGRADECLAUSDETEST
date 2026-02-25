@@ -128,7 +128,7 @@ function KeywordTag({
   index: number
 }) {
   const colors = {
-    blue: "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100",
+    blue: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
     green: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
     red: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
   }
@@ -181,6 +181,80 @@ function CheckItem({
         <p className={`text-sm font-medium ${pass ? "text-slate-800" : "text-red-700"}`}>{label}</p>
         <p className="text-xs text-slate-500 mt-0.5">{note}</p>
       </div>
+    </div>
+  )
+}
+
+/* ─── Cuisine Card (expandable) ─────────────────────────────────────── */
+function CuisineCard({ cuisine: c }: { cuisine: any }) {
+  const [expanded, setExpanded] = useState(false)
+  const restaurants: { name: string; rating: number; reviews: number; distanceKm: number }[] = c.restaurants || []
+
+  return (
+    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 hover:border-amber-300 transition-all duration-300 group">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-700 transition-colors duration-300">
+          {c.cuisine}
+        </h3>
+        <span className="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">
+          {c.count} {c.count === 1 ? "place" : "places"}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+        <div className="bg-white rounded-lg p-2 border border-slate-100 text-center">
+          <p className="text-slate-500 mb-0.5">Reviews</p>
+          <p className="text-slate-800 font-bold text-sm tabular-nums">{c.totalVotes?.toLocaleString() || 0}</p>
+        </div>
+        <div className="bg-white rounded-lg p-2 border border-slate-100 text-center">
+          <p className="text-slate-500 mb-0.5">Avg Rating</p>
+          <p className="text-slate-800 font-bold text-sm">{c.avgRating} <span className="text-amber-500">&#9733;</span></p>
+        </div>
+        <div className="bg-white rounded-lg p-2 border border-slate-100 text-center">
+          <p className="text-slate-500 mb-0.5">Photos</p>
+          <p className="text-slate-800 font-bold text-sm">{c.withPhotos}/{c.count}</p>
+        </div>
+      </div>
+
+      {/* Individual restaurants list */}
+      {restaurants.length > 0 && (
+        <div className="mt-3">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 transition-colors duration-200 mb-2"
+          >
+            <svg
+              className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            {expanded ? "Hide" : "View"} Restaurants
+          </button>
+
+          {expanded && (
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              {restaurants.map((r, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-slate-100 text-xs"
+                  style={{
+                    animation: `fade-in-up 0.3s cubic-bezier(0.16,1,0.3,1) ${idx * 40}ms both`,
+                  }}
+                >
+                  <span className="w-5 h-5 rounded-md bg-amber-50 border border-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-600 shrink-0">
+                    {idx + 1}
+                  </span>
+                  <span className="text-slate-700 font-medium truncate flex-1">{r.name}</span>
+                  <span className="text-amber-600 font-semibold shrink-0">{r.rating} <span className="text-amber-400">&#9733;</span></span>
+                  <span className="text-slate-400 shrink-0 tabular-nums">{r.reviews?.toLocaleString()}</span>
+                  <span className="text-slate-400 shrink-0">{r.distanceKm}km</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -247,17 +321,17 @@ export default function DashboardClient({ data }: any) {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="flex items-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-indigo-200">
+              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
                 R
               </div>
-              <span className="text-sm text-indigo-600 font-semibold tracking-wide uppercase">RetroGrade AI</span>
+              <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RetroGrade AI</span>
             </div>
           </Reveal>
 
           <Reveal delay={100}>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
-                <p className="text-xs text-indigo-600 font-semibold uppercase tracking-[0.2em] mb-2">
+                <p className="text-xs text-emerald-600 font-semibold uppercase tracking-[0.2em] mb-2">
                   Competitive Intelligence Report
                 </p>
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
@@ -316,7 +390,7 @@ export default function DashboardClient({ data }: any) {
             value={reviewMetrics.reviewPercentile || 0}
             suffix="%"
             icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>}
-            color="text-indigo-700"
+            color="text-emerald-700"
             delay={100}
           />
           <MetricCard
@@ -340,7 +414,7 @@ export default function DashboardClient({ data }: any) {
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
@@ -350,7 +424,7 @@ export default function DashboardClient({ data }: any) {
 
             {isStructuredSummary ? (
               <div className="space-y-5">
-                <div className="bg-slate-50 border-l-3 border-indigo-400 rounded-r-xl pl-5 pr-5 py-4">
+                <div className="bg-slate-50 border-l-3 border-emerald-400 rounded-r-xl pl-5 pr-5 py-4">
                   <p className="text-slate-700 leading-relaxed text-base">
                     {execSummary.overview}
                   </p>
@@ -359,7 +433,7 @@ export default function DashboardClient({ data }: any) {
                 {execSummary.keyFindings?.length > 0 && (
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
                     <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                       </svg>
                       Key Findings
@@ -367,7 +441,7 @@ export default function DashboardClient({ data }: any) {
                     <ul className="space-y-2.5">
                       {execSummary.keyFindings.map((finding: string, i: number) => (
                         <li key={i} className="flex items-start gap-3">
-                          <span className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 shrink-0 mt-0.5">
+                          <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600 shrink-0 mt-0.5">
                             {i + 1}
                           </span>
                           <span className="text-slate-600 text-sm leading-relaxed">{finding}</span>
@@ -403,14 +477,14 @@ export default function DashboardClient({ data }: any) {
                 </div>
 
                 {execSummary.recommendation && (
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
-                    <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Our Recommendation
                     </h3>
-                    <p className="text-indigo-900 text-sm leading-relaxed font-medium">{execSummary.recommendation}</p>
+                    <p className="text-emerald-900 text-sm leading-relaxed font-medium">{execSummary.recommendation}</p>
                   </div>
                 )}
               </div>
@@ -464,7 +538,7 @@ export default function DashboardClient({ data }: any) {
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
@@ -476,7 +550,7 @@ export default function DashboardClient({ data }: any) {
             {isStructuredKeywords ? (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-indigo-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
+                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
                   <p className="text-xs text-slate-500 mb-3">Keywords that define your restaurant identity</p>
                   <div className="flex flex-wrap gap-2.5">
                     {(keywords.primary || []).map((kw: string, i: number) => (
@@ -553,59 +627,7 @@ export default function DashboardClient({ data }: any) {
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cuisineBreakdown.map((c: any, i: number) => (
-                  <div
-                    key={i}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-5 hover:border-amber-300 transition-all duration-300 group"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-700 transition-colors duration-300">
-                        {c.cuisine}
-                      </h3>
-                      <span className="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">
-                        {c.count} {c.count === 1 ? "place" : "places"}
-                      </span>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-3 mb-3 border border-slate-100">
-                      <p className="text-xs text-slate-500 mb-0.5">Total Reviews</p>
-                      <p className="text-xl font-bold text-slate-800 tabular-nums">{c.totalVotes?.toLocaleString() || 0}</p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-white rounded-lg p-2 border border-slate-100">
-                        <p className="text-slate-500 mb-0.5">Avg Rating</p>
-                        <p className="text-slate-800 font-semibold">{c.avgRating} <span className="text-amber-500">&#9733;</span></p>
-                      </div>
-                      <div className="bg-white rounded-lg p-2 border border-slate-100">
-                        <p className="text-slate-500 mb-0.5">With Photos</p>
-                        <p className="text-slate-800 font-semibold">{c.withPhotos}/{c.count}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 space-y-1.5 text-xs">
-                      {c.highestRatingName && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-emerald-500 shrink-0">&#9650;</span>
-                          <span className="text-slate-500 truncate">{c.highestRatingName}</span>
-                          <span className="text-emerald-600 font-semibold ml-auto shrink-0">{c.highestRating}</span>
-                        </div>
-                      )}
-                      {c.mostReviewsName && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-indigo-400 shrink-0">&#9679;</span>
-                          <span className="text-slate-500 truncate">{c.mostReviewsName}</span>
-                          <span className="text-indigo-600 font-semibold ml-auto shrink-0">{c.mostReviews?.toLocaleString()}</span>
-                        </div>
-                      )}
-                      {c.lowestRatingName && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-red-400 shrink-0">&#9660;</span>
-                          <span className="text-slate-500 truncate">{c.lowestRatingName}</span>
-                          <span className="text-red-500 font-semibold ml-auto shrink-0">{c.lowestRating}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <CuisineCard key={i} cuisine={c} />
                 ))}
               </div>
             </div>
@@ -870,16 +892,16 @@ export default function DashboardClient({ data }: any) {
 
         {/* ═══════ FINAL VERDICT ═══════ */}
         <Reveal>
-          <div className="bg-white rounded-2xl border border-indigo-200 p-6 md:p-8 relative overflow-hidden hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300">
+          <div className="bg-white rounded-2xl border border-emerald-200 p-6 md:p-8 relative overflow-hidden hover:shadow-lg hover:shadow-emerald-50 transition-all duration-300">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-slate-900">Final Strategic Verdict</h2>
             </div>
-            <div className="bg-indigo-50 border-l-3 border-indigo-400 rounded-r-xl pl-5 pr-5 py-4">
+            <div className="bg-emerald-50 border-l-3 border-emerald-400 rounded-r-xl pl-5 pr-5 py-4">
               <p className="text-slate-700 leading-relaxed text-base">
                 {data?.finalStrategicVerdict}
               </p>
@@ -891,7 +913,7 @@ export default function DashboardClient({ data }: any) {
         <Reveal className="text-center pb-8">
           <a
             href="/"
-            className="inline-flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-800 transition-colors duration-200 text-sm group"
+            className="inline-flex items-center gap-2 text-emerald-600 font-medium hover:text-emerald-800 transition-colors duration-200 text-sm group"
           >
             <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
