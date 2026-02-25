@@ -848,6 +848,66 @@ OTHER RULES:
     })
 
     // ==============================
+    // Swiggy & Zomato delivery platform benchmark via GPT
+    // ==============================
+    const sameCuisineTop10 = [...mapped]
+      .filter(r => r.foodCuisine.toLowerCase() === baseRestaurantCuisine.toLowerCase() && r.distanceKm <= 5)
+      .sort((a, b) => b.totalRatings - a.totalRatings)
+      .slice(0, 10)
+
+    const deliveryAI = await getOpenAI().chat.completions.create({
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume.",
+        },
+        {
+          role: "user",
+          content: `
+Provide Swiggy & Zomato delivery platform benchmark estimates for these restaurants.
+
+Base restaurant: ${name} (${baseRestaurantCuisine}, ${city})
+- Google Rating: ${baseRating}, Reviews: ${baseReviews}, Photos: ${baseDetails?.photoCount || 0}
+
+Same-cuisine competitors in ${city}:
+${sameCuisineTop10.map((r, i) => `${i + 1}. ${r.name} - Rating: ${r.rating}, Reviews: ${r.totalRatings}, Photos: ${r.photoCount}`).join("\n")}
+
+Return STRICT JSON:
+{
+  "deliveryBenchmarks": [
+    {
+      "name": "restaurant name (EXACT name from above, start with ${name} first)",
+      "isBase": true/false,
+      "images": number (estimate total images across platforms, use Google photo count as baseline),
+      "zomatoRating": number (estimated Zomato rating 1.0-5.0, usually close to Google rating +/- 0.3),
+      "swiggyRating": number (estimated Swiggy rating 1.0-5.0, usually close to Google rating +/- 0.2),
+      "topDishes": ["dish 1", "dish 2", "dish 3"] (3 most likely popular dishes for this ${baseRestaurantCuisine} restaurant),
+      "totalItems": number (estimated menu items on delivery platforms, typically 30-150),
+      "itemsAbove4Rating": number (estimated items with 4+ customer rating, typically 20-60% of total)
+    }
+  ]
+}
+
+RULES:
+- First entry MUST be "${name}" with isBase: true
+- Include all ${sameCuisineTop10.length} competitors after the base restaurant
+- Be realistic: higher Google rating/reviews = likely higher platform ratings
+- topDishes should be cuisine-specific and realistic for ${city}
+- totalItems: small restaurants 25-50, medium 50-90, large/chain 90-150
+- itemsAbove4Rating: usually 30-50% of totalItems for good restaurants
+- images: use the Google photo count as a base, add 5-20 more for delivery platform photos
+`
+        },
+      ],
+      temperature: 0.6,
+    })
+
+    const deliveryParsed = JSON.parse(deliveryAI.choices[0].message.content!)
+    const deliveryBenchmarks = deliveryParsed.deliveryBenchmarks || []
+
+    // ==============================
     // Fetch website SEO data
     // ==============================
     const seoChecks = await fetchWebsiteSEO(baseDetails?.website || null, name, city)
@@ -859,6 +919,7 @@ OTHER RULES:
       executiveSummary: aiParsed.executiveSummary,
       googleProfileChecks,
       seoChecks,
+      deliveryBenchmarks,
       competitorRanking,
       searchRankings,
       reviewMetrics: {
