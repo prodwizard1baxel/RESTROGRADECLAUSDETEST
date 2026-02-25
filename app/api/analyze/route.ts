@@ -265,6 +265,114 @@ async function getBaseRestaurantDetails(name: string, city: string) {
 }
 
 // ==============================
+// Fetch website and extract basic SEO data
+// ==============================
+async function fetchWebsiteSEO(websiteUrl: string | null, restaurantName: string, city: string) {
+  const defaultChecks = {
+    domain: {
+      usingCustomDomain: { pass: false, note: "No website found" },
+      cleanUrl: { pass: false, note: "No website to check" },
+    },
+    headline: {
+      exists: { pass: false, note: "No website to check" },
+      includesServiceArea: { pass: false, note: "No website to check" },
+      includesKeywords: { pass: false, note: "No website to check" },
+    },
+    metadata: {
+      descriptionExists: { pass: false, note: "No meta description found" },
+      descriptionLength: { pass: false, note: "No meta description found" },
+      descriptionIncludesArea: { pass: false, note: "No meta description found" },
+    },
+    websiteUrl: websiteUrl,
+  }
+
+  if (!websiteUrl) return defaultChecks
+
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+
+    const res = await fetch(websiteUrl, {
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; RetroGradeBot/1.0)" },
+    })
+    clearTimeout(timeout)
+
+    if (!res.ok) return defaultChecks
+
+    const html = await res.text()
+    const htmlLower = html.toLowerCase()
+
+    // Parse domain
+    let hostname = ""
+    try { hostname = new URL(websiteUrl).hostname } catch {}
+    const thirdPartyDomains = ["zomato.com", "swiggy.com", "yelp.com", "facebook.com", "instagram.com", "tripadvisor.com", "justdial.com", "google.com"]
+    const isCustomDomain = !thirdPartyDomains.some(d => hostname.includes(d))
+
+    // Parse H1
+    const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)
+    const h1Text = h1Match ? h1Match[1].replace(/<[^>]+>/g, "").trim() : ""
+    const cityLower = city.toLowerCase()
+    const nameLower = restaurantName.toLowerCase()
+
+    // Parse meta description
+    const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i)
+    const metaDesc = descMatch ? descMatch[1].trim() : ""
+
+    return {
+      domain: {
+        usingCustomDomain: {
+          pass: isCustomDomain,
+          note: isCustomDomain ? `Custom domain: ${hostname}` : `Using third-party: ${hostname}`,
+        },
+        cleanUrl: {
+          pass: !websiteUrl.includes("?") && !websiteUrl.includes("#") && websiteUrl.length < 80,
+          note: websiteUrl.length < 80 ? "Clean, short URL" : "URL could be shorter and cleaner",
+        },
+      },
+      headline: {
+        exists: {
+          pass: !!h1Text,
+          note: h1Text ? `H1 found: "${h1Text.substring(0, 60)}${h1Text.length > 60 ? "..." : ""}"` : "No H1 headline found on homepage",
+        },
+        includesServiceArea: {
+          pass: h1Text.toLowerCase().includes(cityLower),
+          note: h1Text.toLowerCase().includes(cityLower) ? `H1 includes "${city}"` : `H1 does not mention "${city}" — add your city for local SEO`,
+        },
+        includesKeywords: {
+          pass: h1Text.toLowerCase().includes(nameLower) || htmlLower.includes(nameLower),
+          note: h1Text.toLowerCase().includes(nameLower) ? "Brand name found in H1" : "Consider adding your brand name to the H1",
+        },
+      },
+      metadata: {
+        descriptionExists: {
+          pass: !!metaDesc,
+          note: metaDesc ? `Meta description found (${metaDesc.length} chars)` : "No meta description — add one for better search results",
+        },
+        descriptionLength: {
+          pass: metaDesc.length >= 120 && metaDesc.length <= 160,
+          note: metaDesc.length >= 120 && metaDesc.length <= 160
+            ? "Description length is optimal (120-160 chars)"
+            : metaDesc.length > 0
+              ? `Description is ${metaDesc.length} chars — aim for 120-160 chars`
+              : "No description to check",
+        },
+        descriptionIncludesArea: {
+          pass: metaDesc.toLowerCase().includes(cityLower),
+          note: metaDesc.toLowerCase().includes(cityLower)
+            ? `Description includes "${city}"`
+            : `Description doesn't mention "${city}" — add it for local search`,
+        },
+      },
+      websiteUrl,
+    }
+  } catch {
+    return defaultChecks
+  }
+}
+
+// ==============================
 // Vercel function config - extend timeout for external API calls
 // ==============================
 export const maxDuration = 60
@@ -659,12 +767,99 @@ OTHER RULES:
       },
     }
 
+    // ==============================
+    // Compute competitor ranking (where does the base restaurant rank?)
+    // ==============================
+    const baseCompositeScore = (baseRating / 5) * 50 + Math.min(50, (Math.log10(Math.max(1, baseReviews)) / 4) * 50)
+    const allWithBase = [
+      { name, rating: baseRating, reviews: baseReviews, isBase: true, compositeScore: baseCompositeScore },
+      ...mapped.filter(r => r.distanceKm <= 5).map(r => ({
+        name: r.name,
+        rating: r.rating,
+        reviews: r.totalRatings,
+        isBase: false,
+        compositeScore: (r.rating / 5) * 50 + Math.min(50, (Math.log10(Math.max(1, r.totalRatings)) / 4) * 50),
+      })),
+    ].sort((a, b) => b.compositeScore - a.compositeScore)
+
+    const baseRank = allWithBase.findIndex(r => r.isBase) + 1
+    const competitorsAbove = baseRank - 1
+
+    const competitorRanking = {
+      rank: baseRank,
+      total: allWithBase.length,
+      competitorsAbove,
+      topRanked: allWithBase.slice(0, Math.min(10, allWithBase.length)).map((r, i) => ({
+        rank: i + 1,
+        name: r.name,
+        rating: r.rating,
+        reviews: r.reviews,
+        isBase: r.isBase,
+      })),
+    }
+
+    // ==============================
+    // Generate search ranking queries
+    // ==============================
+    const searchQueries = [
+      `Best ${baseRestaurantCuisine} in ${city}`,
+      `Top restaurants in ${city}`,
+      `Best ${baseRestaurantCuisine} near me ${city}`,
+      `${baseRestaurantCuisine} restaurants ${city}`,
+      `Best restaurants in ${city}`,
+    ]
+
+    // For each query, find who "ranks #1" based on our data
+    const sameCuisineSorted = [...mapped]
+      .filter(r => r.foodCuisine.toLowerCase() === baseRestaurantCuisine.toLowerCase() && r.distanceKm <= 5)
+      .sort((a, b) => {
+        const aScore = (a.rating / 5) * 50 + Math.min(50, (Math.log10(Math.max(1, a.totalRatings)) / 4) * 50)
+        const bScore = (b.rating / 5) * 50 + Math.min(50, (Math.log10(Math.max(1, b.totalRatings)) / 4) * 50)
+        return bScore - aScore
+      })
+
+    const allSorted = [...mapped]
+      .filter(r => r.distanceKm <= 5)
+      .sort((a, b) => {
+        const aScore = (a.rating / 5) * 50 + Math.min(50, (Math.log10(Math.max(1, a.totalRatings)) / 4) * 50)
+        const bScore = (b.rating / 5) * 50 + Math.min(50, (Math.log10(Math.max(1, b.totalRatings)) / 4) * 50)
+        return bScore - aScore
+      })
+
+    const searchRankings = searchQueries.map(query => {
+      const isCuisineQuery = query.toLowerCase().includes(baseRestaurantCuisine.toLowerCase())
+      const pool = isCuisineQuery ? sameCuisineSorted : allSorted
+      const top = pool[0]
+
+      // Find where base restaurant would rank
+      const baseInPool = isCuisineQuery
+        ? sameCuisineSorted.findIndex(r => r.name.toLowerCase().includes(name.toLowerCase().split(" ")[0].toLowerCase()))
+        : allSorted.findIndex(r => r.name.toLowerCase().includes(name.toLowerCase().split(" ")[0].toLowerCase()))
+
+      return {
+        query,
+        topResult: top ? { name: top.name, rating: top.rating, reviews: top.totalRatings } : null,
+        baseRanked: baseInPool >= 0,
+        basePosition: baseInPool >= 0 ? baseInPool + 1 : null,
+        totalResults: pool.length,
+        inMapPack: baseInPool >= 0 && baseInPool < 3,
+      }
+    })
+
+    // ==============================
+    // Fetch website SEO data
+    // ==============================
+    const seoChecks = await fetchWebsiteSEO(baseDetails?.website || null, name, city)
+
     const finalData = {
       restaurantName: name,
       restaurantCity: city,
       generatedAt: new Date().toISOString(),
       executiveSummary: aiParsed.executiveSummary,
       googleProfileChecks,
+      seoChecks,
+      competitorRanking,
+      searchRankings,
       reviewMetrics: {
         totalReviews: baseReviews,
         totalReviewsInArea: totalReviewsInArea,

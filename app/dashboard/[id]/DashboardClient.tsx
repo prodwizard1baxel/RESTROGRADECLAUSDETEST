@@ -128,8 +128,8 @@ function KeywordTag({
   index: number
 }) {
   const colors = {
-    blue: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
-    green: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
+    blue: "bg-green-50 border-green-200 text-green-700 hover:bg-green-100",
+    green: "bg-green-50 border-green-200 text-green-700 hover:bg-green-100",
     red: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
   }
 
@@ -165,7 +165,7 @@ function CheckItem({
       }}
     >
       <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-        pass ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"
+        pass ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"
       }`}>
         {pass ? (
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -296,8 +296,8 @@ export default function DashboardClient({ data }: any) {
   /* ─── Compute overall rank label ── */
   const avgThreat = data?.competitorAnalysis?.averageThreatScore || 0
   const overallRank = avgThreat >= 70 ? "Needs Attention" : avgThreat >= 45 ? "Doing Well" : "Excellent"
-  const rankColor = avgThreat >= 70 ? "text-red-600" : avgThreat >= 45 ? "text-amber-600" : "text-emerald-600"
-  const rankBg = avgThreat >= 70 ? "bg-red-50 border-red-200" : avgThreat >= 45 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"
+  const rankColor = avgThreat >= 70 ? "text-red-600" : avgThreat >= 45 ? "text-amber-600" : "text-green-600"
+  const rankBg = avgThreat >= 70 ? "bg-red-50 border-red-200" : avgThreat >= 45 ? "bg-amber-50 border-amber-200" : "bg-green-50 border-green-200"
 
   /* ─── Google checks labels ── */
   const checkLabels: Record<string, string> = {
@@ -314,6 +314,45 @@ export default function DashboardClient({ data }: any) {
   const checksCount = Object.keys(googleChecks).length
   const passCount = Object.values(googleChecks).filter((c: any) => c?.pass).length
 
+  /* ─── Competitor Ranking data ── */
+  const competitorRanking = data?.competitorRanking || {}
+  const topRanked: { rank: number; name: string; rating: number; reviews: number; isBase: boolean }[] = competitorRanking.topRanked || []
+
+  /* ─── SEO checks ── */
+  const seoChecks = data?.seoChecks || {}
+  const seoSections = [
+    {
+      title: "Domain",
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+        </svg>
+      ),
+      checks: seoChecks.domain || {},
+    },
+    {
+      title: "Headline (H1)",
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+        </svg>
+      ),
+      checks: seoChecks.headline || {},
+    },
+    {
+      title: "Metadata",
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        </svg>
+      ),
+      checks: seoChecks.metadata || {},
+    },
+  ]
+
+  /* ─── Search Rankings ── */
+  const searchRankings: { query: string; topResult: any; baseRanked: boolean; basePosition: number | null; totalResults: number; inMapPack: boolean }[] = data?.searchRankings || []
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* ═══════ HEADER ═══════ */}
@@ -321,17 +360,17 @@ export default function DashboardClient({ data }: any) {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="flex items-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
+              <div className="w-9 h-9 rounded-xl bg-green-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-green-200">
                 R
               </div>
-              <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RetroGrade AI</span>
+              <span className="text-sm text-green-600 font-semibold tracking-wide uppercase">RetroGrade AI</span>
             </div>
           </Reveal>
 
           <Reveal delay={100}>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
-                <p className="text-xs text-emerald-600 font-semibold uppercase tracking-[0.2em] mb-2">
+                <p className="text-xs text-green-600 font-semibold uppercase tracking-[0.2em] mb-2">
                   Competitive Intelligence Report
                 </p>
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
@@ -364,7 +403,7 @@ export default function DashboardClient({ data }: any) {
                 </div>
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2 ${
                   avgThreat >= 70 ? "border-red-400 text-red-600" :
-                  avgThreat >= 45 ? "border-amber-400 text-amber-600" : "border-emerald-400 text-emerald-600"
+                  avgThreat >= 45 ? "border-amber-400 text-amber-600" : "border-green-400 text-green-600"
                 }`}>
                   {avgThreat}
                 </div>
@@ -390,7 +429,7 @@ export default function DashboardClient({ data }: any) {
             value={reviewMetrics.reviewPercentile || 0}
             suffix="%"
             icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>}
-            color="text-emerald-700"
+            color="text-green-700"
             delay={100}
           />
           <MetricCard
@@ -414,7 +453,7 @@ export default function DashboardClient({ data }: any) {
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
@@ -424,7 +463,7 @@ export default function DashboardClient({ data }: any) {
 
             {isStructuredSummary ? (
               <div className="space-y-5">
-                <div className="bg-slate-50 border-l-3 border-emerald-400 rounded-r-xl pl-5 pr-5 py-4">
+                <div className="bg-slate-50 border-l-3 border-green-400 rounded-r-xl pl-5 pr-5 py-4">
                   <p className="text-slate-700 leading-relaxed text-base">
                     {execSummary.overview}
                   </p>
@@ -433,7 +472,7 @@ export default function DashboardClient({ data }: any) {
                 {execSummary.keyFindings?.length > 0 && (
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
                     <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                       </svg>
                       Key Findings
@@ -441,7 +480,7 @@ export default function DashboardClient({ data }: any) {
                     <ul className="space-y-2.5">
                       {execSummary.keyFindings.map((finding: string, i: number) => (
                         <li key={i} className="flex items-start gap-3">
-                          <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600 shrink-0 mt-0.5">
+                          <span className="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center text-xs font-bold text-green-600 shrink-0 mt-0.5">
                             {i + 1}
                           </span>
                           <span className="text-slate-600 text-sm leading-relaxed">{finding}</span>
@@ -464,27 +503,27 @@ export default function DashboardClient({ data }: any) {
                     </div>
                   )}
                   {execSummary.growthOpportunities && (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-                      <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-2 flex items-center gap-2">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                         </svg>
                         Growth Opportunities
                       </h3>
-                      <p className="text-emerald-800 text-sm leading-relaxed">{execSummary.growthOpportunities}</p>
+                      <p className="text-green-800 text-sm leading-relaxed">{execSummary.growthOpportunities}</p>
                     </div>
                   )}
                 </div>
 
                 {execSummary.recommendation && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-                    <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-2 flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Our Recommendation
                     </h3>
-                    <p className="text-emerald-900 text-sm leading-relaxed font-medium">{execSummary.recommendation}</p>
+                    <p className="text-green-900 text-sm leading-relaxed font-medium">{execSummary.recommendation}</p>
                   </div>
                 )}
               </div>
@@ -494,13 +533,229 @@ export default function DashboardClient({ data }: any) {
           </div>
         </Reveal>
 
+        {/* ═══════ YOU'RE RANKING BELOW X COMPETITORS ═══════ */}
+        {topRanked.length > 0 && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">
+                    You&apos;re ranking below {competitorRanking.competitorsAbove || 0} competitor{(competitorRanking.competitorsAbove || 0) !== 1 ? "s" : ""}
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Your position: <span className="font-semibold text-slate-700">#{competitorRanking.rank || "—"}</span> out of {competitorRanking.total || "—"} restaurants within 5km
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-1">
+                {topRanked.map((r, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      r.isBase
+                        ? "bg-green-50 border-2 border-green-300 shadow-sm"
+                        : "bg-slate-50 border border-transparent hover:border-slate-200"
+                    }`}
+                    style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms both` }}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
+                      r.rank === 1 ? "bg-amber-100 text-amber-700 border border-amber-200" :
+                      r.rank === 2 ? "bg-slate-200 text-slate-600 border border-slate-300" :
+                      r.rank === 3 ? "bg-orange-100 text-orange-700 border border-orange-200" :
+                      "bg-slate-100 text-slate-500 border border-slate-200"
+                    }`}>
+                      {r.rank}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium truncate ${r.isBase ? "text-green-800" : "text-slate-700"}`}>
+                        {r.name}
+                        {r.isBase && (
+                          <span className="ml-2 text-[10px] font-bold bg-green-200 text-green-800 px-2 py-0.5 rounded-full uppercase">
+                            You
+                          </span>
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 shrink-0 text-sm">
+                      <span className="text-amber-600 font-semibold tabular-nums">
+                        {r.rating} <span className="text-amber-400">&#9733;</span>
+                      </span>
+                      <span className="text-slate-400 tabular-nums text-xs">
+                        {r.reviews?.toLocaleString()} reviews
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* ═══════ THIS IS HOW YOU'RE DOING ONLINE ═══════ */}
+        {searchRankings.length > 0 && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">This is how you&apos;re doing online</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Where you are showing up when customers search, next to your competitors</p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                {searchRankings.map((sr, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-all duration-200"
+                    style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 60}ms both` }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                          <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                          &ldquo;{sr.query}&rdquo;
+                        </p>
+
+                        {sr.topResult && (
+                          <p className="text-xs text-slate-500 mt-1.5 ml-5.5">
+                            <span className="text-slate-400">#1 Result:</span>{" "}
+                            <span className="font-medium text-slate-700">{sr.topResult.name}</span>
+                            <span className="text-amber-500 ml-1">{sr.topResult.rating} &#9733;</span>
+                            <span className="text-slate-400 ml-1">({sr.topResult.reviews?.toLocaleString()} reviews)</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="shrink-0 text-right">
+                        {sr.inMapPack ? (
+                          <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Top 3
+                          </span>
+                        ) : sr.baseRanked ? (
+                          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            #{sr.basePosition}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-600 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Not ranked
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-xs text-blue-800 leading-relaxed">
+                  <span className="font-semibold">What is SEO?</span> SEO (Search Engine Optimization) means improving your website so search engines like Google can find it, rank it higher, and help more people discover your restaurant when they search online.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* ═══════ SEO WEBSITE CHECKS ═══════ */}
+        {seoChecks.websiteUrl !== undefined && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Website SEO Audit</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {seoChecks.websiteUrl ? (
+                      <>Checked: <span className="font-medium text-slate-600">{seoChecks.websiteUrl}</span></>
+                    ) : "No website found on Google profile"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-5">
+                {seoSections.map((section, si) => {
+                  const checks = Object.entries(section.checks)
+                  const passed = checks.filter(([, v]: [string, any]) => v?.pass).length
+                  return (
+                    <div key={si} className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                            {section.icon}
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-800">{section.title}</h3>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          passed === checks.length ? "bg-green-100 text-green-700" :
+                          passed > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"
+                        }`}>
+                          {passed}/{checks.length}
+                        </span>
+                      </div>
+                      <div className="space-y-2.5">
+                        {checks.map(([key, val]: [string, any], ci) => (
+                          <div key={key} className="flex items-start gap-2.5">
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                              val?.pass ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"
+                            }`}>
+                              {val?.pass ? (
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : (
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className={`text-xs font-medium ${val?.pass ? "text-slate-700" : "text-red-700"}`}>
+                                {key.replace(/([A-Z])/g, " $1").replace(/^./, (s: string) => s.toUpperCase())}
+                              </p>
+                              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{val?.note}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </Reveal>
+        )}
+
         {/* ═══════ GOOGLE PROFILE CHECKS ═══════ */}
         {checksCount > 0 && (
           <Reveal>
             <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                  <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                     </svg>
@@ -511,7 +766,7 @@ export default function DashboardClient({ data }: any) {
                   </div>
                 </div>
                 <div className={`text-sm font-bold px-4 py-2 rounded-full ${
-                  passCount >= checksCount * 0.75 ? "bg-emerald-100 text-emerald-700" :
+                  passCount >= checksCount * 0.75 ? "bg-green-100 text-green-700" :
                   passCount >= checksCount * 0.5 ? "bg-amber-100 text-amber-700" :
                   "bg-red-100 text-red-700"
                 }`}>
@@ -538,7 +793,7 @@ export default function DashboardClient({ data }: any) {
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
@@ -550,7 +805,7 @@ export default function DashboardClient({ data }: any) {
             {isStructuredKeywords ? (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
+                  <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
                   <p className="text-xs text-slate-500 mb-3">Keywords that define your restaurant identity</p>
                   <div className="flex flex-wrap gap-2.5">
                     {(keywords.primary || []).map((kw: string, i: number) => (
@@ -559,8 +814,8 @@ export default function DashboardClient({ data }: any) {
                   </div>
                 </div>
 
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Positive Keywords</h3>
+                <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wider mb-3">Positive Keywords</h3>
                   <p className="text-xs text-slate-500 mb-3">Keywords customers associate with great experiences</p>
                   <div className="flex flex-wrap gap-2.5">
                     {(keywords.positive || []).map((kw: string, i: number) => (
@@ -662,7 +917,7 @@ export default function DashboardClient({ data }: any) {
                     </th>
                     <th className="text-left pb-3 text-slate-500 font-medium">
                       <span className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                        <span className="w-2 h-2 rounded-full bg-green-400" />
                         You Win Here
                       </span>
                     </th>
@@ -708,7 +963,7 @@ export default function DashboardClient({ data }: any) {
                         <ul className="space-y-1.5">
                           {(comp.whereYouWin || comp.weaknesses || []).map((item: string, idx: number) => (
                             <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
-                              <svg className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <svg className="w-4 h-4 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               <span>{item}</span>
@@ -784,7 +1039,7 @@ export default function DashboardClient({ data }: any) {
                     <div className="bg-slate-50 rounded-xl p-2.5 text-center border border-slate-100">
                       <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Sentiment</p>
                       <p className={`text-sm font-bold ${
-                        comp.sentimentLabel === "Positive" ? "text-emerald-600" :
+                        comp.sentimentLabel === "Positive" ? "text-green-600" :
                         comp.sentimentLabel === "Negative" ? "text-red-500" : "text-amber-600"
                       }`}>{comp.sentimentLabel || "—"}</p>
                     </div>
@@ -792,11 +1047,11 @@ export default function DashboardClient({ data }: any) {
 
                   <div className="space-y-4">
                     <div>
-                      <p className="font-semibold text-xs text-emerald-600 uppercase tracking-wider mb-2">Strengths</p>
+                      <p className="font-semibold text-xs text-green-600 uppercase tracking-wider mb-2">Strengths</p>
                       <ul className="space-y-1.5">
                         {comp.strengths?.map((s: string, idx: number) => (
                           <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
-                            <span className="text-emerald-500 mt-0.5 text-xs">&#9679;</span>
+                            <span className="text-green-500 mt-0.5 text-xs">&#9679;</span>
                             <span>{s}</span>
                           </li>
                         ))}
@@ -892,16 +1147,16 @@ export default function DashboardClient({ data }: any) {
 
         {/* ═══════ FINAL VERDICT ═══════ */}
         <Reveal>
-          <div className="bg-white rounded-2xl border border-emerald-200 p-6 md:p-8 relative overflow-hidden hover:shadow-lg hover:shadow-emerald-50 transition-all duration-300">
+          <div className="bg-white rounded-2xl border border-green-200 p-6 md:p-8 relative overflow-hidden hover:shadow-lg hover:shadow-green-50 transition-all duration-300">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-slate-900">Final Strategic Verdict</h2>
             </div>
-            <div className="bg-emerald-50 border-l-3 border-emerald-400 rounded-r-xl pl-5 pr-5 py-4">
+            <div className="bg-green-50 border-l-3 border-green-400 rounded-r-xl pl-5 pr-5 py-4">
               <p className="text-slate-700 leading-relaxed text-base">
                 {data?.finalStrategicVerdict}
               </p>
@@ -913,7 +1168,7 @@ export default function DashboardClient({ data }: any) {
         <Reveal className="text-center pb-8">
           <a
             href="/"
-            className="inline-flex items-center gap-2 text-emerald-600 font-medium hover:text-emerald-800 transition-colors duration-200 text-sm group"
+            className="inline-flex items-center gap-2 text-green-600 font-medium hover:text-green-800 transition-colors duration-200 text-sm group"
           >
             <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
