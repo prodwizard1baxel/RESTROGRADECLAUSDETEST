@@ -228,20 +228,93 @@ export default function Analyze() {
             Generate AI Report
           </h1>
           <p className="text-slate-500 text-sm mb-8">
-            Enter your restaurant details and we&apos;ll analyze your competitive landscape in under 2 minutes.
+            Select your city first, then pick your restaurant from the list.
           </p>
 
-          {/* Restaurant Name Input with Google Places Autocomplete */}
-          <div ref={placeRef} className="relative mb-5">
-            <label className="block text-sm text-slate-700 font-medium mb-2">Restaurant Name</label>
+          {/* Step 1: City Input with Autofill */}
+          <div ref={cityRef} className="relative mb-5">
+            <label className="block text-sm text-slate-700 font-medium mb-2">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold mr-2">1</span>
+              Select City
+            </label>
+            <div className="relative">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              <input
+                placeholder="Enter city name..."
+                value={cityQuery}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-300"
+                onChange={(e) => {
+                  setCityQuery(e.target.value)
+                  setCity(e.target.value)
+                  // Reset restaurant when city changes
+                  setName("")
+                  setNameQuery("")
+                  setPlaceSuggestions([])
+                  setShowPlaceDropdown(false)
+                }}
+                onFocus={() => {
+                  if (citySuggestions.length > 0) setShowCityDropdown(true)
+                }}
+              />
+              {city && INDIAN_CITIES.some(c => c.toLowerCase() === city.toLowerCase()) && (
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                  <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* City suggestions dropdown */}
+            {showCityDropdown && citySuggestions.length > 0 && (
+              <div className="absolute z-20 mt-1.5 w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl shadow-slate-200/50 max-h-52 overflow-y-auto">
+                {citySuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    className="w-full text-left px-4 py-3 hover:bg-emerald-50 transition-colors duration-200 border-b border-slate-100 last:border-0 text-sm text-slate-700"
+                    onClick={() => {
+                      setCity(suggestion)
+                      setCityQuery(suggestion)
+                      setShowCityDropdown(false)
+                      // Reset restaurant when city is selected
+                      setName("")
+                      setNameQuery("")
+                      setPlaceSuggestions([])
+                      setShowPlaceDropdown(false)
+                    }}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Step 2: Restaurant Name Input — only shown after city is selected */}
+          <div
+            ref={placeRef}
+            className={`relative mb-6 transition-all duration-500 ${
+              city && INDIAN_CITIES.some(c => c.toLowerCase() === city.toLowerCase())
+                ? "opacity-100 translate-y-0"
+                : "opacity-40 pointer-events-none translate-y-1"
+            }`}
+          >
+            <label className="block text-sm text-slate-700 font-medium mb-2">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold mr-2">2</span>
+              Select Restaurant in {city || "..."}
+            </label>
             <div className="relative">
               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               <input
-                placeholder="Search restaurant..."
+                placeholder={city ? `Search restaurants in ${city}...` : "Select a city first..."}
                 value={nameQuery}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-300"
+                disabled={!city || !INDIAN_CITIES.some(c => c.toLowerCase() === city.toLowerCase())}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 onChange={(e) => {
                   setNameQuery(e.target.value)
                   setName(e.target.value)
@@ -273,50 +346,8 @@ export default function Analyze() {
               </div>
             )}
 
-            {!mapsLoaded && nameQuery.length >= 2 && (
+            {!mapsLoaded && nameQuery.length >= 2 && city && (
               <p className="text-xs text-slate-400 mt-1.5">Type your restaurant name manually</p>
-            )}
-          </div>
-
-          {/* City Input with Autofill */}
-          <div ref={cityRef} className="relative mb-6">
-            <label className="block text-sm text-slate-700 font-medium mb-2">City</label>
-            <div className="relative">
-              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-              </svg>
-              <input
-                placeholder="Enter city name..."
-                value={cityQuery}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-300"
-                onChange={(e) => {
-                  setCityQuery(e.target.value)
-                  setCity(e.target.value)
-                }}
-                onFocus={() => {
-                  if (citySuggestions.length > 0) setShowCityDropdown(true)
-                }}
-              />
-            </div>
-
-            {/* City suggestions dropdown */}
-            {showCityDropdown && citySuggestions.length > 0 && (
-              <div className="absolute z-20 mt-1.5 w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl shadow-slate-200/50 max-h-52 overflow-y-auto">
-                {citySuggestions.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    className="w-full text-left px-4 py-3 hover:bg-emerald-50 transition-colors duration-200 border-b border-slate-100 last:border-0 text-sm text-slate-700"
-                    onClick={() => {
-                      setCity(suggestion)
-                      setCityQuery(suggestion)
-                      setShowCityDropdown(false)
-                    }}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
             )}
           </div>
 

@@ -297,6 +297,9 @@ export default function DashboardClient({ data }: any) {
   /* ─── Search Rankings ── */
   const searchRankings: { query: string; topResult: any; baseRanked: boolean; basePosition: number | null; totalResults: number; inMapPack: boolean }[] = data?.searchRankings || []
 
+  /* ─── Delivery Platform Benchmarks ── */
+  const deliveryBenchmarks: { name: string; isBase: boolean; address?: string; images: number; zomatoRating: number; swiggyRating: number; topDishes: string[]; totalItems: number; itemsAbove4Rating: number }[] = data?.deliveryBenchmarks || []
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* ═══════ HEADER ═══════ */}
@@ -497,6 +500,129 @@ export default function DashboardClient({ data }: any) {
                 {cuisineBreakdown.map((c: any, i: number) => (
                   <CuisineCard key={i} cuisine={c} />
                 ))}
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* ═══════ SWIGGY & ZOMATO BENCHMARK ═══════ */}
+        {deliveryBenchmarks.length > 0 && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.15c0 .415.336.75.75.75z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Swiggy & Zomato Benchmark</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Top 10 same-cuisine competitors on delivery platforms</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto -mx-6 md:-mx-8 px-6 md:px-8">
+                <table className="w-full text-sm min-w-[900px]">
+                  <thead>
+                    <tr className="border-b-2 border-slate-200">
+                      <th className="text-left pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider pr-3">Restaurant</th>
+                      <th className="text-center pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider px-2">Images</th>
+                      <th className="text-center pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider px-2">
+                        <span className="text-red-500">Zomato</span>
+                      </th>
+                      <th className="text-center pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider px-2">
+                        <span className="text-orange-500">Swiggy</span>
+                      </th>
+                      <th className="text-left pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider px-2">Top Dishes</th>
+                      <th className="text-center pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider px-2">Menu Items</th>
+                      <th className="text-center pb-3 text-slate-500 font-semibold text-xs uppercase tracking-wider px-2">4+ Rated</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {deliveryBenchmarks.map((b, i) => (
+                      <tr
+                        key={i}
+                        className={`border-t border-slate-100 transition-colors duration-200 ${
+                          b.isBase
+                            ? "bg-emerald-50/60"
+                            : "hover:bg-slate-50"
+                        }`}
+                        style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 40}ms both` }}
+                      >
+                        <td className="py-3.5 pr-3">
+                          <div className="flex items-center gap-2">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-sm font-medium truncate max-w-[180px] ${b.isBase ? "text-emerald-800" : "text-slate-700"}`}>
+                                  {b.name}
+                                </span>
+                                {b.isBase && (
+                                  <span className="text-[10px] font-bold bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded-full uppercase shrink-0">
+                                    You
+                                  </span>
+                                )}
+                              </div>
+                              {b.address && (
+                                <p className="text-[11px] text-slate-400 truncate max-w-[200px] mt-0.5">{b.address}</p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 text-center px-2">
+                          <span className="text-slate-700 font-semibold tabular-nums">{b.images}</span>
+                        </td>
+                        <td className="py-3.5 text-center px-2">
+                          <span className={`inline-flex items-center gap-0.5 font-bold tabular-nums ${
+                            b.zomatoRating >= 4.0 ? "text-emerald-600" : b.zomatoRating >= 3.5 ? "text-amber-600" : "text-red-500"
+                          }`}>
+                            {b.zomatoRating.toFixed(1)}
+                            <svg className="w-3 h-3 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          </span>
+                        </td>
+                        <td className="py-3.5 text-center px-2">
+                          <span className={`inline-flex items-center gap-0.5 font-bold tabular-nums ${
+                            b.swiggyRating >= 4.0 ? "text-emerald-600" : b.swiggyRating >= 3.5 ? "text-amber-600" : "text-red-500"
+                          }`}>
+                            {b.swiggyRating.toFixed(1)}
+                            <svg className="w-3 h-3 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex flex-wrap gap-1">
+                            {(b.topDishes || []).map((dish, di) => (
+                              <span key={di} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-[11px] font-medium">
+                                {dish}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-3.5 text-center px-2">
+                          <span className="text-slate-700 font-semibold tabular-nums">{b.totalItems}</span>
+                        </td>
+                        <td className="py-3.5 text-center px-2">
+                          <span className={`font-bold tabular-nums ${
+                            b.totalItems > 0 && (b.itemsAbove4Rating / b.totalItems) >= 0.4 ? "text-emerald-600" : "text-amber-600"
+                          }`}>
+                            {b.itemsAbove4Rating}
+                          </span>
+                          <span className="text-slate-400 text-[11px] ml-0.5">
+                            ({b.totalItems > 0 ? Math.round((b.itemsAbove4Rating / b.totalItems) * 100) : 0}%)
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <p className="text-xs text-orange-800 leading-relaxed">
+                  <span className="font-semibold">Note:</span> Swiggy & Zomato ratings and menu data are AI-estimated benchmarks based on Google data, cuisine type, and market patterns. For exact numbers, check the respective platforms directly.
+                </p>
               </div>
             </div>
           </Reveal>
