@@ -905,7 +905,13 @@ RULES:
     })
 
     const deliveryParsed = JSON.parse(deliveryAI.choices[0].message.content!)
-    const deliveryBenchmarks = deliveryParsed.deliveryBenchmarks || []
+    const deliveryBenchmarks = (deliveryParsed.deliveryBenchmarks || []).map((b: any) => {
+      if (b.isBase) {
+        return { ...b, address: baseDetails?.location ? `${city}` : city }
+      }
+      const match = sameCuisineTop10.find(r => r.name === b.name)
+      return { ...b, address: match?.address || city }
+    })
 
     // ==============================
     // Fetch website SEO data

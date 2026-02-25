@@ -298,7 +298,7 @@ export default function DashboardClient({ data }: any) {
   const searchRankings: { query: string; topResult: any; baseRanked: boolean; basePosition: number | null; totalResults: number; inMapPack: boolean }[] = data?.searchRankings || []
 
   /* ─── Delivery Platform Benchmarks ── */
-  const deliveryBenchmarks: { name: string; isBase: boolean; images: number; zomatoRating: number; swiggyRating: number; topDishes: string[]; totalItems: number; itemsAbove4Rating: number }[] = data?.deliveryBenchmarks || []
+  const deliveryBenchmarks: { name: string; isBase: boolean; address?: string; images: number; zomatoRating: number; swiggyRating: number; topDishes: string[]; totalItems: number; itemsAbove4Rating: number }[] = data?.deliveryBenchmarks || []
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
@@ -551,14 +551,21 @@ export default function DashboardClient({ data }: any) {
                       >
                         <td className="py-3.5 pr-3">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium truncate max-w-[180px] ${b.isBase ? "text-emerald-800" : "text-slate-700"}`}>
-                              {b.name}
-                            </span>
-                            {b.isBase && (
-                              <span className="text-[10px] font-bold bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded-full uppercase shrink-0">
-                                You
-                              </span>
-                            )}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-sm font-medium truncate max-w-[180px] ${b.isBase ? "text-emerald-800" : "text-slate-700"}`}>
+                                  {b.name}
+                                </span>
+                                {b.isBase && (
+                                  <span className="text-[10px] font-bold bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded-full uppercase shrink-0">
+                                    You
+                                  </span>
+                                )}
+                              </div>
+                              {b.address && (
+                                <p className="text-[11px] text-slate-400 truncate max-w-[200px] mt-0.5">{b.address}</p>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="py-3.5 text-center px-2">
