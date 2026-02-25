@@ -807,6 +807,7 @@ OTHER RULES:
       `Best ${baseRestaurantCuisine} near me ${city}`,
       `${baseRestaurantCuisine} restaurants ${city}`,
       `Best restaurants in ${city}`,
+      `Best restaurants to order online ${city}`,
     ]
 
     // For each query, find who "ranks #1" based on our data

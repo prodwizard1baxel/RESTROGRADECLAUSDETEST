@@ -145,46 +145,6 @@ function KeywordTag({
   )
 }
 
-/* ─── Check Item ────────────────────────────────────────────────────── */
-function CheckItem({
-  label,
-  pass,
-  note,
-  delay = 0,
-}: {
-  label: string
-  pass: boolean
-  note: string
-  delay?: number
-}) {
-  return (
-    <div
-      className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0"
-      style={{
-        animation: `fade-in-up 0.5s cubic-bezier(0.16,1,0.3,1) ${delay}ms both`,
-      }}
-    >
-      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-        pass ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"
-      }`}>
-        {pass ? (
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        ) : (
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        )}
-      </div>
-      <div className="min-w-0">
-        <p className={`text-sm font-medium ${pass ? "text-slate-800" : "text-red-700"}`}>{label}</p>
-        <p className="text-xs text-slate-500 mt-0.5">{note}</p>
-      </div>
-    </div>
-  )
-}
-
 /* ─── Cuisine Card (expandable) ─────────────────────────────────────── */
 function CuisineCard({ cuisine: c }: { cuisine: any }) {
   const [expanded, setExpanded] = useState(false)
@@ -273,7 +233,6 @@ export default function DashboardClient({ data }: any) {
     data?.competitorAnalysis?.baseRestaurantCuisine || ""
 
   const reviewMetrics = data?.reviewMetrics || {}
-  const googleChecks = data?.googleProfileChecks || {}
 
   /* ─── Handle both old (string) and new (object) executiveSummary format ── */
   const execSummary = data?.executiveSummary
@@ -298,21 +257,6 @@ export default function DashboardClient({ data }: any) {
   const overallRank = avgThreat >= 70 ? "Needs Attention" : avgThreat >= 45 ? "Doing Well" : "Excellent"
   const rankColor = avgThreat >= 70 ? "text-red-600" : avgThreat >= 45 ? "text-amber-600" : "text-emerald-600"
   const rankBg = avgThreat >= 70 ? "bg-red-50 border-red-200" : avgThreat >= 45 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"
-
-  /* ─── Google checks labels ── */
-  const checkLabels: Record<string, string> = {
-    websiteAvailable: "Website Available",
-    googlePageUpdated: "Google Page Updated",
-    seoOptimised: "SEO Optimised",
-    timingsUpdated: "Timings Updated",
-    ownerPhotosAdded: "Images Added by Owner",
-    respondingToReviews: "Responding to Reviews",
-    menuAvailable: "Menu Available Online",
-    contactInfoComplete: "Contact Info Complete",
-  }
-
-  const checksCount = Object.keys(googleChecks).length
-  const passCount = Object.values(googleChecks).filter((c: any) => c?.pass).length
 
   /* ─── Competitor Ranking data ── */
   const competitorRanking = data?.competitorRanking || {}
@@ -533,6 +477,31 @@ export default function DashboardClient({ data }: any) {
           </div>
         </Reveal>
 
+        {/* ═══════ CUISINE BREAKDOWN ═══════ */}
+        {cuisineBreakdown.length > 0 && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.38a48.474 48.474 0 00-6-.37c-2.032 0-4.034.125-6 .37" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Food Cuisine Breakdown</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Restaurants within 5km by cuisine type</p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cuisineBreakdown.map((c: any, i: number) => (
+                  <CuisineCard key={i} cuisine={c} />
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        )}
+
         {/* ═══════ YOU'RE RANKING BELOW X COMPETITORS ═══════ */}
         {topRanked.length > 0 && (
           <Reveal>
@@ -599,253 +568,6 @@ export default function DashboardClient({ data }: any) {
           </Reveal>
         )}
 
-        {/* ═══════ THIS IS HOW YOU'RE DOING ONLINE ═══════ */}
-        {searchRankings.length > 0 && (
-          <Reveal>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">This is how you&apos;re doing online</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Where you are showing up when customers search, next to your competitors</p>
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-3">
-                {searchRankings.map((sr, i) => (
-                  <div
-                    key={i}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-all duration-200"
-                    style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 60}ms both` }}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                          <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                          </svg>
-                          &ldquo;{sr.query}&rdquo;
-                        </p>
-
-                        {sr.topResult && (
-                          <p className="text-xs text-slate-500 mt-1.5 ml-5.5">
-                            <span className="text-slate-400">#1 Result:</span>{" "}
-                            <span className="font-medium text-slate-700">{sr.topResult.name}</span>
-                            <span className="text-amber-500 ml-1">{sr.topResult.rating} &#9733;</span>
-                            <span className="text-slate-400 ml-1">({sr.topResult.reviews?.toLocaleString()} reviews)</span>
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="shrink-0 text-right">
-                        {sr.inMapPack ? (
-                          <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Top 3
-                          </span>
-                        ) : sr.baseRanked ? (
-                          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">
-                            #{sr.basePosition}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-600 px-2.5 py-1 rounded-lg text-xs font-bold">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Not ranked
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-xs text-blue-800 leading-relaxed">
-                  <span className="font-semibold">What is SEO?</span> SEO (Search Engine Optimization) means improving your website so search engines like Google can find it, rank it higher, and help more people discover your restaurant when they search online.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        )}
-
-        {/* ═══════ SEO WEBSITE CHECKS ═══════ */}
-        {seoChecks.websiteUrl !== undefined && (
-          <Reveal>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Website SEO Audit</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {seoChecks.websiteUrl ? (
-                      <>Checked: <span className="font-medium text-slate-600">{seoChecks.websiteUrl}</span></>
-                    ) : "No website found on Google profile"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-5">
-                {seoSections.map((section, si) => {
-                  const checks = Object.entries(section.checks)
-                  const passed = checks.filter(([, v]: [string, any]) => v?.pass).length
-                  return (
-                    <div key={si} className="bg-slate-50 border border-slate-200 rounded-xl p-5">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500">
-                            {section.icon}
-                          </div>
-                          <h3 className="text-sm font-bold text-slate-800">{section.title}</h3>
-                        </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          passed === checks.length ? "bg-emerald-100 text-emerald-700" :
-                          passed > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"
-                        }`}>
-                          {passed}/{checks.length}
-                        </span>
-                      </div>
-                      <div className="space-y-2.5">
-                        {checks.map(([key, val]: [string, any], ci) => (
-                          <div key={key} className="flex items-start gap-2.5">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                              val?.pass ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"
-                            }`}>
-                              {val?.pass ? (
-                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                              ) : (
-                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <p className={`text-xs font-medium ${val?.pass ? "text-slate-700" : "text-red-700"}`}>
-                                {key.replace(/([A-Z])/g, " $1").replace(/^./, (s: string) => s.toUpperCase())}
-                              </p>
-                              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{val?.note}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </Reveal>
-        )}
-
-        {/* ═══════ GOOGLE PROFILE CHECKS ═══════ */}
-        {checksCount > 0 && (
-          <Reveal>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-900">Google Profile Checks</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Quick audit of your Google Business presence</p>
-                  </div>
-                </div>
-                <div className={`text-sm font-bold px-4 py-2 rounded-full ${
-                  passCount >= checksCount * 0.75 ? "bg-emerald-100 text-emerald-700" :
-                  passCount >= checksCount * 0.5 ? "bg-amber-100 text-amber-700" :
-                  "bg-red-100 text-red-700"
-                }`}>
-                  {passCount}/{checksCount} Passed
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-x-8">
-                {Object.entries(googleChecks).map(([key, val]: [string, any], i: number) => (
-                  <CheckItem
-                    key={key}
-                    label={checkLabels[key] || key}
-                    pass={val?.pass ?? false}
-                    note={val?.note || ""}
-                    delay={i * 60}
-                  />
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        )}
-
-        {/* ═══════ KEYWORD CLUSTER ═══════ */}
-        <Reveal>
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-                </svg>
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-slate-900">Your Keyword Strategy</h2>
-            </div>
-
-            {isStructuredKeywords ? (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
-                  <p className="text-xs text-slate-500 mb-3">Keywords that define your restaurant identity</p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {(keywords.primary || []).map((kw: string, i: number) => (
-                      <KeywordTag key={i} keyword={kw} color="blue" index={i} />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Positive Keywords</h3>
-                  <p className="text-xs text-slate-500 mb-3">Keywords customers associate with great experiences</p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {(keywords.positive || []).map((kw: string, i: number) => (
-                      <KeywordTag key={i} keyword={kw} color="green" index={i} />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider mb-3">Negative Keywords to Avoid</h3>
-                  <p className="text-xs text-slate-500 mb-3">Common complaints in your market</p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {(keywords.negative || []).map((kw: string, i: number) => (
-                      <KeywordTag key={i} keyword={kw} color="red" index={i} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-3">
-                {(Array.isArray(keywords) ? keywords : []).map(
-                  (kw: string, i: number) => (
-                    <KeywordTag key={i} keyword={kw} color="blue" index={i} />
-                  )
-                )}
-              </div>
-            )}
-          </div>
-        </Reveal>
-
         {/* ═══════ COMPETITIVE THREAT MAP ═══════ */}
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
@@ -863,31 +585,6 @@ export default function DashboardClient({ data }: any) {
             <ThreatRadar competitors={competitors} />
           </div>
         </Reveal>
-
-        {/* ═══════ CUISINE BREAKDOWN ═══════ */}
-        {cuisineBreakdown.length > 0 && (
-          <Reveal>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.38a48.474 48.474 0 00-6-.37c-2.032 0-4.034.125-6 .37" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Food Cuisine Breakdown</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Restaurants within 5km by cuisine type</p>
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {cuisineBreakdown.map((c: any, i: number) => (
-                  <CuisineCard key={i} cuisine={c} />
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        )}
 
         {/* ═══════ COMPETITOR COMPARISON TABLE ═══════ */}
         <Reveal>
@@ -1105,6 +802,213 @@ export default function DashboardClient({ data }: any) {
                 </div>
               ))}
             </div>
+          </div>
+        </Reveal>
+
+        {/* ═══════ SEARCH FEED FROM GOOGLE ═══════ */}
+        {searchRankings.length > 0 && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Your Search Feed from Frequent Google Searches</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Where you show up when customers search for you, next to your competitors</p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                {searchRankings.map((sr, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-all duration-200"
+                    style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 60}ms both` }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                          <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                          &ldquo;{sr.query}&rdquo;
+                        </p>
+
+                        {sr.topResult && (
+                          <p className="text-xs text-slate-500 mt-1.5 ml-5.5">
+                            <span className="text-slate-400">#1 Result:</span>{" "}
+                            <span className="font-medium text-slate-700">{sr.topResult.name}</span>
+                            <span className="text-amber-500 ml-1">{sr.topResult.rating} &#9733;</span>
+                            <span className="text-slate-400 ml-1">({sr.topResult.reviews?.toLocaleString()} reviews)</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="shrink-0 text-right">
+                        {sr.inMapPack ? (
+                          <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Top 3
+                          </span>
+                        ) : sr.baseRanked ? (
+                          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            #{sr.basePosition}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-600 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Not ranked
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-xs text-blue-800 leading-relaxed">
+                  <span className="font-semibold">What is SEO?</span> SEO (Search Engine Optimization) means improving your website so search engines like Google can find it, rank it higher, and help more people discover your restaurant when they search online.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* ═══════ SEO WEBSITE CHECKS ═══════ */}
+        {seoChecks.websiteUrl !== undefined && (
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Website SEO Audit</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {seoChecks.websiteUrl ? (
+                      <>Checked: <span className="font-medium text-slate-600">{seoChecks.websiteUrl}</span></>
+                    ) : "No website found on Google profile"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-5">
+                {seoSections.map((section, si) => {
+                  const checks = Object.entries(section.checks)
+                  const passed = checks.filter(([, v]: [string, any]) => v?.pass).length
+                  return (
+                    <div key={si} className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                            {section.icon}
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-800">{section.title}</h3>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          passed === checks.length ? "bg-emerald-100 text-emerald-700" :
+                          passed > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"
+                        }`}>
+                          {passed}/{checks.length}
+                        </span>
+                      </div>
+                      <div className="space-y-2.5">
+                        {checks.map(([key, val]: [string, any], ci) => (
+                          <div key={key} className="flex items-start gap-2.5">
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                              val?.pass ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"
+                            }`}>
+                              {val?.pass ? (
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : (
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className={`text-xs font-medium ${val?.pass ? "text-slate-700" : "text-red-700"}`}>
+                                {key.replace(/([A-Z])/g, " $1").replace(/^./, (s: string) => s.toUpperCase())}
+                              </p>
+                              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{val?.note}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* ═══════ KEYWORD CLUSTER ═══════ */}
+        <Reveal>
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+                </svg>
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900">Your Keyword Strategy</h2>
+            </div>
+
+            {isStructuredKeywords ? (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
+                  <p className="text-xs text-slate-500 mb-3">Keywords that define your restaurant identity</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(keywords.primary || []).map((kw: string, i: number) => (
+                      <KeywordTag key={i} keyword={kw} color="blue" index={i} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Positive Keywords</h3>
+                  <p className="text-xs text-slate-500 mb-3">Keywords customers associate with great experiences</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(keywords.positive || []).map((kw: string, i: number) => (
+                      <KeywordTag key={i} keyword={kw} color="green" index={i} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider mb-3">Negative Keywords to Avoid</h3>
+                  <p className="text-xs text-slate-500 mb-3">Common complaints in your market</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(keywords.negative || []).map((kw: string, i: number) => (
+                      <KeywordTag key={i} keyword={kw} color="red" index={i} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-3">
+                {(Array.isArray(keywords) ? keywords : []).map(
+                  (kw: string, i: number) => (
+                    <KeywordTag key={i} keyword={kw} color="blue" index={i} />
+                  )
+                )}
+              </div>
+            )}
           </div>
         </Reveal>
 
