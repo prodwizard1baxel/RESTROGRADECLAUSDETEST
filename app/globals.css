@@ -3,17 +3,17 @@
 :root {
   --background: #FFFFFF;
   --foreground: #1E293B;
-  --accent: #22C55E;
-  --accent-dark: #16A34A;
-  --accent-light: #4ADE80;
-  --accent-soft: #F0FDF4;
+  --accent: #059669;
+  --accent-dark: #047857;
+  --accent-light: #6EE7B7;
+  --accent-soft: #ECFDF5;
   --surface: #F8FAFC;
   --border: #E2E8F0;
   --border-light: #F1F5F9;
   --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  --success: #22C55E;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --success: #059669;
   --warning: #F59E0B;
   --danger: #EF4444;
 }
@@ -21,8 +21,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-accent: #22C55E;
-  --color-accent-light: #4ADE80;
+  --color-accent: #059669;
+  --color-accent-light: #6EE7B7;
   --color-surface: #F8FAFC;
   --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
@@ -112,9 +112,9 @@ body {
 .animation-delay-400 { animation-delay: 0.4s; }
 .animation-delay-500 { animation-delay: 0.5s; }
 
-/* ── Gradient text (vibrant green) ───────────────────────────────────── */
+/* ── Gradient text (muted emerald) ───────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, #16A34A, #22C55E, #4ADE80);
+  background: linear-gradient(135deg, #059669, #6EE7B7, #10B981);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -125,9 +125,9 @@ body {
   background: linear-gradient(
     90deg,
     #0F172A 0%,
-    #16A34A 25%,
-    #4ADE80 50%,
-    #16A34A 75%,
+    #059669 25%,
+    #6EE7B7 50%,
+    #059669 75%,
     #0F172A 100%
   );
   background-size: 200% auto;
@@ -137,15 +137,15 @@ body {
   animation: gradient-shift 4s linear infinite;
 }
 
-/* ── Gradient CTA (owner.com style) ─────────────────────────────────── */
+/* ── Gradient CTA (muted emerald) ────────────────────────────────────── */
 .cta-gradient {
-  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.35);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.30);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cta-gradient:hover {
-  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.45);
+  box-shadow: 0 8px 30px rgba(5, 150, 105, 0.40);
   transform: translateY(-1px);
 }
 
@@ -232,7 +232,7 @@ body {
 
 /* ── Selection ──────────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(5, 150, 105, 0.15);
   color: #1E293B;
 }
 
