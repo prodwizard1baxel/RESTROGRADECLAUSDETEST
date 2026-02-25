@@ -10,6 +10,8 @@ type Restaurant = {
   rating: number
   totalRatings: number
   distanceKm: number
+  lat: number
+  lng: number
   cuisine: string[]
   foodCuisine: string
   averagePrice: number
@@ -139,6 +141,7 @@ async function getCoordinates(address: string) {
 // ==============================
 async function getNearbyRestaurants(lat: number, lng: number) {
   const radius = 7000
+  const allResults: any[] = []
 
   const res = await fetch(
     `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=restaurant&key=${getGoogleKey()}`
@@ -154,7 +157,28 @@ async function getNearbyRestaurants(lat: number, lng: number) {
     throw new Error("Places API failed: " + data.status)
   }
 
-  return data.results
+  allResults.push(...data.results)
+
+  // Fetch up to 2 more pages for better coverage (max 60 results)
+  let nextPageToken = data.next_page_token
+  for (let page = 0; page < 2 && nextPageToken; page++) {
+    // Google requires a short delay before using next_page_token
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const pageRes = await fetch(
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?pagetoken=${nextPageToken}&key=${getGoogleKey()}`
+    )
+    const pageData = await pageRes.json()
+
+    if (pageData.status === "OK" && pageData.results) {
+      allResults.push(...pageData.results)
+      nextPageToken = pageData.next_page_token
+    } else {
+      break
+    }
+  }
+
+  return allResults
 }
 
 // ==============================
@@ -329,6 +353,8 @@ export async function POST(req: Request) {
         rating: place.rating || 0,
         totalRatings: place.user_ratings_total || 0,
         distanceKm: Number(distance.toFixed(2)),
+        lat: place.geometry.location.lat,
+        lng: place.geometry.location.lng,
         cuisine: placeTypes.filter(
           (t: string) => !["point_of_interest", "establishment"].includes(t)
         ).slice(0, 3),
@@ -498,6 +524,7 @@ OTHER RULES:
           lowestRatingName: "",
           mostReviews: 0,
           mostReviewsName: "",
+          restaurants: [] as { name: string; rating: number; reviews: number; distanceKm: number }[],
         }
       }
       const c = cuisineAgg[foodCuisine]
@@ -518,6 +545,17 @@ OTHER RULES:
         c.mostReviews = r.totalRatings
         c.mostReviewsName = r.name
       }
+      c.restaurants.push({
+        name: r.name,
+        rating: r.rating,
+        reviews: r.totalRatings,
+        distanceKm: r.distanceKm,
+      })
+    })
+
+    // Sort restaurants within each cuisine by rating desc, then by reviews desc
+    Object.values(cuisineAgg).forEach((c: any) => {
+      c.restaurants.sort((a: any, b: any) => b.rating - a.rating || b.reviews - a.reviews)
     })
 
     const cuisineBreakdown = Object.values(cuisineAgg)
