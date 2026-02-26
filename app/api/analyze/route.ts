@@ -375,7 +375,7 @@ async function fetchWebsiteSEO(websiteUrl: string | null, restaurantName: string
 // ==============================
 // Vercel function config - extend timeout for external API calls
 // ==============================
-export const maxDuration = 60
+export const maxDuration = 120
 
 // ==============================
 // MAIN API
@@ -848,24 +848,26 @@ OTHER RULES:
     })
 
     // ==============================
-    // Swiggy & Zomato delivery platform benchmark via GPT
+    // Swiggy & Zomato benchmark + SEO fetch (run in parallel to save time)
     // ==============================
     const sameCuisineTop10 = [...mapped]
       .filter(r => r.foodCuisine.toLowerCase() === baseRestaurantCuisine.toLowerCase() && r.distanceKm <= 5)
       .sort((a, b) => b.totalRatings - a.totalRatings)
       .slice(0, 10)
 
-    const deliveryAI = await getOpenAI().chat.completions.create({
-      model: "gpt-4o-mini",
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume.",
-        },
-        {
-          role: "user",
-          content: `
+    const [deliveryResult, seoChecks] = await Promise.all([
+      // Delivery benchmark GPT call
+      getOpenAI().chat.completions.create({
+        model: "gpt-4o-mini",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume.",
+          },
+          {
+            role: "user",
+            content: `
 Provide Swiggy & Zomato delivery platform benchmark estimates for these restaurants.
 
 Base restaurant: ${name} (${baseRestaurantCuisine}, ${city})
@@ -899,12 +901,16 @@ RULES:
 - itemsAbove4Rating: usually 30-50% of totalItems for good restaurants
 - images: use the Google photo count as a base, add 5-20 more for delivery platform photos
 `
-        },
-      ],
-      temperature: 0.6,
-    })
+          },
+        ],
+        temperature: 0.6,
+      }).catch(() => null),
 
-    const deliveryParsed = JSON.parse(deliveryAI.choices[0].message.content!)
+      // SEO fetch (runs in parallel)
+      fetchWebsiteSEO(baseDetails?.website || null, name, city),
+    ])
+
+    const deliveryParsed = deliveryResult ? JSON.parse(deliveryResult.choices[0].message.content!) : { deliveryBenchmarks: [] }
     const deliveryBenchmarks = (deliveryParsed.deliveryBenchmarks || []).map((b: any) => {
       if (b.isBase) {
         return { ...b, address: baseDetails?.location ? `${city}` : city }
@@ -912,11 +918,6 @@ RULES:
       const match = sameCuisineTop10.find(r => r.name === b.name)
       return { ...b, address: match?.address || city }
     })
-
-    // ==============================
-    // Fetch website SEO data
-    // ==============================
-    const seoChecks = await fetchWebsiteSEO(baseDetails?.website || null, name, city)
 
     const finalData = {
       restaurantName: name,
