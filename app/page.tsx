@@ -616,8 +616,9 @@ export default function Home() {
               <p className="text-sm font-semibold mb-4 text-slate-700">Company</p>
               <div className="flex flex-col gap-2.5">
                 <a href="#testimonials" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">Testimonials</a>
-                <a href="#" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">Privacy Policy</a>
-                <a href="#" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">Terms of Service</a>
+                <a href="/privacy" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">Privacy Policy</a>
+                <a href="/terms" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">Terms of Service</a>
+                <a href="/contact" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">Contact Us</a>
               </div>
             </div>
           </div>

@@ -117,9 +117,9 @@ function LoginForm() {
             {/* Terms */}
             <p className="mt-8 text-center text-[11px] text-slate-400 leading-relaxed">
               By signing in, you agree to our{" "}
-              <a href="#" className="underline hover:text-slate-600 transition-colors">Terms of Service</a>
+              <a href="/terms" className="underline hover:text-slate-600 transition-colors">Terms of Service</a>
               {" "}and{" "}
-              <a href="#" className="underline hover:text-slate-600 transition-colors">Privacy Policy</a>
+              <a href="/privacy" className="underline hover:text-slate-600 transition-colors">Privacy Policy</a>
             </p>
           </div>
 
