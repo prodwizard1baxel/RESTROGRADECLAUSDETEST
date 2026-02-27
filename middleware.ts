@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const CUSTOM_DOMAIN = "restropulse.in"
+const CUSTOM_DOMAIN = "restorank.in"
 
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host") || ""
