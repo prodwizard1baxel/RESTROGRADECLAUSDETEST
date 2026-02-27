@@ -147,7 +147,7 @@ export default function Home() {
               { label: "How It Works", id: "how-it-works" },
               { label: "Features", id: "features" },
               { label: "Preview", id: "preview" },
-              { label: "Testimonials", id: "testimonials" },
+              { label: "Pricing", id: "pricing" },
             ].map((link) => (
               <a
                 key={link.id}
@@ -202,7 +202,7 @@ export default function Home() {
           }`}
         >
           <div className="px-6 py-4 flex flex-col gap-3 bg-white/95 backdrop-blur-2xl">
-            {["how-it-works", "features", "preview", "testimonials"].map((id) => (
+            {["how-it-works", "features", "preview", "pricing"].map((id) => (
               <a
                 key={id}
                 href={`#${id}`}
@@ -237,7 +237,7 @@ export default function Home() {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
             </span>
             <span className="text-sm text-emerald-700 font-medium tracking-wide">
-              AI Restaurant Growth Engine
+              Restaurant Competitive Intelligence
             </span>
           </div>
 
@@ -248,9 +248,9 @@ export default function Home() {
           </h1>
 
           <p className="animate-fade-in-up animation-delay-200 text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Get an AI-generated competitive intelligence report for your restaurant
-            in minutes. Analyze threats, uncover SEO opportunities, and receive
-            actionable strategies to outperform every competitor nearby.
+            Competition analysed for historic 2 years data. Get a detailed
+            competitive intelligence report for your restaurant in minutes —
+            powered by real Google Maps data, review analysis, and market trends.
           </p>
 
           <div className="animate-fade-in-up animation-delay-300 flex flex-col sm:flex-row gap-4 justify-center">
@@ -258,7 +258,7 @@ export default function Home() {
               href="/analyze"
               className="cta-hero group cta-gradient text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all duration-300 inline-flex items-center justify-center gap-2.5 shadow-2xl shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-0.5"
             >
-              <span>Get Your Free Report</span>
+              <span>Get Your Report</span>
               <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -276,7 +276,7 @@ export default function Home() {
           </div>
 
           <p className="animate-fade-in animation-delay-500 mt-10 text-sm text-slate-400">
-            No sign-up required &bull; No credit card &bull; Results in under 2 minutes
+            Based on 2 years of historic data &bull; Real Google Maps insights &bull; Results in under 2 minutes
           </p>
         </div>
 
@@ -291,7 +291,7 @@ export default function Home() {
               Trusted by restaurant owners across India
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-50">
-              {["Zomato Partner", "Google Maps", "GPT-4 Powered", "Swiggy Listed", "TripAdvisor"].map((name, i) => (
+              {["Zomato Partner", "Google Maps", "Swiggy Listed", "TripAdvisor", "2 Years Data"].map((name, i) => (
                 <span key={i} className="text-sm md:text-base font-semibold text-slate-500 tracking-wider whitespace-nowrap hover:text-emerald-500 transition-colors duration-500">
                   {name}
                 </span>
@@ -325,8 +325,8 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-emerald-200 to-transparent" />
             {[
-              { step: "01", title: "Enter Your Restaurant", description: "Provide your restaurant name and city. Our AI locates your business and identifies all competitors within a 7km radius.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg> },
-              { step: "02", title: "AI Analyzes Everything", description: "We pull Google Maps data, calculate threat scores, analyze sentiment, and generate SEO keyword clusters using GPT-4.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" /></svg> },
+              { step: "01", title: "Enter Your Restaurant", description: "Provide your restaurant name and city. We locate your business and identify all competitors within a 7km radius using real map data.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg> },
+              { step: "02", title: "Data-Driven Analysis", description: "We pull 2 years of Google Maps data, calculate threat scores, analyze review sentiment, and build SEO keyword clusters.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" /></svg> },
               { step: "03", title: "Get Actionable Report", description: "Receive a comprehensive dashboard with threat maps, competitor breakdowns, keyword strategy, and a strategic verdict.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg> },
             ].map((item, i) => (
               <Reveal key={i} delay={i * 150}>
@@ -369,7 +369,7 @@ export default function Home() {
               { title: "Overall Rank & Metrics", description: "Get your overall ranking with breakdown of reviews, rating percentile, and competitive position.", color: "text-red-500", bgColor: "bg-red-50 border-red-100", hoverBorder: "hover:border-red-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg> },
               { title: "Competitor Deep Dive", description: "Strengths, weaknesses, sentiment analysis, and keyword clusters for your top 5 competitors.", color: "text-emerald-600", bgColor: "bg-emerald-50 border-emerald-100", hoverBorder: "hover:border-emerald-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg> },
               { title: "Google Profile Audit", description: "Checklist audit of your Google Business presence — website, photos, timings, SEO, and reviews.", color: "text-emerald-600", bgColor: "bg-emerald-50 border-emerald-100", hoverBorder: "hover:border-emerald-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg> },
-              { title: "SEO Keyword Strategy", description: "AI-generated keyword clusters to dominate local search and drive organic discovery.", color: "text-violet-600", bgColor: "bg-violet-50 border-violet-100", hoverBorder: "hover:border-violet-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" /></svg> },
+              { title: "SEO Keyword Strategy", description: "Data-driven keyword clusters to dominate local search and drive organic discovery.", color: "text-violet-600", bgColor: "bg-violet-50 border-violet-100", hoverBorder: "hover:border-violet-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" /></svg> },
               { title: "Threat Radar Map", description: "Visual chart plotting all competitors by threat level so you can see the landscape at a glance.", color: "text-amber-600", bgColor: "bg-amber-50 border-amber-100", hoverBorder: "hover:border-amber-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg> },
               { title: "Strategic Verdict", description: "A final executive-level verdict with specific, actionable recommendations.", color: "text-slate-700", bgColor: "bg-slate-100 border-slate-200", hoverBorder: "hover:border-slate-300", icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg> },
             ].map((feature, i) => (
@@ -474,6 +474,108 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Pricing ──────────────────────────────────────────────────── */}
+      <section id="pricing" className="py-20 md:py-32 bg-slate-50 relative">
+        <div className="max-w-5xl mx-auto px-6">
+          <Reveal className="text-center mb-16">
+            <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Simple Pricing</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Choose Your <span className="gradient-text">Plan</span>
+            </h2>
+            <p className="text-slate-500 mt-5 max-w-xl mx-auto leading-relaxed">
+              Every report is built from 2 years of real competition data. Pick the plan that fits your needs.
+            </p>
+          </Reveal>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            {/* Starter Plan */}
+            <Reveal delay={0}>
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100 transition-all duration-300 h-full flex flex-col">
+                <div className="mb-6">
+                  <p className="text-xs uppercase tracking-[0.15em] text-slate-400 font-semibold mb-2">Starter</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-slate-900">&#8377;499</span>
+                    <span className="text-slate-400 text-sm">/one-time</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-grow">
+                  {[
+                    "1 detailed competitive report",
+                    "2 years of historic data analysis",
+                    "Top 10 competitor benchmarking",
+                    "Google profile audit",
+                    "SEO keyword strategy",
+                    "Swiggy & Zomato benchmarks",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                      <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href="/login?callbackUrl=/analyze"
+                  className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block"
+                >
+                  Get Started
+                </a>
+              </div>
+            </Reveal>
+
+            {/* Growth Plan */}
+            <Reveal delay={150}>
+              <div className="bg-white rounded-2xl border-2 border-emerald-500 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-100 transition-all duration-300 h-full flex flex-col relative">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <span className="bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg shadow-emerald-200">
+                    Best Value
+                  </span>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-xs uppercase tracking-[0.15em] text-emerald-600 font-semibold mb-2">Growth Pack</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-slate-900">&#8377;1,499</span>
+                    <span className="text-slate-400 text-sm">/6 reports</span>
+                  </div>
+                  <p className="text-xs text-emerald-600 font-medium mt-1.5">&#8377;250 per report — Save 50%</p>
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-grow">
+                  {[
+                    "6 detailed competitive reports",
+                    "2 years of historic data analysis",
+                    "Top 10 competitor benchmarking",
+                    "Google profile audit",
+                    "SEO keyword strategy",
+                    "Swiggy & Zomato benchmarks",
+                    "Track multiple restaurants or cities",
+                    "Monitor competition over time",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                      <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href="/login?callbackUrl=/analyze"
+                  className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block"
+                >
+                  Get Growth Pack
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* ── Final CTA ───────────────────────────────────────────────── */}
       <section className="py-24 md:py-36 bg-slate-50 relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
@@ -483,7 +585,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight text-slate-900">
             Ready to Outsmart<br /><span className="gradient-text-animated">Your Competition?</span>
           </h2>
-          <p className="text-slate-500 text-lg mb-12 max-w-xl mx-auto leading-relaxed">Get a detailed competitive intelligence report for your restaurant. No sign-up, no credit card.</p>
+          <p className="text-slate-500 text-lg mb-12 max-w-xl mx-auto leading-relaxed">Get a detailed competitive intelligence report based on 2 years of historic data. Choose a plan and start winning.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/analyze" className="cta-hero group cta-gradient text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all duration-300 shadow-2xl shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-0.5 inline-flex items-center justify-center gap-2">
               <span>Generate My Report</span>
@@ -506,7 +608,7 @@ export default function Home() {
                 <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
                 <span className="font-semibold text-lg tracking-tight text-slate-800">Retro<span className="text-emerald-600">Grade</span></span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">AI-powered competitive intelligence for restaurants. Know your market, outperform your competitors, and grow your business.</p>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">Data-driven competitive intelligence for restaurants. Competition analysed for historic 2 years data to help you outperform every competitor.</p>
             </div>
             <div>
               <p className="text-sm font-semibold mb-4 text-slate-700">Product</p>
@@ -526,8 +628,8 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-400">&copy; 2026 RetroGrade AI. All rights reserved.</p>
-            <p className="text-xs text-slate-300">Powered by GPT-4 &bull; Google Maps API &bull; Built with Next.js</p>
+            <p className="text-xs text-slate-400">&copy; 2026 RetroGrade. All rights reserved.</p>
+            <p className="text-xs text-slate-300">Powered by 2 Years Historic Data &bull; Google Maps API &bull; Built with Next.js</p>
           </div>
         </div>
       </footer>

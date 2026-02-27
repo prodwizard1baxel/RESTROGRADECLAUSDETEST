@@ -2,6 +2,8 @@
 
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import OpenAI from "openai"
 
 type Restaurant = {
@@ -375,7 +377,7 @@ async function fetchWebsiteSEO(websiteUrl: string | null, restaurantName: string
 // ==============================
 // Vercel function config - extend timeout for external API calls
 // ==============================
-export const maxDuration = 60
+export const maxDuration = 120
 
 // ==============================
 // MAIN API
@@ -388,6 +390,37 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Missing name or city" },
         { status: 400 }
+      )
+    }
+
+    // ==============================
+    // Check subscription credits
+    // ==============================
+    const session = await getServerSession(authOptions)
+    let subscriptionId: string | null = null
+    let userId: string | null = null
+
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+      })
+
+      if (user) {
+        userId = user.id
+        const activeSub = user.subscriptions.find(s => s.reportsUsed < s.totalReports)
+        if (!activeSub) {
+          return NextResponse.json(
+            { error: "No report credits remaining. Please purchase a plan to generate reports." },
+            { status: 403 }
+          )
+        }
+        subscriptionId = activeSub.id
+      }
+    } else {
+      return NextResponse.json(
+        { error: "Please sign in and purchase a plan to generate reports." },
+        { status: 401 }
       )
     }
 
@@ -848,24 +881,26 @@ OTHER RULES:
     })
 
     // ==============================
-    // Swiggy & Zomato delivery platform benchmark via GPT
+    // Swiggy & Zomato benchmark + SEO fetch (run in parallel to save time)
     // ==============================
     const sameCuisineTop10 = [...mapped]
       .filter(r => r.foodCuisine.toLowerCase() === baseRestaurantCuisine.toLowerCase() && r.distanceKm <= 5)
       .sort((a, b) => b.totalRatings - a.totalRatings)
       .slice(0, 10)
 
-    const deliveryAI = await getOpenAI().chat.completions.create({
-      model: "gpt-4o-mini",
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume.",
-        },
-        {
-          role: "user",
-          content: `
+    const [deliveryResult, seoChecks] = await Promise.all([
+      // Delivery benchmark GPT call
+      getOpenAI().chat.completions.create({
+        model: "gpt-4o-mini",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume.",
+          },
+          {
+            role: "user",
+            content: `
 Provide Swiggy & Zomato delivery platform benchmark estimates for these restaurants.
 
 Base restaurant: ${name} (${baseRestaurantCuisine}, ${city})
@@ -899,12 +934,16 @@ RULES:
 - itemsAbove4Rating: usually 30-50% of totalItems for good restaurants
 - images: use the Google photo count as a base, add 5-20 more for delivery platform photos
 `
-        },
-      ],
-      temperature: 0.6,
-    })
+          },
+        ],
+        temperature: 0.6,
+      }).catch(() => null),
 
-    const deliveryParsed = JSON.parse(deliveryAI.choices[0].message.content!)
+      // SEO fetch (runs in parallel)
+      fetchWebsiteSEO(baseDetails?.website || null, name, city),
+    ])
+
+    const deliveryParsed = deliveryResult ? JSON.parse(deliveryResult.choices[0].message.content!) : { deliveryBenchmarks: [] }
     const deliveryBenchmarks = (deliveryParsed.deliveryBenchmarks || []).map((b: any) => {
       if (b.isBase) {
         return { ...b, address: baseDetails?.location ? `${city}` : city }
@@ -912,11 +951,6 @@ RULES:
       const match = sameCuisineTop10.find(r => r.name === b.name)
       return { ...b, address: match?.address || city }
     })
-
-    // ==============================
-    // Fetch website SEO data
-    // ==============================
-    const seoChecks = await fetchWebsiteSEO(baseDetails?.website || null, name, city)
 
     const finalData = {
       restaurantName: name,
@@ -962,9 +996,25 @@ RULES:
     const savedReport = await prisma.report.create({
       data: {
         restaurantId: restaurant.id,
+        userId: userId || undefined,
         data: JSON.parse(JSON.stringify(finalData)),
       },
     })
+
+    // Deduct one report credit from the active subscription
+    if (subscriptionId) {
+      const sub = await prisma.subscription.update({
+        where: { id: subscriptionId },
+        data: { reportsUsed: { increment: 1 } },
+      })
+      // Mark exhausted if all credits used
+      if (sub.reportsUsed >= sub.totalReports) {
+        await prisma.subscription.update({
+          where: { id: subscriptionId },
+          data: { status: "exhausted" },
+        })
+      }
+    }
 
     return NextResponse.json({
       reportId: savedReport.id,
