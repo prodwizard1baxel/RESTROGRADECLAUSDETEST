@@ -2,6 +2,8 @@
 
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import OpenAI from "openai"
 
 type Restaurant = {
@@ -388,6 +390,37 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Missing name or city" },
         { status: 400 }
+      )
+    }
+
+    // ==============================
+    // Check subscription credits
+    // ==============================
+    const session = await getServerSession(authOptions)
+    let subscriptionId: string | null = null
+    let userId: string | null = null
+
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+      })
+
+      if (user) {
+        userId = user.id
+        const activeSub = user.subscriptions.find(s => s.reportsUsed < s.totalReports)
+        if (!activeSub) {
+          return NextResponse.json(
+            { error: "No report credits remaining. Please purchase a plan to generate reports." },
+            { status: 403 }
+          )
+        }
+        subscriptionId = activeSub.id
+      }
+    } else {
+      return NextResponse.json(
+        { error: "Please sign in and purchase a plan to generate reports." },
+        { status: 401 }
       )
     }
 
@@ -963,9 +996,25 @@ RULES:
     const savedReport = await prisma.report.create({
       data: {
         restaurantId: restaurant.id,
+        userId: userId || undefined,
         data: JSON.parse(JSON.stringify(finalData)),
       },
     })
+
+    // Deduct one report credit from the active subscription
+    if (subscriptionId) {
+      const sub = await prisma.subscription.update({
+        where: { id: subscriptionId },
+        data: { reportsUsed: { increment: 1 } },
+      })
+      // Mark exhausted if all credits used
+      if (sub.reportsUsed >= sub.totalReports) {
+        await prisma.subscription.update({
+          where: { id: subscriptionId },
+          data: { status: "exhausted" },
+        })
+      }
+    }
 
     return NextResponse.json({
       reportId: savedReport.id,

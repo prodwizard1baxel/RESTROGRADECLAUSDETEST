@@ -221,11 +221,11 @@ export default function Analyze() {
             <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
               R
             </div>
-            <span className="text-sm text-emerald-600 font-medium tracking-wide">RetroGrade AI</span>
+            <span className="text-sm text-emerald-600 font-medium tracking-wide">RetroGrade</span>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mt-4 mb-2">
-            Generate AI Report
+            Generate Report
           </h1>
           <p className="text-slate-500 text-sm mb-8">
             Select your city first, then pick your restaurant from the list.
@@ -383,7 +383,7 @@ export default function Analyze() {
           </button>
 
           <p className="text-center text-xs text-slate-400 mt-5">
-            No sign-up required &bull; Free &bull; Results in under 2 minutes
+            Based on 2 years of data &bull; Results in under 2 minutes
           </p>
         </div>
       </div>

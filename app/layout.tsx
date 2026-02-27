@@ -3,9 +3,9 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "RetroGrade AI — Competitive Intelligence for Restaurants",
+  title: "RetroGrade — Competitive Intelligence for Restaurants",
   description:
-    "AI-powered competitive analysis for restaurants. Analyze reviews, beat competitors, and increase your ratings with actionable intelligence reports.",
+    "Competition analysed for historic 2 years data. Analyze reviews, beat competitors, and increase your ratings with data-driven intelligence reports.",
 };
 
 export default function RootLayout({

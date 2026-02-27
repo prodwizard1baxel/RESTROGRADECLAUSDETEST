@@ -310,7 +310,7 @@ export default function DashboardClient({ data }: any) {
               <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
                 R
               </div>
-              <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RetroGrade AI</span>
+              <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RetroGrade</span>
             </div>
           </Reveal>
 
