@@ -394,34 +394,23 @@ export async function POST(req: Request) {
     }
 
     // ==============================
-    // Check subscription credits
+    // Auth disabled for testing — allow all users
     // ==============================
-    const session = await getServerSession(authOptions)
     let subscriptionId: string | null = null
     let userId: string | null = null
 
-    if (session?.user?.email) {
-      const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
-      })
-
-      if (user) {
-        userId = user.id
-        const activeSub = user.subscriptions.find(s => s.reportsUsed < s.totalReports)
-        if (!activeSub) {
-          return NextResponse.json(
-            { error: "No report credits remaining. Please purchase a plan to generate reports." },
-            { status: 403 }
-          )
+    try {
+      const session = await getServerSession(authOptions)
+      if (session?.user?.email) {
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email },
+        })
+        if (user) {
+          userId = user.id
         }
-        subscriptionId = activeSub.id
       }
-    } else {
-      return NextResponse.json(
-        { error: "Please sign in and purchase a plan to generate reports." },
-        { status: 401 }
-      )
+    } catch {
+      // Auth not configured — continue without user tracking
     }
 
     // Get real details for the base restaurant via Places API
@@ -1001,20 +990,7 @@ RULES:
       },
     })
 
-    // Deduct one report credit from the active subscription
-    if (subscriptionId) {
-      const sub = await prisma.subscription.update({
-        where: { id: subscriptionId },
-        data: { reportsUsed: { increment: 1 } },
-      })
-      // Mark exhausted if all credits used
-      if (sub.reportsUsed >= sub.totalReports) {
-        await prisma.subscription.update({
-          where: { id: subscriptionId },
-          data: { status: "exhausted" },
-        })
-      }
-    }
+    // Subscription credit deduction disabled for testing
 
     return NextResponse.json({
       reportId: savedReport.id,

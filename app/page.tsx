@@ -162,12 +162,6 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <a
-              href="/login"
-              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
-            >
-              Sign In
-            </a>
-            <a
               href="/demo"
               className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
             >
@@ -213,10 +207,10 @@ export default function Home() {
               </a>
             ))}
             <a
-              href="/login"
+              href="/analyze"
               className="text-emerald-600 hover:text-emerald-800 transition-colors text-sm font-semibold py-1 border-t border-slate-100 pt-3 mt-1"
             >
-              Sign In
+              Get Report
             </a>
           </div>
         </div>
@@ -387,8 +381,110 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Pricing ──────────────────────────────────────────────────── */}
+      <section id="pricing" className="py-20 md:py-32 bg-slate-50 relative">
+        <div className="max-w-5xl mx-auto px-6">
+          <Reveal className="text-center mb-16">
+            <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Simple Pricing</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Choose Your <span className="gradient-text">Plan</span>
+            </h2>
+            <p className="text-slate-500 mt-5 max-w-xl mx-auto leading-relaxed">
+              Every report is built from 2 years of real competition data. Pick the plan that fits your needs.
+            </p>
+          </Reveal>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            {/* Starter Plan */}
+            <Reveal delay={0}>
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100 transition-all duration-300 h-full flex flex-col">
+                <div className="mb-6">
+                  <p className="text-xs uppercase tracking-[0.15em] text-slate-400 font-semibold mb-2">Starter</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-slate-900">&#8377;499</span>
+                    <span className="text-slate-400 text-sm">/one-time</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-grow">
+                  {[
+                    "1 detailed competitive report",
+                    "2 years of historic data analysis",
+                    "Top 10 competitor benchmarking",
+                    "Google profile audit",
+                    "SEO keyword strategy",
+                    "Swiggy & Zomato benchmarks",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                      <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href="/analyze"
+                  className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block"
+                >
+                  Get Started
+                </a>
+              </div>
+            </Reveal>
+
+            {/* Growth Plan */}
+            <Reveal delay={150}>
+              <div className="bg-white rounded-2xl border-2 border-emerald-500 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-100 transition-all duration-300 h-full flex flex-col relative">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <span className="bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg shadow-emerald-200">
+                    Best Value
+                  </span>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-xs uppercase tracking-[0.15em] text-emerald-600 font-semibold mb-2">Growth Pack</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-slate-900">&#8377;1,499</span>
+                    <span className="text-slate-400 text-sm">/6 reports</span>
+                  </div>
+                  <p className="text-xs text-emerald-600 font-medium mt-1.5">&#8377;250 per report — Save 50%</p>
+                </div>
+
+                <ul className="space-y-3 mb-8 flex-grow">
+                  {[
+                    "6 detailed competitive reports",
+                    "2 years of historic data analysis",
+                    "Top 10 competitor benchmarking",
+                    "Google profile audit",
+                    "SEO keyword strategy",
+                    "Swiggy & Zomato benchmarks",
+                    "Track multiple restaurants or cities",
+                    "Monitor competition over time",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                      <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href="/analyze"
+                  className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block"
+                >
+                  Get Growth Pack
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* ── Report Preview ──────────────────────────────────────────── */}
-      <section id="preview" className="py-20 md:py-32 bg-slate-50 relative">
+      <section id="preview" className="py-20 md:py-32 bg-white relative">
         <div className="max-w-6xl mx-auto px-6">
           <Reveal className="text-center mb-16">
             <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Sample Output</p>
@@ -439,7 +535,7 @@ export default function Home() {
       </section>
 
       {/* ── Testimonials ─────────────────────────────────────────────── */}
-      <section id="testimonials" className="py-20 md:py-32 bg-white relative">
+      <section id="testimonials" className="py-20 md:py-32 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <Reveal className="text-center mb-16">
             <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Trusted by Restaurateurs</p>
@@ -453,7 +549,7 @@ export default function Home() {
               { quote: "The Google profile audit was eye-opening. We fixed 4 things and saw our profile views jump 40% in a month.", name: "Meera K.", role: "Manager, The Coastal Kitchen", city: "Bandra, Mumbai" },
             ].map((t, i) => (
               <Reveal key={i} delay={i * 150}>
-                <div className="bg-slate-50 rounded-2xl border border-slate-200 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100 h-full flex flex-col transition-all duration-300">
+                <div className="bg-white rounded-2xl border border-slate-200 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100 h-full flex flex-col transition-all duration-300">
                   <div className="flex gap-1 mb-5">
                     {[...Array(5)].map((_, j) => (
                       <svg key={j} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
@@ -470,108 +566,6 @@ export default function Home() {
                 </div>
               </Reveal>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pricing ──────────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 md:py-32 bg-slate-50 relative">
-        <div className="max-w-5xl mx-auto px-6">
-          <Reveal className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Simple Pricing</p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
-              Choose Your <span className="gradient-text">Plan</span>
-            </h2>
-            <p className="text-slate-500 mt-5 max-w-xl mx-auto leading-relaxed">
-              Every report is built from 2 years of real competition data. Pick the plan that fits your needs.
-            </p>
-          </Reveal>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            {/* Starter Plan */}
-            <Reveal delay={0}>
-              <div className="bg-white rounded-2xl border border-slate-200 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100 transition-all duration-300 h-full flex flex-col">
-                <div className="mb-6">
-                  <p className="text-xs uppercase tracking-[0.15em] text-slate-400 font-semibold mb-2">Starter</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">&#8377;499</span>
-                    <span className="text-slate-400 text-sm">/one-time</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {[
-                    "1 detailed competitive report",
-                    "2 years of historic data analysis",
-                    "Top 10 competitor benchmarking",
-                    "Google profile audit",
-                    "SEO keyword strategy",
-                    "Swiggy & Zomato benchmarks",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href="/login?callbackUrl=/analyze"
-                  className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block"
-                >
-                  Get Started
-                </a>
-              </div>
-            </Reveal>
-
-            {/* Growth Plan */}
-            <Reveal delay={150}>
-              <div className="bg-white rounded-2xl border-2 border-emerald-500 p-8 group hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-100 transition-all duration-300 h-full flex flex-col relative">
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg shadow-emerald-200">
-                    Best Value
-                  </span>
-                </div>
-
-                <div className="mb-6">
-                  <p className="text-xs uppercase tracking-[0.15em] text-emerald-600 font-semibold mb-2">Growth Pack</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">&#8377;1,499</span>
-                    <span className="text-slate-400 text-sm">/6 reports</span>
-                  </div>
-                  <p className="text-xs text-emerald-600 font-medium mt-1.5">&#8377;250 per report — Save 50%</p>
-                </div>
-
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {[
-                    "6 detailed competitive reports",
-                    "2 years of historic data analysis",
-                    "Top 10 competitor benchmarking",
-                    "Google profile audit",
-                    "SEO keyword strategy",
-                    "Swiggy & Zomato benchmarks",
-                    "Track multiple restaurants or cities",
-                    "Monitor competition over time",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <svg className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href="/login?callbackUrl=/analyze"
-                  className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block"
-                >
-                  Get Growth Pack
-                </a>
-              </div>
-            </Reveal>
           </div>
         </div>
       </section>
