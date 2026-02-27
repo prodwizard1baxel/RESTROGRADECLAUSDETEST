@@ -2,8 +2,6 @@
 
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import OpenAI from "openai"
 
 type Restaurant = {
@@ -393,25 +391,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // ==============================
     // Auth disabled for testing — allow all users
-    // ==============================
-    let subscriptionId: string | null = null
-    let userId: string | null = null
-
-    try {
-      const session = await getServerSession(authOptions)
-      if (session?.user?.email) {
-        const user = await prisma.user.findUnique({
-          where: { email: session.user.email },
-        })
-        if (user) {
-          userId = user.id
-        }
-      }
-    } catch {
-      // Auth not configured — continue without user tracking
-    }
+    const userId: string | null = null
 
     // Get real details for the base restaurant via Places API
     const baseDetails = await getBaseRestaurantDetails(name, city)
