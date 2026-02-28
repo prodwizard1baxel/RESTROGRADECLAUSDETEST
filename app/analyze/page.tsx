@@ -58,7 +58,10 @@ export default function Analyze() {
   const [nameQuery, setNameQuery] = useState("")
   const placeRef = useRef<HTMLDivElement>(null)
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
+  const geocoder = useRef<google.maps.Geocoder | null>(null)
   const [mapsLoaded, setMapsLoaded] = useState(false)
+  const [cityBounds, setCityBounds] = useState<google.maps.LatLngBounds | null>(null)
+  const [cityCenter, setCityCenter] = useState<{ lat: number; lng: number } | null>(null)
 
   /* ─── Load Google Maps Places library ──────────────────────────── */
   useEffect(() => {
@@ -75,14 +78,42 @@ export default function Analyze() {
       script.defer = true
       script.onload = () => {
         autocompleteService.current = new google.maps.places.AutocompleteService()
+        geocoder.current = new google.maps.Geocoder()
         setMapsLoaded(true)
       }
       document.head.appendChild(script)
     } else if (window.google?.maps?.places) {
       autocompleteService.current = new google.maps.places.AutocompleteService()
+      geocoder.current = new google.maps.Geocoder()
       setMapsLoaded(true)
     }
   }, [])
+
+  /* ─── Geocode selected city to get bounds for location bias ────── */
+  useEffect(() => {
+    if (!geocoder.current || !city || !mapsLoaded) {
+      setCityBounds(null)
+      setCityCenter(null)
+      return
+    }
+    const validCity = INDIAN_CITIES.find(c => c.toLowerCase() === city.toLowerCase())
+    if (!validCity) {
+      setCityBounds(null)
+      setCityCenter(null)
+      return
+    }
+    geocoder.current.geocode(
+      { address: `${validCity}, India`, componentRestrictions: { country: "IN" } },
+      (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+          const bounds = results[0].geometry.viewport || results[0].geometry.bounds
+          setCityBounds(bounds || null)
+          const loc = results[0].geometry.location
+          setCityCenter({ lat: loc.lat(), lng: loc.lng() })
+        }
+      }
+    )
+  }, [city, mapsLoaded])
 
   /* ─── Restaurant name autocomplete via Google Places ───────────── */
   const searchPlaces = useCallback((input: string) => {
@@ -92,12 +123,21 @@ export default function Analyze() {
     }
 
     const request: google.maps.places.AutocompletionRequest = {
-      input,
+      input: `${input} restaurant`,
       types: ["establishment"],
       componentRestrictions: { country: "in" },
     }
 
-    if (city) {
+    // Use city bounds for location bias to strongly prefer results in that city
+    if (cityBounds) {
+      request.locationBias = cityBounds
+    } else if (cityCenter) {
+      request.locationBias = new google.maps.Circle({
+        center: cityCenter,
+        radius: 30000, // 30km radius
+      })
+    } else if (city) {
+      // Fallback: append city name to query
       request.input = `${input} ${city}`
     }
 
@@ -105,14 +145,21 @@ export default function Analyze() {
       request,
       (predictions, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-          setPlaceSuggestions(predictions)
+          // Filter predictions to prefer those that contain the city name
+          const cityLower = city.toLowerCase()
+          const filtered = predictions.filter((p) => {
+            const secondary = (p.structured_formatting.secondary_text || "").toLowerCase()
+            return secondary.includes(cityLower)
+          })
+          // Show filtered results if available, otherwise show all (fallback)
+          setPlaceSuggestions(filtered.length > 0 ? filtered : predictions)
           setShowPlaceDropdown(true)
         } else {
           setPlaceSuggestions([])
         }
       }
     )
-  }, [city])
+  }, [city, cityBounds, cityCenter])
 
   useEffect(() => {
     const timer = setTimeout(() => {
