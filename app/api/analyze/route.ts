@@ -2,8 +2,6 @@
 
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import OpenAI from "openai"
 
 type Restaurant = {
@@ -204,7 +202,7 @@ async function getBaseRestaurantDetails(name: string, city: string) {
 
   // Step 2: Get detailed info
   const detailRes = await fetch(
-    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,user_ratings_total,website,url,formatted_phone_number,opening_hours,photos,reviews,editorial_summary,business_status&key=${getGoogleKey()}`
+    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,user_ratings_total,website,url,formatted_phone_number,opening_hours,photos,reviews,editorial_summary,business_status,formatted_address,address_components&key=${getGoogleKey()}`
   )
   const detailData = await detailRes.json()
 
@@ -231,6 +229,15 @@ async function getBaseRestaurantDetails(name: string, city: string) {
   }
 
   const d = detailData.result
+
+  // Extract zone/locality/area from address_components
+  const addressComponents: { long_name: string; short_name: string; types: string[] }[] = d.address_components || []
+  const zone =
+    addressComponents.find((c: any) => c.types.includes("sublocality_level_1"))?.long_name ||
+    addressComponents.find((c: any) => c.types.includes("sublocality"))?.long_name ||
+    addressComponents.find((c: any) => c.types.includes("neighborhood"))?.long_name ||
+    addressComponents.find((c: any) => c.types.includes("locality"))?.long_name ||
+    null
 
   // Check if owner responds to reviews (look at recent reviews for owner replies)
   const recentReviews = (d.reviews || []).slice(0, 5)
@@ -263,6 +270,8 @@ async function getBaseRestaurantDetails(name: string, city: string) {
     editorialSummary: d.editorial_summary?.overview || null,
     location: findData.candidates[0].geometry?.location,
     googleUrl: d.url || null,
+    zone,
+    formattedAddress: d.formatted_address || null,
   }
 }
 
@@ -393,25 +402,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // ==============================
     // Auth disabled for testing — allow all users
-    // ==============================
-    let subscriptionId: string | null = null
-    let userId: string | null = null
-
-    try {
-      const session = await getServerSession(authOptions)
-      if (session?.user?.email) {
-        const user = await prisma.user.findUnique({
-          where: { email: session.user.email },
-        })
-        if (user) {
-          userId = user.id
-        }
-      }
-    } catch {
-      // Auth not configured — continue without user tracking
-    }
+    const userId: string | null = null
 
     // Get real details for the base restaurant via Places API
     const baseDetails = await getBaseRestaurantDetails(name, city)
@@ -944,6 +936,8 @@ RULES:
     const finalData = {
       restaurantName: name,
       restaurantCity: city,
+      restaurantZone: baseDetails?.zone || null,
+      restaurantAddress: baseDetails?.formattedAddress || null,
       generatedAt: new Date().toISOString(),
       executiveSummary: aiParsed.executiveSummary,
       googleProfileChecks,
