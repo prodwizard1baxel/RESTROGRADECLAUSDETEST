@@ -309,14 +309,48 @@ export default function DashboardClient({ data }: any) {
     if (!reportRef.current || pdfLoading) return
     setPdfLoading(true)
     try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 1.5,
+      // Force all Reveal-animated elements to be visible for capture
+      const container = reportRef.current
+      const animatedEls = container.querySelectorAll<HTMLElement>("[style*='opacity']")
+      const savedStyles: { el: HTMLElement; opacity: string; transform: string; transition: string }[] = []
+      animatedEls.forEach((el) => {
+        savedStyles.push({
+          el,
+          opacity: el.style.opacity,
+          transform: el.style.transform,
+          transition: el.style.transition,
+        })
+        el.style.opacity = "1"
+        el.style.transform = "translateY(0) scale(1)"
+        el.style.transition = "none"
+      })
+
+      // Hide the floating action bar during capture
+      const floatingBar = document.querySelector<HTMLElement>(".fixed.bottom-6")
+      if (floatingBar) floatingBar.style.display = "none"
+
+      // Small delay to let style changes apply
+      await new Promise((r) => setTimeout(r, 100))
+
+      const canvas = await html2canvas(container, {
+        scale: 1,
         useCORS: true,
         logging: false,
         backgroundColor: "#f8fafc",
-        windowWidth: 1200,
+        scrollY: -window.scrollY,
+        windowWidth: container.scrollWidth,
+        windowHeight: container.scrollHeight,
       })
-      const imgData = canvas.toDataURL("image/jpeg", 0.85)
+
+      // Restore original styles
+      savedStyles.forEach(({ el, opacity, transform, transition }) => {
+        el.style.opacity = opacity
+        el.style.transform = transform
+        el.style.transition = transition
+      })
+      if (floatingBar) floatingBar.style.display = ""
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.8)
       const imgWidth = 210 // A4 width in mm
       const pageHeight = 297 // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width
