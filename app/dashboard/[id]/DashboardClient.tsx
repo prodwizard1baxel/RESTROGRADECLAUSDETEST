@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import ThreatRadar from "./ThreatRadar"
-import html2canvas from "html2canvas"
-import jsPDF from "jspdf"
 
 /* ─── Scroll-reveal hook ────────────────────────────────────────────── */
 function useReveal(threshold = 0.15) {
@@ -302,48 +300,9 @@ export default function DashboardClient({ data }: any) {
   const searchRankings: { query: string; topResult: any; baseRanked: boolean; basePosition: number | null; totalResults: number; inMapPack: boolean }[] = data?.searchRankings || []
 
   /* ─── PDF Download & WhatsApp Share ── */
-  const reportRef = useRef<HTMLDivElement>(null)
-  const [pdfLoading, setPdfLoading] = useState(false)
-
-  const handleDownloadPdf = useCallback(async () => {
-    if (!reportRef.current || pdfLoading) return
-    setPdfLoading(true)
-    try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 1.5,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#f8fafc",
-        windowWidth: 1200,
-      })
-      const imgData = canvas.toDataURL("image/jpeg", 0.85)
-      const imgWidth = 210 // A4 width in mm
-      const pageHeight = 297 // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-      const pdf = new jsPDF("p", "mm", "a4")
-
-      let heightLeft = imgHeight
-      let position = 0
-
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-      }
-
-      const fileName = `${restaurantName.replace(/[^a-zA-Z0-9]/g, "_")}_RetroGrade_Report.pdf`
-      pdf.save(fileName)
-    } catch (err) {
-      console.error("PDF generation failed:", err)
-      alert("Failed to generate PDF. Please try again.")
-    } finally {
-      setPdfLoading(false)
-    }
-  }, [pdfLoading, restaurantName])
+  const handleDownloadPdf = useCallback(() => {
+    window.print()
+  }, [])
 
   const handleShareWhatsApp = useCallback(() => {
     const reportUrl = typeof window !== "undefined" ? window.location.href : ""
@@ -366,7 +325,7 @@ export default function DashboardClient({ data }: any) {
   const deliveryBenchmarks: { name: string; isBase: boolean; address?: string; images: number; zomatoRating: number; swiggyRating: number; topDishes: string[]; totalItems: number; itemsAbove4Rating: number }[] = data?.deliveryBenchmarks || []
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800" ref={reportRef}>
+    <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* ═══════ HEADER ═══════ */}
       <div className="bg-white border-b border-slate-200 px-6 md:px-10 py-8 md:py-12">
         <div className="max-w-6xl mx-auto">
@@ -1288,25 +1247,12 @@ export default function DashboardClient({ data }: any) {
         <div className="flex items-center gap-3 bg-white/95 backdrop-blur-lg border border-slate-200 rounded-2xl px-5 py-3 shadow-xl shadow-slate-200/50">
           <button
             onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-            className="inline-flex items-center gap-2.5 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2.5 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 active:scale-[0.97] transition-all duration-200"
           >
-            {pdfLoading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Generating...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-                Download PDF
-              </>
-            )}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Download PDF
           </button>
 
           <div className="w-px h-8 bg-slate-200" />
