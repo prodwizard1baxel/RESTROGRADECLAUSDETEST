@@ -120,24 +120,28 @@ function MetricCard({
 /* ─── Keyword Tag ───────────────────────────────────────────────────── */
 function KeywordTag({
   keyword,
-  color,
+  variant = "default",
   index,
 }: {
   keyword: string
-  color: "blue" | "green" | "red"
+  variant?: "primary" | "positive" | "negative" | "longtail" | "trending" | "competitor" | "default"
   index: number
 }) {
-  const colors = {
-    blue: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
-    green: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
-    red: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
+  const styles: Record<string, string> = {
+    primary: "bg-slate-900 text-white border-slate-700 shadow-sm",
+    positive: "bg-emerald-600 text-white border-emerald-500 shadow-sm",
+    negative: "bg-red-500 text-white border-red-400 shadow-sm",
+    longtail: "bg-blue-50 border-blue-200 text-blue-700",
+    trending: "bg-amber-50 border-amber-200 text-amber-700",
+    competitor: "bg-violet-50 border-violet-200 text-violet-700",
+    default: "bg-emerald-50 border-emerald-200 text-emerald-700",
   }
 
   return (
     <span
-      className={`${colors[color]} border px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 cursor-default`}
+      className={`${styles[variant]} border px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 cursor-default hover:scale-[1.03]`}
       style={{
-        animation: `fade-in-up 0.5s cubic-bezier(0.16,1,0.3,1) ${index * 50}ms both`,
+        animation: `fade-in-up 0.5s cubic-bezier(0.16,1,0.3,1) ${index * 40}ms both`,
       }}
     >
       {keyword}
@@ -682,21 +686,22 @@ export default function DashboardClient({ data }: any) {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-1">
+              <div className="mt-6 space-y-1 max-h-[500px] overflow-y-auto pr-1">
                 {topRanked.map((r, i) => (
                   <div
                     key={i}
                     className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                       r.isBase
-                        ? "bg-emerald-50 border-2 border-emerald-300 shadow-sm"
+                        ? "bg-emerald-50 border-2 border-emerald-300 shadow-sm sticky top-0 z-10"
                         : "bg-slate-50 border border-transparent hover:border-slate-200"
                     }`}
-                    style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 50}ms both` }}
+                    style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) ${Math.min(i, 15) * 50}ms both` }}
                   >
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
                       r.rank === 1 ? "bg-amber-100 text-amber-700 border border-amber-200" :
                       r.rank === 2 ? "bg-slate-200 text-slate-600 border border-slate-300" :
                       r.rank === 3 ? "bg-orange-100 text-orange-700 border border-orange-200" :
+                      r.isBase ? "bg-emerald-200 text-emerald-800 border border-emerald-300" :
                       "bg-slate-100 text-slate-500 border border-slate-200"
                     }`}>
                       {r.rank}
@@ -1115,47 +1120,135 @@ export default function DashboardClient({ data }: any) {
           </Reveal>
         )}
 
-        {/* ═══════ KEYWORD CLUSTER ═══════ */}
+        {/* ═══════ KEYWORD STRATEGY ═══════ */}
         <Reveal>
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-                </svg>
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 md:p-8 shadow-2xl shadow-slate-900/20">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <svg className="w-5.5 h-5.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Keyword Strategy</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">SEO & discovery intelligence for your brand</p>
+                </div>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-slate-900">Your Keyword Strategy</h2>
+              <span className="hidden md:inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                AI-Powered
+              </span>
             </div>
 
             {isStructuredKeywords ? (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Your Brand Keywords</h3>
-                  <p className="text-xs text-slate-500 mb-3">Keywords that define your restaurant identity</p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {(keywords.primary || []).map((kw: string, i: number) => (
-                      <KeywordTag key={i} keyword={kw} color="blue" index={i} />
-                    ))}
+                {/* Row 1: Brand + Positive side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Brand Keywords */}
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                      </svg>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Brand Keywords</h3>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mb-4">Core terms that define your restaurant identity on search</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(keywords.primary || []).map((kw: string, i: number) => (
+                        <KeywordTag key={i} keyword={kw} variant="primary" index={i} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Positive Keywords */}
+                  <div className="bg-emerald-500/10 rounded-xl border border-emerald-500/20 p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 10.203 4.167 9.75 5 9.75h1.053c.472 0 .745.556.5.96a8.958 8.958 0 00-1.302 4.665c0 1.194.232 2.333.654 3.375z" />
+                      </svg>
+                      <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider">Positive Signals</h3>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mb-4">What customers love — use these in your marketing</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(keywords.positive || []).map((kw: string, i: number) => (
+                        <KeywordTag key={i} keyword={kw} variant="positive" index={i} />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Positive Keywords</h3>
-                  <p className="text-xs text-slate-500 mb-3">Keywords customers associate with great experiences</p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {(keywords.positive || []).map((kw: string, i: number) => (
-                      <KeywordTag key={i} keyword={kw} color="green" index={i} />
-                    ))}
+                {/* Row 2: Long-tail Keywords */}
+                {(keywords.longTail || []).length > 0 && (
+                  <div className="bg-blue-500/10 rounded-xl border border-blue-500/20 p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                      </svg>
+                      <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider">Long-Tail Search Phrases</h3>
+                      <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-semibold ml-auto">HIGH INTENT</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mb-4">Exact phrases customers type into Google, Zomato & Swiggy — target these for maximum visibility</p>
+                    <div className="flex flex-wrap gap-2">
+                      {keywords.longTail.map((kw: string, i: number) => (
+                        <KeywordTag key={i} keyword={kw} variant="longtail" index={i} />
+                      ))}
+                    </div>
                   </div>
+                )}
+
+                {/* Row 3: Trending + Competitor side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Trending Keywords */}
+                  {(keywords.trending || []).length > 0 && (
+                    <div className="bg-amber-500/10 rounded-xl border border-amber-500/20 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                        </svg>
+                        <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider">Trending Now</h3>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mb-4">Seasonal & trending searches in your area</p>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords.trending.map((kw: string, i: number) => (
+                          <KeywordTag key={i} keyword={kw} variant="trending" index={i} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Competitor Keywords */}
+                  {(keywords.competitor || []).length > 0 && (
+                    <div className="bg-violet-500/10 rounded-xl border border-violet-500/20 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <svg className="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                        </svg>
+                        <h3 className="text-sm font-bold text-violet-400 uppercase tracking-wider">Steal from Competitors</h3>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mb-4">Keywords your competitors rank for — target these to capture their traffic</p>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords.competitor.map((kw: string, i: number) => (
+                          <KeywordTag key={i} keyword={kw} variant="competitor" index={i} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wider mb-3">Negative Keywords to Avoid</h3>
-                  <p className="text-xs text-slate-500 mb-3">Common complaints in your market</p>
-                  <div className="flex flex-wrap gap-2.5">
+                {/* Row 4: Negative Keywords */}
+                <div className="bg-red-500/10 rounded-xl border border-red-500/20 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Negative Keywords to Avoid</h3>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mb-4">Common complaints in your market — address these proactively in your operations</p>
+                  <div className="flex flex-wrap gap-2">
                     {(keywords.negative || []).map((kw: string, i: number) => (
-                      <KeywordTag key={i} keyword={kw} color="red" index={i} />
+                      <KeywordTag key={i} keyword={kw} variant="negative" index={i} />
                     ))}
                   </div>
                 </div>
@@ -1164,7 +1257,7 @@ export default function DashboardClient({ data }: any) {
               <div className="flex flex-wrap gap-3">
                 {(Array.isArray(keywords) ? keywords : []).map(
                   (kw: string, i: number) => (
-                    <KeywordTag key={i} keyword={kw} color="blue" index={i} />
+                    <KeywordTag key={i} keyword={kw} variant="default" index={i} />
                   )
                 )}
               </div>

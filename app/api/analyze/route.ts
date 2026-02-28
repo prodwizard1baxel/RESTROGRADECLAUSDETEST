@@ -540,9 +540,12 @@ Return STRICT JSON with these fields:
   },
   "finalStrategicVerdict": "",
   "yourKeywordCluster": {
-    "primary": ["5-8 primary SEO/brand keywords that define this restaurant"],
-    "positive": ["5-8 positive sentiment keywords - words customers associate with good experiences at this type of restaurant"],
-    "negative": ["5-8 negative sentiment keywords - words customers use when leaving bad reviews for this type of restaurant, things to avoid"]
+    "primary": ["5-8 primary SEO/brand keywords that define this restaurant - terms people search when looking for this type of food"],
+    "positive": ["5-8 positive sentiment keywords - words customers associate with great experiences at this type of restaurant"],
+    "negative": ["5-8 negative sentiment keywords - words customers use when leaving bad reviews for this type of restaurant, things to avoid"],
+    "longTail": ["5-8 long-tail keyword phrases (3-5 words each) that a customer might type into Google/Zomato/Swiggy when searching for this type of restaurant - e.g. 'best butter chicken near me', 'affordable family dinner Hyderabad'"],
+    "trending": ["4-6 trending/seasonal keywords relevant to this restaurant's cuisine and location - e.g. 'weekend brunch spots', 'late night delivery', 'party orders bulk food'"],
+    "competitor": ["4-6 keywords your top competitors rank for that you should also target"]
   },
   "competitorKeywordClusters": [
     {
@@ -579,7 +582,7 @@ CRITICAL RULES for cuisineClassification:
 
 OTHER RULES:
 - Make executiveSummary.keyFindings exactly 4 items, each a specific insight (not generic)
-- Make yourKeywordCluster.primary, .positive, and .negative each have 5-8 keywords
+- Make yourKeywordCluster.primary, .positive, .negative each have 5-8 keywords, .longTail 5-8 phrases, .trending 4-6 keywords, .competitor 4-6 keywords
 - For each competitor in competitorEnhancements, include 2-3 items in whatTheyDoBetter and whereYouWin
 - Be specific to the actual restaurants, not generic advice
 `
@@ -803,7 +806,7 @@ OTHER RULES:
       rank: baseRank,
       total: allWithBase.length,
       competitorsAbove,
-      topRanked: allWithBase.slice(0, Math.min(10, allWithBase.length)).map((r, i) => ({
+      topRanked: allWithBase.slice(0, Math.max(10, baseRank + 2)).map((r, i) => ({
         rank: i + 1,
         name: r.name,
         rating: r.rating,
