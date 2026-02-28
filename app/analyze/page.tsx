@@ -61,7 +61,6 @@ export default function Analyze() {
   const geocoder = useRef<google.maps.Geocoder | null>(null)
   const [mapsLoaded, setMapsLoaded] = useState(false)
   const [cityBounds, setCityBounds] = useState<google.maps.LatLngBounds | null>(null)
-  const [cityCenter, setCityCenter] = useState<{ lat: number; lng: number } | null>(null)
 
   /* ─── Load Google Maps Places library ──────────────────────────── */
   useEffect(() => {
@@ -89,27 +88,37 @@ export default function Analyze() {
     }
   }, [])
 
-  /* ─── Geocode selected city to get bounds for location bias ────── */
+  /* ─── Geocode selected city to get bounds for location restriction ─ */
   useEffect(() => {
     if (!geocoder.current || !city || !mapsLoaded) {
       setCityBounds(null)
-      setCityCenter(null)
       return
     }
     const validCity = INDIAN_CITIES.find(c => c.toLowerCase() === city.toLowerCase())
     if (!validCity) {
       setCityBounds(null)
-      setCityCenter(null)
       return
     }
     geocoder.current.geocode(
       { address: `${validCity}, India`, componentRestrictions: { country: "IN" } },
       (results, status) => {
         if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
-          const bounds = results[0].geometry.viewport || results[0].geometry.bounds
-          setCityBounds(bounds || null)
-          const loc = results[0].geometry.location
-          setCityCenter({ lat: loc.lat(), lng: loc.lng() })
+          // Use viewport which covers the whole city area
+          const viewport = results[0].geometry.viewport
+          if (viewport) {
+            // Expand bounds by ~30% to include outskirts and suburbs
+            const ne = viewport.getNorthEast()
+            const sw = viewport.getSouthWest()
+            const latPad = (ne.lat() - sw.lat()) * 0.3
+            const lngPad = (ne.lng() - sw.lng()) * 0.3
+            const expanded = new google.maps.LatLngBounds(
+              { lat: sw.lat() - latPad, lng: sw.lng() - lngPad },
+              { lat: ne.lat() + latPad, lng: ne.lng() + lngPad }
+            )
+            setCityBounds(expanded)
+          } else {
+            setCityBounds(null)
+          }
         }
       }
     )
@@ -122,44 +131,30 @@ export default function Analyze() {
       return
     }
 
+    // Use locationBias (soft preference) when bounds available, otherwise fall back to city in query
     const request: google.maps.places.AutocompletionRequest = {
-      input: `${input} restaurant`,
+      input: cityBounds ? `${input} ${city}` : `${input} in ${city}`,
       types: ["establishment"],
       componentRestrictions: { country: "in" },
     }
 
-    // Use city bounds for location bias to strongly prefer results in that city
+    // locationBias prefers results within bounds but still shows results from nearby areas
     if (cityBounds) {
       request.locationBias = cityBounds
-    } else if (cityCenter) {
-      request.locationBias = new google.maps.Circle({
-        center: cityCenter,
-        radius: 30000, // 30km radius
-      })
-    } else if (city) {
-      // Fallback: append city name to query
-      request.input = `${input} ${city}`
     }
 
     autocompleteService.current.getPlacePredictions(
       request,
       (predictions, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-          // Filter predictions to prefer those that contain the city name
-          const cityLower = city.toLowerCase()
-          const filtered = predictions.filter((p) => {
-            const secondary = (p.structured_formatting.secondary_text || "").toLowerCase()
-            return secondary.includes(cityLower)
-          })
-          // Show filtered results if available, otherwise show all (fallback)
-          setPlaceSuggestions(filtered.length > 0 ? filtered : predictions)
+          setPlaceSuggestions(predictions)
           setShowPlaceDropdown(true)
         } else {
           setPlaceSuggestions([])
         }
       }
     )
-  }, [city, cityBounds, cityCenter])
+  }, [city, cityBounds])
 
   useEffect(() => {
     const timer = setTimeout(() => {
