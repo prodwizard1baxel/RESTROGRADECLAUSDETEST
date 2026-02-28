@@ -71,7 +71,7 @@ model Subscription {
   plan           String   // "starter" or "growth"
   totalReports   Int      // 1 or 6
   reportsUsed    Int      @default(0)
-  amountPaid     Int      // 499 or 1499 (in INR)
+  amountPaid     Int      // 499 or 1299 (in INR)
   paymentId      String?  // Razorpay payment ID
   status         String   @default("active") // "active" or "exhausted"
   createdAt      DateTime @default(now())

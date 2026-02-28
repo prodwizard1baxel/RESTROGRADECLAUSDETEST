@@ -425,7 +425,9 @@ export default function Home() {
                 </ul>
 
                 <a
-                  href="/analyze"
+                  href="https://rzp.io/rzp/X8AwLjo"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block"
                 >
                   Get Started
@@ -445,10 +447,10 @@ export default function Home() {
                 <div className="mb-6">
                   <p className="text-xs uppercase tracking-[0.15em] text-emerald-600 font-semibold mb-2">Growth Pack</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">&#8377;1,499</span>
+                    <span className="text-4xl font-bold text-slate-900">&#8377;1,299</span>
                     <span className="text-slate-400 text-sm">/6 reports</span>
                   </div>
-                  <p className="text-xs text-emerald-600 font-medium mt-1.5">&#8377;250 per report — Save 50%</p>
+                  <p className="text-xs text-emerald-600 font-medium mt-1.5">&#8377;217 per report — Save 57%</p>
                 </div>
 
                 <ul className="space-y-3 mb-8 flex-grow">
@@ -472,7 +474,9 @@ export default function Home() {
                 </ul>
 
                 <a
-                  href="/analyze"
+                  href="https://rzp.io/rzp/VDH3bSG"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block"
                 >
                   Get Growth Pack
