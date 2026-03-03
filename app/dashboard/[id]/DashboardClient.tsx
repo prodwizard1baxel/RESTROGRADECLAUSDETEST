@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
+import { useSession } from "next-auth/react"
 import ThreatRadar from "./ThreatRadar"
 
 /* ─── Scroll-reveal hook ────────────────────────────────────────────── */
@@ -223,7 +224,45 @@ function CuisineCard({ cuisine: c }: { cuisine: any }) {
   )
 }
 
-export default function DashboardClient({ data }: any) {
+/* ─── Blurred Section Wrapper ───────────────────────────────────────── */
+function BlurredSection({
+  children,
+  locked,
+  onUnlock,
+}: {
+  children: React.ReactNode
+  locked: boolean
+  onUnlock: () => void
+}) {
+  if (!locked) return <>{children}</>
+
+  return (
+    <div className="relative">
+      <div className="blur-[6px] pointer-events-none select-none" aria-hidden="true">
+        {children}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-2xl shadow-slate-200/60 px-8 py-7 max-w-sm mx-4 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Premium Insight</h3>
+          <p className="text-sm text-slate-500 mb-5">Unlock full report with a promo code or subscription</p>
+          <button
+            onClick={onUnlock}
+            className="w-full bg-emerald-600 text-white rounded-xl px-5 py-3 text-sm font-semibold hover:bg-emerald-700 transition-all duration-200"
+          >
+            Unlock Full Report
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function DashboardClient({ data, hasFullAccess: initialAccess = false }: any) {
   const competitors =
     data?.competitorAnalysis?.topCompetitors || []
 
@@ -328,7 +367,117 @@ export default function DashboardClient({ data }: any) {
   /* ─── Delivery Platform Benchmarks ── */
   const deliveryBenchmarks: { name: string; isBase: boolean; address?: string; images: number; zomatoRating: number; swiggyRating: number; topDishes: string[]; totalItems: number; itemsAbove4Rating: number }[] = data?.deliveryBenchmarks || []
 
+  /* ─── Access control ── */
+  const { data: session } = useSession()
+  const [hasFullAccess, setHasFullAccess] = useState(initialAccess)
+  const [showPromoModal, setShowPromoModal] = useState(false)
+  const [promoCode, setPromoCode] = useState("")
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoError, setPromoError] = useState("")
+  const [promoSuccess, setPromoSuccess] = useState("")
+  const isLocked = !hasFullAccess
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoError("")
+    setPromoSuccess("")
+    try {
+      const res = await fetch("/api/promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setPromoSuccess(data.message)
+        setHasFullAccess(true)
+        setTimeout(() => setShowPromoModal(false), 1500)
+      } else {
+        setPromoError(data.error || "Invalid promo code")
+      }
+    } catch {
+      setPromoError("Network error. Please try again.")
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  const handleUnlockClick = () => {
+    if (!session) {
+      window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+    } else {
+      setShowPromoModal(true)
+    }
+  }
+
   return (
+    <>
+    {/* ─── Promo Code Modal ── */}
+    {showPromoModal && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setShowPromoModal(false)}>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-8" onClick={(e) => e.stopPropagation()}>
+          <div className="text-center mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 14.25l3-3m0 0l3 3m-3-3v9M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-1">Unlock Full Report</h2>
+            <p className="text-sm text-slate-500">Enter your promo code to unlock all premium insights</p>
+          </div>
+
+          {promoError && (
+            <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <p className="text-sm text-red-600">{promoError}</p>
+            </div>
+          )}
+
+          {promoSuccess && (
+            <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+              <p className="text-sm text-emerald-700 font-medium">{promoSuccess}</p>
+            </div>
+          )}
+
+          <div className="mb-4">
+            <input
+              type="text"
+              value={promoCode}
+              onChange={(e) => { setPromoCode(e.target.value); setPromoError("") }}
+              placeholder="Enter promo code"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
+              onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+              autoFocus
+            />
+          </div>
+
+          <button
+            onClick={handleApplyPromo}
+            disabled={promoLoading || !promoCode.trim()}
+            className="w-full bg-emerald-600 text-white rounded-xl px-5 py-3.5 text-sm font-semibold hover:bg-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {promoLoading ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Applying...
+              </>
+            ) : (
+              "Apply Promo Code"
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowPromoModal(false)}
+            className="w-full mt-3 text-sm text-slate-500 hover:text-slate-700 transition-colors py-2"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    )}
     <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* ═══════ HEADER ═══════ */}
       <div className="bg-white border-b border-slate-200 px-6 md:px-10 py-8 md:py-12">
@@ -434,6 +583,7 @@ export default function DashboardClient({ data }: any) {
           />
         </div>
 
+        <BlurredSection locked={isLocked} onUnlock={handleUnlockClick}>
         {/* ═══════ EXECUTIVE SUMMARY ═══════ */}
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
@@ -542,6 +692,7 @@ export default function DashboardClient({ data }: any) {
             </div>
           </Reveal>
         )}
+        </BlurredSection>
 
         {/* ═══════ SWIGGY & ZOMATO BENCHMARK ═══════ */}
         {deliveryBenchmarks.length > 0 && (
@@ -733,6 +884,7 @@ export default function DashboardClient({ data }: any) {
           </Reveal>
         )}
 
+        <BlurredSection locked={isLocked} onUnlock={handleUnlockClick}>
         {/* ═══════ COMPETITIVE THREAT MAP ═══════ */}
         <Reveal>
           <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 hover:shadow-lg hover:shadow-slate-100 transition-all duration-300">
@@ -1333,6 +1485,7 @@ export default function DashboardClient({ data }: any) {
             <span>Back to Home</span>
           </a>
         </Reveal>
+        </BlurredSection>
       </div>
 
       {/* ═══════ FLOATING ACTION BAR ═══════ */}
@@ -1362,5 +1515,6 @@ export default function DashboardClient({ data }: any) {
         </div>
       </div>
     </div>
+    </>
   )
 }
