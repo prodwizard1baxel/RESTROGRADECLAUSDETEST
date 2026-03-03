@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import DashboardClient from "./DashboardClient"
 
 const prisma = new PrismaClient()
@@ -30,5 +32,22 @@ export default async function Page({
     data.restaurantCity = report.restaurant.city
   }
 
-  return <DashboardClient data={data} />
+  // Check if user is signed in and has an active subscription
+  let hasFullAccess = false
+  const session = await getServerSession(authOptions)
+
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+    })
+    if (user && user.subscriptions.length > 0) {
+      const activeSub = user.subscriptions.find(s => s.reportsUsed < s.totalReports)
+      if (activeSub) {
+        hasFullAccess = true
+      }
+    }
+  }
+
+  return <DashboardClient data={data} hasFullAccess={hasFullAccess} />
 }

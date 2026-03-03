@@ -131,16 +131,16 @@ export default function Analyze() {
       return
     }
 
-    // Use locationRestriction (strict) when bounds available, otherwise fall back to city in query
+    // Use locationBias (soft preference) when bounds available, otherwise fall back to city in query
     const request: google.maps.places.AutocompletionRequest = {
-      input: cityBounds ? input : `${input} in ${city}`,
+      input: cityBounds ? `${input} ${city}` : `${input} in ${city}`,
       types: ["establishment"],
       componentRestrictions: { country: "in" },
     }
 
-    // locationRestriction strictly confines results within the city bounds
+    // locationBias prefers results within bounds but still shows results from nearby areas
     if (cityBounds) {
-      request.locationRestriction = cityBounds
+      request.locationBias = cityBounds
     }
 
     autocompleteService.current.getPlacePredictions(
