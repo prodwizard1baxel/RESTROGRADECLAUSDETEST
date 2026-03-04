@@ -56,17 +56,33 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account }) {
+      // For credentials (OTP) provider, skip adapter session creation
+      if (account?.provider === "phone-otp") {
+        return true
+      }
+      return true
+    },
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
+        token.phone = (user as any).phone
+      }
+      if (account) {
+        token.provider = account.provider
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id
+        if (token.phone) {
+          (session.user as any).phone = token.phone
+        }
       }
       return session
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 }
