@@ -1,7 +1,5 @@
-// temp change to trigger commit
-
 import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import OpenAI from "openai"
 
 type Restaurant = {
@@ -26,8 +24,6 @@ type Restaurant = {
   whatTheyDoBetter?: string[]
   whereYouWin?: string[]
 }
-
-const prisma = new PrismaClient()
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })

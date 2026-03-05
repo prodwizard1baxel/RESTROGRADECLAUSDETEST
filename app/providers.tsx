@@ -3,9 +3,5 @@
 import { SessionProvider } from "next-auth/react"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  try {
-    return <SessionProvider>{children}</SessionProvider>
-  } catch {
-    return <>{children}</>
-  }
+  return <SessionProvider basePath="/api/auth" refetchOnWindowFocus={false}>{children}</SessionProvider>
 }
