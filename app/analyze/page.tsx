@@ -247,15 +247,26 @@ export default function Analyze() {
 
       {/* Main card */}
       <div className="relative z-10 w-full max-w-lg mx-4">
-        <a
-          href="/"
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors duration-200 text-sm mb-6 group"
-        >
-          <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-          </svg>
-          <span>Back to Home</span>
-        </a>
+        <div className="flex items-center justify-between mb-6">
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors duration-200 text-sm group"
+          >
+            <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+            </svg>
+            <span>Back to Home</span>
+          </a>
+          <a
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-emerald-600 transition-colors duration-200"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+            Sign In
+          </a>
+        </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-10 shadow-xl shadow-slate-200/50">
           {/* Header */}
