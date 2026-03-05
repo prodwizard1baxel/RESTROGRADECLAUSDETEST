@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
+import twilio from "twilio"
 
 const prisma = new PrismaClient()
 
@@ -9,6 +10,11 @@ export async function POST(req: Request) {
 
     if (!phone) {
       return NextResponse.json({ error: "Phone number required" }, { status: 400 })
+    }
+
+    // Validate Indian phone number format
+    if (!/^\+91[6-9]\d{9}$/.test(phone)) {
+      return NextResponse.json({ error: "Invalid Indian mobile number" }, { status: 400 })
     }
 
     // Generate 6-digit OTP
@@ -28,22 +34,23 @@ export async function POST(req: Request) {
     const authToken = process.env.TWILIO_AUTH_TOKEN
     const twilioPhone = process.env.TWILIO_PHONE_NUMBER
 
-    if (!accountSid || !authToken) {
+    if (!accountSid || !authToken || !twilioPhone) {
       // Dev mode: return OTP in response for testing
+      console.log(`[DEV] OTP for ${phone}: ${code}`)
       return NextResponse.json({ success: true, dev: true, otp: code })
     }
 
-    const twilio = require("twilio")(accountSid, authToken)
+    const client = twilio(accountSid, authToken)
 
     if (channel === "whatsapp") {
-      await twilio.messages.create({
-        body: `Your RetroGrade AI verification code is: ${code}`,
+      await client.messages.create({
+        body: `Your RetroGrade verification code is: ${code}. Valid for 5 minutes.`,
         from: `whatsapp:${twilioPhone}`,
         to: `whatsapp:${phone}`,
       })
     } else {
-      await twilio.messages.create({
-        body: `Your RetroGrade AI verification code is: ${code}`,
+      await client.messages.create({
+        body: `Your RetroGrade verification code is: ${code}. Valid for 5 minutes.`,
         from: twilioPhone,
         to: phone,
       })
