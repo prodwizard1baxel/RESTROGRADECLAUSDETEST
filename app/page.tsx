@@ -162,10 +162,10 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <a
-              href="/demo"
+              href="/login"
               className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
             >
-              Try Demo
+              Sign In
             </a>
             <a
               href="/analyze"
@@ -207,8 +207,14 @@ export default function Home() {
               </a>
             ))}
             <a
+              href="/login"
+              className="text-slate-600 hover:text-slate-800 transition-colors text-sm font-medium py-1 border-t border-slate-100 pt-3 mt-1"
+            >
+              Sign In
+            </a>
+            <a
               href="/analyze"
-              className="text-emerald-600 hover:text-emerald-800 transition-colors text-sm font-semibold py-1 border-t border-slate-100 pt-3 mt-1"
+              className="text-emerald-600 hover:text-emerald-800 transition-colors text-sm font-semibold py-1"
             >
               Get Report
             </a>
