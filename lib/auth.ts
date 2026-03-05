@@ -4,15 +4,21 @@ import type { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
-  providers: [
+const providers: any[] = []
+
+// Only register Google if credentials are set
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  providers.push(
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       allowDangerousEmailAccountLinking: true,
-    }),
-    CredentialsProvider({
+    })
+  )
+}
+
+providers.push(
+  CredentialsProvider({
       id: "phone-otp",
       name: "Phone OTP",
       credentials: {
@@ -49,8 +55,12 @@ export const authOptions: NextAuthOptions = {
 
         return { id: user.id, phone: user.phone, name: user.name, email: user.email }
       },
-    }),
-  ],
+    })
+)
+
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   callbacks: {
