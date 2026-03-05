@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { authOptions } from "@/lib/auth"
-
-const prisma = new PrismaClient()
 
 // Valid promo codes — 'restorank' gives 100% discount (full access)
 const PROMO_CODES: Record<string, { discount: number; reports: number }> = {
