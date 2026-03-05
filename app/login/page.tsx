@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn } from "next-auth/react"
+import { signIn, SessionProvider } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { Suspense, useState, useRef, useEffect } from "react"
 
@@ -10,7 +10,7 @@ function LoginForm() {
   const error = searchParams.get("error")
 
   const [loading, setLoading] = useState(false)
-  const [mode, setMode] = useState<"main" | "otp">("main")
+  const [mode, setMode] = useState<"main" | "otp" | "promo">("main")
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [otpSending, setOtpSending] = useState(false)
@@ -19,6 +19,10 @@ function LoginForm() {
   const [otpError, setOtpError] = useState("")
   const [countdown, setCountdown] = useState(0)
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [promoCode, setPromoCode] = useState("")
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoError, setPromoError] = useState("")
+  const [promoSuccess, setPromoSuccess] = useState("")
 
   useEffect(() => {
     if (countdown <= 0) return
@@ -117,6 +121,31 @@ function LoginForm() {
       setOtpError("Verification failed. Please try again.")
     } finally {
       setOtpVerifying(false)
+    }
+  }
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoError("")
+    setPromoSuccess("")
+    try {
+      const res = await fetch("/api/promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setPromoSuccess(data.message)
+        setTimeout(() => { window.location.href = callbackUrl }, 1500)
+      } else {
+        setPromoError(data.error || "Invalid promo code")
+      }
+    } catch {
+      setPromoError("Network error. Please try again.")
+    } finally {
+      setPromoLoading(false)
     }
   }
 
@@ -227,6 +256,27 @@ function LoginForm() {
                   </div>
                 </div>
 
+                {/* Promo Code */}
+                <button
+                  onClick={() => { setMode("promo"); setPromoError(""); setPromoSuccess("") }}
+                  className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-6 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-100 hover:border-amber-300 transition-all duration-300"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                  </svg>
+                  Have a Promo Code?
+                </button>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-4 text-slate-400 uppercase tracking-wider">or</span>
+                  </div>
+                </div>
+
                 {/* Continue without sign-in */}
                 <a
                   href="/analyze"
@@ -238,7 +288,7 @@ function LoginForm() {
                   </svg>
                 </a>
               </>
-            ) : (
+            ) : mode === "otp" ? (
               <>
                 {/* OTP Flow */}
                 {!otpSent ? (
@@ -356,7 +406,77 @@ function LoginForm() {
                   Back to all sign-in options
                 </button>
               </>
-            )}
+            ) : mode === "promo" ? (
+              <>
+                {/* Promo Code Flow */}
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">Enter Promo Code</p>
+                      <p className="text-xs text-slate-400">Unlock full access to all reports</p>
+                    </div>
+                  </div>
+
+                  {promoError && (
+                    <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                      <p className="text-sm text-red-600">{promoError}</p>
+                    </div>
+                  )}
+
+                  {promoSuccess && (
+                    <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                      <p className="text-sm text-emerald-700 font-medium">{promoSuccess}</p>
+                    </div>
+                  )}
+
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => { setPromoCode(e.target.value); setPromoError("") }}
+                    placeholder="Enter promo code"
+                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all mb-4"
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                    autoFocus
+                  />
+
+                  <button
+                    onClick={handleApplyPromo}
+                    disabled={promoLoading || !promoCode.trim()}
+                    className="w-full flex items-center justify-center gap-2 bg-amber-500 text-white rounded-xl px-6 py-3.5 text-sm font-semibold hover:bg-amber-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {promoLoading ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Applying...
+                      </>
+                    ) : (
+                      "Apply Promo Code"
+                    )}
+                  </button>
+
+                  <p className="mt-3 text-[11px] text-slate-400 text-center">You must be signed in first to apply a promo code</p>
+                </div>
+
+                {/* Back button */}
+                <button
+                  onClick={() => { setMode("main"); setPromoError(""); setPromoSuccess(""); setPromoCode("") }}
+                  className="mt-4 w-full flex items-center justify-center gap-2 border border-slate-200 rounded-xl px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                  </svg>
+                  Back to all sign-in options
+                </button>
+              </>
+            ) : null}
 
             {/* Terms */}
             <p className="mt-8 text-center text-[11px] text-slate-400 leading-relaxed">
@@ -379,12 +499,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
+    <SessionProvider>
+      <Suspense fallback={
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }>
+        <LoginForm />
+      </Suspense>
+    </SessionProvider>
   )
 }
