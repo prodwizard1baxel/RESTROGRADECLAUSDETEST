@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn } from "next-auth/react"
+import { signIn, SessionProvider } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { Suspense, useState, useRef, useEffect } from "react"
 
@@ -379,12 +379,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
+    <SessionProvider>
+      <Suspense fallback={
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }>
+        <LoginForm />
+      </Suspense>
+    </SessionProvider>
   )
 }
