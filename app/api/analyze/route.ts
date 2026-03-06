@@ -389,6 +389,15 @@ export const maxDuration = 120
 // ==============================
 export async function POST(req: Request) {
   try {
+    // Validate DATABASE_URL before doing any work
+    const dbUrl = process.env.DATABASE_URL
+    if (!dbUrl || (!dbUrl.startsWith("mongodb://") && !dbUrl.startsWith("mongodb+srv://"))) {
+      return NextResponse.json(
+        { error: "Database not configured. Please set DATABASE_URL in Vercel environment variables with a valid MongoDB connection string (starting with mongodb+srv://). Then redeploy the app." },
+        { status: 503 }
+      )
+    }
+
     const { name, city } = await req.json()
 
     if (!name || !city) {
