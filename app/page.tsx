@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 /* ─── Scroll-reveal hook ────────────────────────────────────────────── */
 function useReveal(threshold = 0.15) {
@@ -107,6 +108,7 @@ function StatCard({
    MAIN PAGE
    ═══════════════════════════════════════════════════════════════════════ */
 export default function Home() {
+  const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -161,12 +163,26 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-            <a
-              href="/login"
-              className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
-            >
-              Sign In
-            </a>
+            {session?.user ? (
+              <div className="hidden sm:flex items-center gap-3">
+                <span className="text-sm text-slate-500 truncate max-w-[150px]">
+                  {session.user.name || session.user.email}
+                </span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-sm text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <a
+                href="/login"
+                className="text-sm text-slate-500 hover:text-slate-800 transition-colors hidden sm:block"
+              >
+                Sign In
+              </a>
+            )}
             <a
               href="/analyze"
               className="cta-primary bg-emerald-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-px"
@@ -206,12 +222,26 @@ export default function Home() {
                 {id.replace(/-/g, " ")}
               </a>
             ))}
-            <a
-              href="/login"
-              className="text-slate-600 hover:text-slate-800 transition-colors text-sm font-medium py-1 border-t border-slate-100 pt-3 mt-1"
-            >
-              Sign In
-            </a>
+            {session?.user ? (
+              <>
+                <span className="text-slate-600 text-sm py-1 border-t border-slate-100 pt-3 mt-1 truncate">
+                  {session.user.name || session.user.email}
+                </span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-red-500 hover:text-red-600 transition-colors text-sm font-medium py-1 text-left"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <a
+                href="/login"
+                className="text-slate-600 hover:text-slate-800 transition-colors text-sm font-medium py-1 border-t border-slate-100 pt-3 mt-1"
+              >
+                Sign In
+              </a>
+            )}
             <a
               href="/analyze"
               className="text-emerald-600 hover:text-emerald-800 transition-colors text-sm font-semibold py-1"

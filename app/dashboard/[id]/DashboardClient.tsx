@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { useSession, SessionProvider } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import ThreatRadar from "./ThreatRadar"
 
 /* ─── Scroll-reveal hook ────────────────────────────────────────────── */
@@ -263,11 +263,7 @@ function BlurredSection({
 }
 
 export default function DashboardClient(props: any) {
-  return (
-    <SessionProvider>
-      <DashboardClientInner {...props} />
-    </SessionProvider>
-  )
+  return <DashboardClientInner {...props} />
 }
 
 function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: any) {

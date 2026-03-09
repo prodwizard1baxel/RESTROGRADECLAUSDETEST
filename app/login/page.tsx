@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn, SessionProvider } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { Suspense, useState, useRef, useEffect } from "react"
 
@@ -480,7 +480,7 @@ function LoginForm() {
                     )}
                   </button>
 
-                  <p className="mt-3 text-[11px] text-slate-400 text-center">You must be signed in first to apply a promo code</p>
+                  <p className="mt-3 text-[11px] text-slate-400 text-center">Sign in with Google or OTP first, then apply your promo code on the next page</p>
                 </div>
 
                 {/* Back button */}
@@ -517,14 +517,12 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <SessionProvider>
-      <Suspense fallback={
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      }>
-        <LoginForm />
-      </Suspense>
-    </SessionProvider>
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
