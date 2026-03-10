@@ -461,7 +461,7 @@ export default function Home() {
                 </ul>
 
                 <a
-                  href="https://rzp.io/rzp/X8AwLjo"
+                  href="https://rzp.io/rzp/rRAPyt7"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block"
@@ -510,7 +510,7 @@ export default function Home() {
                 </ul>
 
                 <a
-                  href="https://rzp.io/rzp/VDH3bSG"
+                  href="https://rzp.io/rzp/1ajNMFc"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block"
