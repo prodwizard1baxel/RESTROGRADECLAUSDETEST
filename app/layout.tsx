@@ -5,8 +5,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "RetroGrade — Competitive Intelligence for Restaurants",
-    template: "%s | RetroGrade",
+    default: "RestoRank — Competitive Intelligence for Restaurants",
+    template: "%s | RestoRank",
   },
   description:
     "Get a detailed competitive intelligence report for your restaurant in minutes. 2 years of historic data, Google Maps insights, competitor analysis, SEO keywords & more.",
@@ -22,18 +22,18 @@ export const metadata: Metadata = {
     "restaurant business intelligence India",
     "restaurant analytics",
   ],
-  authors: [{ name: "RetroGrade" }],
-  creator: "RetroGrade",
-  publisher: "RetroGrade",
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://retrograde.in"),
+  authors: [{ name: "RestoRank" }],
+  creator: "RestoRank",
+  publisher: "RestoRank",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://restorank.in"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "RetroGrade",
-    title: "RetroGrade — Competitive Intelligence for Restaurants",
+    siteName: "RestoRank",
+    title: "RestoRank — Competitive Intelligence for Restaurants",
     description:
       "Get a detailed competitive intelligence report for your restaurant in minutes. Powered by 2 years of real Google Maps data.",
     images: [
@@ -41,13 +41,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "RetroGrade — Restaurant Competitive Intelligence",
+        alt: "RestoRank — Restaurant Competitive Intelligence",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "RetroGrade — Competitive Intelligence for Restaurants",
+    title: "RestoRank — Competitive Intelligence for Restaurants",
     description:
       "Get a detailed competitive intelligence report for your restaurant in minutes.",
     images: ["/og-image.png"],

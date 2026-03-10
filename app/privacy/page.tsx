@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy – RetroGrade",
-  description: "Privacy Policy for the RetroGrade platform.",
+  title: "Privacy Policy – RestoRank",
+  description: "Privacy Policy for the RestoRank platform.",
 };
 
 export default function PrivacyPolicy() {
@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
         <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
-            <span className="font-semibold text-lg tracking-tight text-slate-800">Retro<span className="text-emerald-600">Grade</span></span>
+            <span className="font-semibold text-lg tracking-tight text-slate-800">Resto<span className="text-emerald-600">Rank</span></span>
           </Link>
           <Link href="/" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">&larr; Back to Home</Link>
         </div>
@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
         <div className="space-y-10 text-slate-600 text-sm leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-slate-800 mb-3">1. Introduction</h2>
-            <p>RetroGrade (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our competitive intelligence platform for restaurants (&quot;the Service&quot;).</p>
+            <p>RestoRank (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our competitive intelligence platform for restaurants (&quot;the Service&quot;).</p>
           </section>
 
           <section>
@@ -143,8 +143,8 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-semibold text-slate-800 mb-3">13. Contact Us</h2>
             <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:</p>
             <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="font-semibold text-slate-700">RetroGrade</p>
-              <p>Email: <a href="mailto:support@retrograde.app" className="text-emerald-600 hover:underline">support@retrograde.app</a></p>
+              <p className="font-semibold text-slate-700">RestoRank</p>
+              <p>Email: <a href="mailto:support@restorank.app" className="text-emerald-600 hover:underline">support@restorank.app</a></p>
               <p>Visit our <Link href="/contact" className="text-emerald-600 hover:underline">Contact Page</Link></p>
             </div>
           </section>
@@ -154,7 +154,7 @@ export default function PrivacyPolicy() {
       {/* Footer */}
       <footer className="border-t border-slate-100">
         <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">&copy; 2026 RetroGrade. All rights reserved.</p>
+          <p className="text-xs text-slate-400">&copy; 2026 RestoRank. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="text-xs text-slate-400 hover:text-emerald-600 transition-colors font-semibold">Privacy Policy</Link>
             <Link href="/terms" className="text-xs text-slate-400 hover:text-emerald-600 transition-colors">Terms of Service</Link>

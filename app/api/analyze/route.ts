@@ -301,7 +301,7 @@ async function fetchWebsiteSEO(websiteUrl: string | null, restaurantName: string
 
     const res = await fetch(websiteUrl, {
       signal: controller.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; RetroGradeBot/1.0)" },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; RestoRankBot/1.0)" },
     })
     clearTimeout(timeout)
 

@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Service – RetroGrade",
-  description: "Terms of Service for the RetroGrade platform.",
+  title: "Terms of Service – RestoRank",
+  description: "Terms of Service for the RestoRank platform.",
 };
 
 export default function TermsOfService() {
@@ -13,7 +13,7 @@ export default function TermsOfService() {
         <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
-            <span className="font-semibold text-lg tracking-tight text-slate-800">Retro<span className="text-emerald-600">Grade</span></span>
+            <span className="font-semibold text-lg tracking-tight text-slate-800">Resto<span className="text-emerald-600">Rank</span></span>
           </Link>
           <Link href="/" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">&larr; Back to Home</Link>
         </div>
@@ -27,12 +27,12 @@ export default function TermsOfService() {
         <div className="space-y-10 text-slate-600 text-sm leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-slate-800 mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using RetroGrade (&quot;the Service&quot;), operated by RetroGrade (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.</p>
+            <p>By accessing or using RestoRank (&quot;the Service&quot;), operated by RestoRank (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-slate-800 mb-3">2. Description of Service</h2>
-            <p>RetroGrade provides data-driven competitive intelligence for restaurants, including competitor analysis based on historic data, review sentiment analysis, and performance benchmarking. The Service uses publicly available data from platforms such as Google Maps to generate reports and insights.</p>
+            <p>RestoRank provides data-driven competitive intelligence for restaurants, including competitor analysis based on historic data, review sentiment analysis, and performance benchmarking. The Service uses publicly available data from platforms such as Google Maps to generate reports and insights.</p>
           </section>
 
           <section>
@@ -69,7 +69,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-lg font-semibold text-slate-800 mb-3">6. Intellectual Property</h2>
-            <p>All content, features, and functionality of the Service — including but not limited to text, graphics, logos, and software — are owned by RetroGrade and protected by copyright, trademark, and other intellectual property laws. Reports generated for you are licensed for your personal or internal business use only.</p>
+            <p>All content, features, and functionality of the Service — including but not limited to text, graphics, logos, and software — are owned by RestoRank and protected by copyright, trademark, and other intellectual property laws. Reports generated for you are licensed for your personal or internal business use only.</p>
           </section>
 
           <section>
@@ -83,7 +83,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-lg font-semibold text-slate-800 mb-3">8. Limitation of Liability</h2>
-            <p>To the maximum extent permitted by law, RetroGrade shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities, arising out of or related to your use of the Service.</p>
+            <p>To the maximum extent permitted by law, RestoRank shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities, arising out of or related to your use of the Service.</p>
           </section>
 
           <section>
@@ -110,8 +110,8 @@ export default function TermsOfService() {
             <h2 className="text-lg font-semibold text-slate-800 mb-3">13. Contact Us</h2>
             <p>If you have any questions about these Terms of Service, please contact us at:</p>
             <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="font-semibold text-slate-700">RetroGrade</p>
-              <p>Email: <a href="mailto:support@retrograde.app" className="text-emerald-600 hover:underline">support@retrograde.app</a></p>
+              <p className="font-semibold text-slate-700">RestoRank</p>
+              <p>Email: <a href="mailto:support@restorank.app" className="text-emerald-600 hover:underline">support@restorank.app</a></p>
               <p>Visit our <Link href="/contact" className="text-emerald-600 hover:underline">Contact Page</Link></p>
             </div>
           </section>
@@ -121,7 +121,7 @@ export default function TermsOfService() {
       {/* Footer */}
       <footer className="border-t border-slate-100">
         <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">&copy; 2026 RetroGrade. All rights reserved.</p>
+          <p className="text-xs text-slate-400">&copy; 2026 RestoRank. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="text-xs text-slate-400 hover:text-emerald-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-xs text-slate-400 hover:text-emerald-600 transition-colors font-semibold">Terms of Service</Link>
