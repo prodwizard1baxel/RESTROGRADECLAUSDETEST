@@ -88,7 +88,15 @@ providers.push(
           })
         }
 
-        return { id: user.id, phone: user.phone, name: user.name, email: user.email }
+        return {
+          id: user.id,
+          phone: user.phone,
+          name: user.name,
+          email: user.email,
+          onboarded: user.onboarded,
+          restaurantName: user.restaurantName,
+          city: user.city,
+        }
       },
     })
 )

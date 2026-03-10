@@ -407,8 +407,33 @@ export async function POST(req: Request) {
       )
     }
 
-    // Auth disabled for testing — allow all users
-    const userId: string | null = null
+    // Resolve user from session (if signed in)
+    let userId: string | null = null
+    let activeSub: any = null
+
+    const { getServerSession } = await import("next-auth")
+    const { authOptions } = await import("@/lib/auth")
+    const session = await getServerSession(authOptions)
+
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+      })
+      if (user) {
+        userId = user.id
+        activeSub = user.subscriptions.find((s: any) => s.reportsUsed < s.totalReports) || null
+      }
+    } else if ((session?.user as any)?.phone) {
+      const user = await prisma.user.findUnique({
+        where: { phone: (session!.user as any).phone },
+        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+      })
+      if (user) {
+        userId = user.id
+        activeSub = user.subscriptions.find((s: any) => s.reportsUsed < s.totalReports) || null
+      }
+    }
 
     // Get real details for the base restaurant via Places API
     const baseDetails = await getBaseRestaurantDetails(name, city)
@@ -992,7 +1017,17 @@ RULES:
       },
     })
 
-    // Subscription credit deduction disabled for testing
+    // Deduct subscription credit if user has an active subscription
+    if (activeSub) {
+      const newUsed = activeSub.reportsUsed + 1
+      await prisma.subscription.update({
+        where: { id: activeSub.id },
+        data: {
+          reportsUsed: newUsed,
+          status: newUsed >= activeSub.totalReports ? "exhausted" : "active",
+        },
+      })
+    }
 
     return NextResponse.json({
       reportId: savedReport.id,
