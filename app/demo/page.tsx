@@ -120,7 +120,7 @@ export default function DemoPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-2.5 mb-6">
             <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">R</div>
-            <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RetroGrade</span>
+            <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RestoRank</span>
           </div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>

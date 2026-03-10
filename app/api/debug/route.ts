@@ -6,7 +6,11 @@ export async function GET() {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || "MISSING",
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? "SET (" + process.env.GOOGLE_CLIENT_ID.substring(0, 10) + "...)" : "MISSING",
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? "SET (" + process.env.GOOGLE_CLIENT_SECRET.length + " chars)" : "MISSING",
-    DATABASE_URL: process.env.DATABASE_URL ? "SET (" + process.env.DATABASE_URL.substring(0, 15) + "...)" : "MISSING",
+    DATABASE_URL: process.env.DATABASE_URL
+      ? process.env.DATABASE_URL.startsWith("mongodb")
+        ? "SET & VALID FORMAT (" + process.env.DATABASE_URL.substring(0, 20) + "...)"
+        : "SET BUT WRONG FORMAT — starts with: " + process.env.DATABASE_URL.substring(0, 15) + "... (must start with mongodb:// or mongodb+srv://)"
+      : "MISSING — add your MongoDB connection string in Vercel env vars",
     TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID ? "SET" : "MISSING",
     TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN ? "SET" : "MISSING",
     TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER || "MISSING",

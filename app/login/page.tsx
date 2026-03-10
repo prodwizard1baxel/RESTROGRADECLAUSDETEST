@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn, SessionProvider } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { Suspense, useState, useRef, useEffect } from "react"
 
@@ -10,7 +10,15 @@ function LoginForm() {
   const error = searchParams.get("error")
 
   const [loading, setLoading] = useState(false)
-  const [mode, setMode] = useState<"main" | "otp" | "promo">("main")
+  const [mode, setMode] = useState<"main" | "otp" | "promo" | "email">("main")
+  const [emailMode, setEmailMode] = useState<"login" | "register">("login")
+  const [emailInput, setEmailInput] = useState("")
+  const [passwordInput, setPasswordInput] = useState("")
+  const [nameInput, setNameInput] = useState("")
+  const [restaurantNameInput, setRestaurantNameInput] = useState("")
+  const [cityInput, setCityInput] = useState("")
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [emailError, setEmailError] = useState("")
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [otpSending, setOtpSending] = useState(false)
@@ -161,6 +169,82 @@ function LoginForm() {
     }
   }
 
+  const handleEmailLogin = async () => {
+    if (!emailInput.trim() || !passwordInput) {
+      setEmailError("Email and password are required")
+      return
+    }
+    setEmailLoading(true)
+    setEmailError("")
+    try {
+      const result = await signIn("email-password", {
+        email: emailInput.trim(),
+        password: passwordInput,
+        redirect: false,
+      })
+      if (result?.ok) {
+        window.location.href = callbackUrl
+      } else {
+        setEmailError("Invalid email or password")
+      }
+    } catch {
+      setEmailError("Sign-in failed. Please try again.")
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
+  const handleEmailRegister = async () => {
+    if (!emailInput.trim() || !passwordInput) {
+      setEmailError("Email and password are required")
+      return
+    }
+    if (passwordInput.length < 6) {
+      setEmailError("Password must be at least 6 characters")
+      return
+    }
+    if (!nameInput.trim() || !restaurantNameInput.trim() || !cityInput.trim()) {
+      setEmailError("Please fill in all fields")
+      return
+    }
+    setEmailLoading(true)
+    setEmailError("")
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: emailInput.trim(),
+          password: passwordInput,
+          name: nameInput.trim(),
+          restaurantName: restaurantNameInput.trim(),
+          city: cityInput.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setEmailError(data.error || "Registration failed")
+        return
+      }
+      // Auto sign-in after registration
+      const result = await signIn("email-password", {
+        email: emailInput.trim(),
+        password: passwordInput,
+        redirect: false,
+      })
+      if (result?.ok) {
+        window.location.href = callbackUrl
+      } else {
+        setEmailError("Account created but sign-in failed. Please try logging in.")
+        setEmailMode("login")
+      }
+    } catch {
+      setEmailError("Network error. Please try again.")
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
   const errorMessages: Record<string, string> = {
     OAuthAccountNotLinked: "This email is already associated with another sign-in method.",
     OAuthCallbackError: "Google sign-in was cancelled or failed. Please try again.",
@@ -181,7 +265,7 @@ function LoginForm() {
             R
           </div>
           <span className="font-semibold text-lg tracking-tight text-slate-800">
-            Retro<span className="text-emerald-600">Grade</span>
+            Resto<span className="text-emerald-600">Rank</span>
           </span>
         </a>
       </nav>
@@ -197,7 +281,7 @@ function LoginForm() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome to RetroGrade</h1>
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome to RestoRank</h1>
               <p className="text-sm text-slate-500 leading-relaxed">
                 Sign in to generate competitive intelligence reports for your restaurant
               </p>
@@ -283,6 +367,27 @@ function LoginForm() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                   </svg>
                   Have a Promo Code?
+                </button>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-4 text-slate-400 uppercase tracking-wider">or</span>
+                  </div>
+                </div>
+
+                {/* Email/Password Sign In */}
+                <button
+                  onClick={() => { setMode("email"); setEmailError(""); setEmailMode("login") }}
+                  className="w-full flex items-center justify-center gap-3 bg-emerald-600 text-white rounded-xl px-6 py-3.5 text-sm font-semibold hover:bg-emerald-700 transition-all duration-300"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                  <span>Continue with Email</span>
                 </button>
 
                 {/* Divider */}
@@ -480,12 +585,133 @@ function LoginForm() {
                     )}
                   </button>
 
-                  <p className="mt-3 text-[11px] text-slate-400 text-center">You must be signed in first to apply a promo code</p>
+                  <p className="mt-3 text-[11px] text-slate-400 text-center">Sign in with Google or OTP first, then apply your promo code on the next page</p>
                 </div>
 
                 {/* Back button */}
                 <button
                   onClick={() => { setMode("main"); setPromoError(""); setPromoSuccess(""); setPromoCode("") }}
+                  className="mt-4 w-full flex items-center justify-center gap-2 border border-slate-200 rounded-xl px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                  </svg>
+                  Back to all sign-in options
+                </button>
+              </>
+            ) : mode === "email" ? (
+              <>
+                {/* Email/Password Flow */}
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">{emailMode === "login" ? "Sign In with Email" : "Create an Account"}</p>
+                      <p className="text-xs text-slate-400">{emailMode === "login" ? "Enter your credentials" : "Fill in your details to get started"}</p>
+                    </div>
+                  </div>
+
+                  {emailError && (
+                    <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                      <p className="text-sm text-red-600">{emailError}</p>
+                    </div>
+                  )}
+
+                  {emailMode === "register" && (
+                    <>
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">Your Name</label>
+                      <input
+                        type="text"
+                        value={nameInput}
+                        onChange={(e) => { setNameInput(e.target.value); setEmailError("") }}
+                        placeholder="Enter your name"
+                        className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-3"
+                      />
+
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">Restaurant Name</label>
+                      <input
+                        type="text"
+                        value={restaurantNameInput}
+                        onChange={(e) => { setRestaurantNameInput(e.target.value); setEmailError("") }}
+                        placeholder="Enter your restaurant name"
+                        className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-3"
+                      />
+
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">City</label>
+                      <input
+                        type="text"
+                        value={cityInput}
+                        onChange={(e) => { setCityInput(e.target.value); setEmailError("") }}
+                        placeholder="Enter your city"
+                        className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-3"
+                      />
+                    </>
+                  )}
+
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    value={emailInput}
+                    onChange={(e) => { setEmailInput(e.target.value); setEmailError("") }}
+                    placeholder="you@example.com"
+                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-3"
+                    autoFocus
+                  />
+
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                  <input
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => { setPasswordInput(e.target.value); setEmailError("") }}
+                    placeholder={emailMode === "register" ? "Min 6 characters" : "Enter your password"}
+                    className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-4"
+                    onKeyDown={(e) => e.key === "Enter" && (emailMode === "login" ? handleEmailLogin() : handleEmailRegister())}
+                  />
+
+                  <button
+                    onClick={emailMode === "login" ? handleEmailLogin : handleEmailRegister}
+                    disabled={emailLoading}
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white rounded-xl px-6 py-3.5 text-sm font-semibold hover:bg-emerald-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {emailLoading ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        {emailMode === "login" ? "Signing in..." : "Creating account..."}
+                      </>
+                    ) : (
+                      emailMode === "login" ? "Sign In" : "Create Account"
+                    )}
+                  </button>
+
+                  <p className="mt-4 text-center text-sm text-slate-500">
+                    {emailMode === "login" ? (
+                      <>
+                        Don&apos;t have an account?{" "}
+                        <button onClick={() => { setEmailMode("register"); setEmailError("") }} className="text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
+                          Register
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        Already have an account?{" "}
+                        <button onClick={() => { setEmailMode("login"); setEmailError("") }} className="text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
+                          Sign In
+                        </button>
+                      </>
+                    )}
+                  </p>
+                </div>
+
+                {/* Back button */}
+                <button
+                  onClick={() => { setMode("main"); setEmailError(""); setEmailInput(""); setPasswordInput(""); setNameInput(""); setRestaurantNameInput(""); setCityInput("") }}
                   className="mt-4 w-full flex items-center justify-center gap-2 border border-slate-200 rounded-xl px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -517,14 +743,12 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <SessionProvider>
-      <Suspense fallback={
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      }>
-        <LoginForm />
-      </Suspense>
-    </SessionProvider>
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

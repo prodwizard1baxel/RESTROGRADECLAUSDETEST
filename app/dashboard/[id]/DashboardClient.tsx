@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { useSession, SessionProvider } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import ThreatRadar from "./ThreatRadar"
 
 /* ─── Scroll-reveal hook ────────────────────────────────────────────── */
@@ -263,11 +263,7 @@ function BlurredSection({
 }
 
 export default function DashboardClient(props: any) {
-  return (
-    <SessionProvider>
-      <DashboardClientInner {...props} />
-    </SessionProvider>
-  )
+  return <DashboardClientInner {...props} />
 }
 
 function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: any) {
@@ -358,7 +354,7 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
   const handleShareWhatsApp = useCallback(() => {
     const reportUrl = typeof window !== "undefined" ? window.location.href : ""
     const message = [
-      `*${restaurantName}* — RetroGrade Competitive Intelligence Report`,
+      `*${restaurantName}* — RestoRank Competitive Intelligence Report`,
       ``,
       `Rating: ${reviewMetrics.rating || "N/A"} | Reviews: ${reviewMetrics.totalReviews || "N/A"}`,
       `Review Percentile: ${reviewMetrics.reviewPercentile || "N/A"}%`,
@@ -495,7 +491,7 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
               <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
                 R
               </div>
-              <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RetroGrade</span>
+              <span className="text-sm text-emerald-600 font-semibold tracking-wide uppercase">RestoRank</span>
             </div>
           </Reveal>
 
