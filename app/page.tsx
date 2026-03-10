@@ -107,16 +107,82 @@ function StatCard({
 /* ═══════════════════════════════════════════════════════════════════════
    MAIN PAGE
    ═══════════════════════════════════════════════════════════════════════ */
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function Home() {
   const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Load Razorpay checkout script
+  useEffect(() => {
+    if (typeof window !== "undefined" && !document.querySelector('script[src*="checkout.razorpay.com"]')) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  const handlePayment = useCallback(async (plan: "starter" | "growth") => {
+    setPaymentLoading(plan);
+    try {
+      const res = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create order");
+
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "RestoRank",
+        description: data.description,
+        order_id: data.orderId,
+        handler: function (response: any) {
+          // Payment successful - redirect to success page with payment ID
+          const paymentId = response.razorpay_payment_id;
+          window.location.href = `/payment/success?razorpay_payment_id=${paymentId}`;
+        },
+        prefill: {
+          email: session?.user?.email || "",
+          name: session?.user?.name || "",
+        },
+        theme: {
+          color: "#059669",
+        },
+        modal: {
+          ondismiss: function () {
+            setPaymentLoading(null);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function () {
+        setPaymentLoading(null);
+        alert("Payment failed. Please try again.");
+      });
+      rzp.open();
+    } catch (err: any) {
+      alert(err.message || "Something went wrong. Please try again.");
+      setPaymentLoading(null);
+    }
+  }, [session]);
 
   const scrollTo = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -460,14 +526,13 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <a
-                  href="https://rzp.io/rzp/rRAPyt7"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block"
+                <button
+                  onClick={() => handlePayment("starter")}
+                  disabled={paymentLoading === "starter"}
+                  className="w-full border-2 border-emerald-600 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-300 text-center block disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Get Started
-                </a>
+                  {paymentLoading === "starter" ? "Processing..." : "Get Started"}
+                </button>
               </div>
             </Reveal>
 
@@ -509,14 +574,13 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <a
-                  href="https://rzp.io/rzp/1ajNMFc"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block"
+                <button
+                  onClick={() => handlePayment("growth")}
+                  disabled={paymentLoading === "growth"}
+                  className="w-full cta-gradient text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200 text-center block disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Get Growth Pack
-                </a>
+                  {paymentLoading === "growth" ? "Processing..." : "Get Growth Pack"}
+                </button>
               </div>
             </Reveal>
           </div>

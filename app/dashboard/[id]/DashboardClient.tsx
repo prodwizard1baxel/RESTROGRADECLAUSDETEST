@@ -262,6 +262,114 @@ function BlurredSection({
   )
 }
 
+/* ─── Feedback Form ────────────────────────────────────────────────── */
+function FeedbackForm() {
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [message, setMessage] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleSubmit = async () => {
+    if (rating === 0) { setError("Please select a rating"); return }
+    if (!message.trim()) { setError("Please enter your feedback"); return }
+
+    setSubmitting(true)
+    setError("")
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, message, page: "dashboard" }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        setError(data.error || "Failed to submit feedback")
+      }
+    } catch {
+      setError("Network error. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center">
+        <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+          <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-bold text-slate-900 mb-1">Thank You!</h3>
+        <p className="text-sm text-slate-500">Your feedback helps us improve RestoRank.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8">
+      <div className="text-center mb-6">
+        <h3 className="text-lg font-bold text-slate-900 mb-1">How was your report?</h3>
+        <p className="text-sm text-slate-500">Your feedback helps us improve</p>
+      </div>
+
+      {/* Star rating */}
+      <div className="flex justify-center gap-2 mb-6">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            className="transition-transform duration-150 hover:scale-110 active:scale-95"
+          >
+            <svg
+              className={`w-8 h-8 ${
+                star <= (hoverRating || rating)
+                  ? "text-amber-400 fill-amber-400"
+                  : "text-slate-300"
+              } transition-colors duration-150`}
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+              />
+            </svg>
+          </button>
+        ))}
+      </div>
+
+      {/* Message */}
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Tell us what you liked, or what we can improve..."
+        rows={3}
+        maxLength={2000}
+        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none mb-4"
+      />
+
+      {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+
+      <button
+        onClick={handleSubmit}
+        disabled={submitting}
+        className="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-slate-800 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {submitting ? "Submitting..." : "Submit Feedback"}
+      </button>
+    </div>
+  )
+}
+
 export default function DashboardClient(props: any) {
   return <DashboardClientInner {...props} />
 }
@@ -1475,6 +1583,11 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
               </p>
             </div>
           </div>
+        </Reveal>
+
+        {/* Feedback Form */}
+        <Reveal className="max-w-xl mx-auto pb-12">
+          <FeedbackForm />
         </Reveal>
 
         {/* Back to home */}
