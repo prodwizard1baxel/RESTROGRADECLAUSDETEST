@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 
 /* ─── Indian cities list for autocomplete ───────────────────────────── */
 const INDIAN_CITIES = [
@@ -41,12 +41,60 @@ const INDIAN_CITIES = [
 
 export default function Analyze() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, update } = useSession()
 
   const [name, setName] = useState("")
   const [city, setCity] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  /* ─── Onboarding state ──────────────────────────────────────────── */
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [onboardName, setOnboardName] = useState("")
+  const [onboardRestaurant, setOnboardRestaurant] = useState("")
+  const [onboardCity, setOnboardCity] = useState("")
+  const [onboardLoading, setOnboardLoading] = useState(false)
+  const [onboardError, setOnboardError] = useState("")
+
+  useEffect(() => {
+    if (session?.user && !(session.user as any).onboarded) {
+      setShowOnboarding(true)
+      // Pre-fill name if available from Google
+      if (session.user.name) setOnboardName(session.user.name)
+    }
+  }, [session])
+
+  const handleOnboardSubmit = async () => {
+    if (!onboardName.trim() || !onboardRestaurant.trim() || !onboardCity.trim()) {
+      setOnboardError("Please fill in all fields")
+      return
+    }
+    setOnboardLoading(true)
+    setOnboardError("")
+    try {
+      const res = await fetch("/api/user/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: onboardName.trim(),
+          restaurantName: onboardRestaurant.trim(),
+          city: onboardCity.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setShowOnboarding(false)
+        // Update session
+        await update({ onboarded: true, name: onboardName.trim(), restaurantName: onboardRestaurant.trim(), city: onboardCity.trim() })
+      } else {
+        setOnboardError(data.error || "Failed to save profile")
+      }
+    } catch {
+      setOnboardError("Network error. Please try again.")
+    } finally {
+      setOnboardLoading(false)
+    }
+  }
 
   /* ─── Promo code state ───────────────────────────────────────────── */
   const [showPromo, setShowPromo] = useState(false)
@@ -279,6 +327,74 @@ export default function Analyze() {
       <div className="absolute top-1/4 left-[15%] w-64 h-64 bg-emerald-100/40 rounded-full blur-[100px] animate-float pointer-events-none" />
       <div className="absolute bottom-1/4 right-[10%] w-80 h-80 bg-teal-100/30 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
 
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md p-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
+                R
+              </div>
+              <span className="text-sm text-emerald-600 font-medium tracking-wide">RetroGrade</span>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mt-4 mb-1">Complete Your Profile</h2>
+            <p className="text-sm text-slate-500 mb-6">Tell us about yourself and your restaurant to get started.</p>
+
+            {onboardError && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <p className="text-sm text-red-600">{onboardError}</p>
+              </div>
+            )}
+
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Your Name</label>
+            <input
+              type="text"
+              value={onboardName}
+              onChange={(e) => { setOnboardName(e.target.value); setOnboardError("") }}
+              placeholder="Enter your name"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-3"
+              autoFocus
+            />
+
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Restaurant Name</label>
+            <input
+              type="text"
+              value={onboardRestaurant}
+              onChange={(e) => { setOnboardRestaurant(e.target.value); setOnboardError("") }}
+              placeholder="Enter your restaurant name"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-3"
+            />
+
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">City</label>
+            <input
+              type="text"
+              value={onboardCity}
+              onChange={(e) => { setOnboardCity(e.target.value); setOnboardError("") }}
+              placeholder="Enter your city"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all mb-4"
+            />
+
+            <button
+              onClick={handleOnboardSubmit}
+              disabled={onboardLoading}
+              className="w-full bg-emerald-600 text-white rounded-xl py-3.5 text-sm font-semibold hover:bg-emerald-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {onboardLoading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                "Continue"
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main card */}
       <div className="relative z-10 w-full max-w-lg mx-4">
         <div className="flex items-center justify-between mb-6">
@@ -291,15 +407,29 @@ export default function Analyze() {
             </svg>
             <span>Back to Home</span>
           </a>
-          <a
-            href="/login"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-emerald-600 transition-colors duration-200"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
-            Sign In
-          </a>
+          {session?.user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-500 truncate max-w-[150px]">
+                {session.user.name || session.user.email}
+              </span>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="text-sm text-slate-400 hover:text-red-500 transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <a
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-emerald-600 transition-colors duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              Sign In
+            </a>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-8 md:p-10 shadow-xl shadow-slate-200/50">
