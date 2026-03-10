@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Contact Us – RetroGrade",
-  description: "Get in touch with the RetroGrade team.",
+  title: "Contact Us – RestoRank",
+  description: "Get in touch with the RestoRank team.",
 };
 
 export default function ContactUs() {
@@ -13,7 +13,7 @@ export default function ContactUs() {
         <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
-            <span className="font-semibold text-lg tracking-tight text-slate-800">Retro<span className="text-emerald-600">Grade</span></span>
+            <span className="font-semibold text-lg tracking-tight text-slate-800">Resto<span className="text-emerald-600">Rank</span></span>
           </Link>
           <Link href="/" className="text-sm text-slate-400 hover:text-emerald-600 transition-colors">&larr; Back to Home</Link>
         </div>
@@ -41,7 +41,7 @@ export default function ContactUs() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-700">Email</p>
-                  <a href="mailto:support@retrograde.app" className="text-sm text-emerald-600 hover:underline">support@retrograde.app</a>
+                  <a href="mailto:support@restorank.app" className="text-sm text-emerald-600 hover:underline">support@restorank.app</a>
                   <p className="text-xs text-slate-400 mt-1">We typically respond within 24 hours</p>
                 </div>
               </div>
@@ -80,26 +80,26 @@ export default function ContactUs() {
 
             <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:shadow-sm transition-all">
               <h3 className="text-sm font-semibold text-slate-700 mb-1">General Inquiries</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Questions about our platform, features, or how RetroGrade can help your restaurant business.</p>
-              <a href="mailto:support@retrograde.app?subject=General%20Inquiry" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Send an email &rarr;</a>
+              <p className="text-xs text-slate-500 leading-relaxed">Questions about our platform, features, or how RestoRank can help your restaurant business.</p>
+              <a href="mailto:support@restorank.app?subject=General%20Inquiry" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Send an email &rarr;</a>
             </div>
 
             <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:shadow-sm transition-all">
               <h3 className="text-sm font-semibold text-slate-700 mb-1">Technical Support</h3>
               <p className="text-xs text-slate-500 leading-relaxed">Having trouble with your report, account, or a technical issue? We&apos;re here to help.</p>
-              <a href="mailto:support@retrograde.app?subject=Technical%20Support" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Get support &rarr;</a>
+              <a href="mailto:support@restorank.app?subject=Technical%20Support" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Get support &rarr;</a>
             </div>
 
             <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:shadow-sm transition-all">
               <h3 className="text-sm font-semibold text-slate-700 mb-1">Billing &amp; Subscriptions</h3>
               <p className="text-xs text-slate-500 leading-relaxed">Questions about your subscription plan, payments, invoices, or refund requests.</p>
-              <a href="mailto:support@retrograde.app?subject=Billing%20Inquiry" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Billing help &rarr;</a>
+              <a href="mailto:support@restorank.app?subject=Billing%20Inquiry" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Billing help &rarr;</a>
             </div>
 
             <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:shadow-sm transition-all">
               <h3 className="text-sm font-semibold text-slate-700 mb-1">Partnerships &amp; Business</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Interested in partnering with RetroGrade or exploring enterprise solutions?</p>
-              <a href="mailto:support@retrograde.app?subject=Partnership%20Inquiry" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Let&apos;s talk &rarr;</a>
+              <p className="text-xs text-slate-500 leading-relaxed">Interested in partnering with RestoRank or exploring enterprise solutions?</p>
+              <a href="mailto:support@restorank.app?subject=Partnership%20Inquiry" className="text-xs text-emerald-600 hover:underline mt-2 inline-block">Let&apos;s talk &rarr;</a>
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function ContactUs() {
       {/* Footer */}
       <footer className="border-t border-slate-100 mt-16">
         <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">&copy; 2026 RetroGrade. All rights reserved.</p>
+          <p className="text-xs text-slate-400">&copy; 2026 RestoRank. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="text-xs text-slate-400 hover:text-emerald-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-xs text-slate-400 hover:text-emerald-600 transition-colors">Terms of Service</Link>

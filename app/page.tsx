@@ -140,7 +140,7 @@ export default function Home() {
               R
             </div>
             <span className="font-semibold text-lg tracking-tight text-slate-800">
-              Retro<span className="text-emerald-600">Grade</span>
+              Resto<span className="text-emerald-600">Rank</span>
             </span>
           </a>
 
@@ -584,7 +584,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { quote: "We had no idea two new competitors opened within 2km of us. RetroGrade's report helped us react before we lost customers.", name: "Priya M.", role: "Owner, Tandoor Tales", city: "Koramangala, Bangalore" },
+              { quote: "We had no idea two new competitors opened within 2km of us. RestoRank's report helped us react before we lost customers.", name: "Priya M.", role: "Owner, Tandoor Tales", city: "Koramangala, Bangalore" },
               { quote: "The SEO keyword clusters alone were worth it. We started ranking for 'best biryani near me' within weeks of optimizing our profile.", name: "Arjun S.", role: "Co-founder, Biryani Blues", city: "Indiranagar, Bangalore" },
               { quote: "The Google profile audit was eye-opening. We fixed 4 things and saw our profile views jump 40% in a month.", name: "Meera K.", role: "Manager, The Coastal Kitchen", city: "Bandra, Mumbai" },
             ].map((t, i) => (
@@ -629,7 +629,7 @@ export default function Home() {
               <span>See Demo First</span>
             </a>
           </div>
-          <p className="mt-8 text-sm text-slate-400">Join 500+ restaurant owners already using RetroGrade</p>
+          <p className="mt-8 text-sm text-slate-400">Join 500+ restaurant owners already using RestoRank</p>
         </Reveal>
       </section>
 
@@ -640,7 +640,7 @@ export default function Home() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
-                <span className="font-semibold text-lg tracking-tight text-slate-800">Retro<span className="text-emerald-600">Grade</span></span>
+                <span className="font-semibold text-lg tracking-tight text-slate-800">Resto<span className="text-emerald-600">Rank</span></span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed max-w-sm">Data-driven competitive intelligence for restaurants. Competition analysed for historic 2 years data to help you outperform every competitor.</p>
             </div>
@@ -663,7 +663,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-400">&copy; 2026 RetroGrade. All rights reserved.</p>
+            <p className="text-xs text-slate-400">&copy; 2026 RestoRank. All rights reserved.</p>
             <p className="text-xs text-slate-300">Powered by 2 Years Historic Data &bull; Google Maps API &bull; Built with Next.js</p>
           </div>
         </div>

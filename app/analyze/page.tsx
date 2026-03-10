@@ -335,7 +335,7 @@ export default function Analyze() {
               <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
                 R
               </div>
-              <span className="text-sm text-emerald-600 font-medium tracking-wide">RetroGrade</span>
+              <span className="text-sm text-emerald-600 font-medium tracking-wide">RestoRank</span>
             </div>
             <h2 className="text-xl font-bold text-slate-900 mt-4 mb-1">Complete Your Profile</h2>
             <p className="text-sm text-slate-500 mb-6">Tell us about yourself and your restaurant to get started.</p>
@@ -438,7 +438,7 @@ export default function Analyze() {
             <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg shadow-emerald-200">
               R
             </div>
-            <span className="text-sm text-emerald-600 font-medium tracking-wide">RetroGrade</span>
+            <span className="text-sm text-emerald-600 font-medium tracking-wide">RestoRank</span>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mt-4 mb-2">

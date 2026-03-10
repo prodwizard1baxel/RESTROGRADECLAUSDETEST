@@ -42,13 +42,13 @@ export async function POST(req: Request) {
 
     if (channel === "whatsapp") {
       await client.messages.create({
-        body: `Your RetroGrade verification code is: ${code}. Valid for 5 minutes.`,
+        body: `Your RestoRank verification code is: ${code}. Valid for 5 minutes.`,
         from: `whatsapp:${twilioPhone}`,
         to: `whatsapp:${phone}`,
       })
     } else {
       await client.messages.create({
-        body: `Your RetroGrade verification code is: ${code}. Valid for 5 minutes.`,
+        body: `Your RestoRank verification code is: ${code}. Valid for 5 minutes.`,
         from: twilioPhone,
         to: phone,
       })
