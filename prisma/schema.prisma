@@ -22,6 +22,7 @@ model User {
   sessions       Session[]
   reports        Report[]
   subscriptions  Subscription[]
+  feedbacks      Feedback[]
   createdAt      DateTime       @default(now())
 }
 
@@ -88,4 +89,16 @@ model Otp {
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
+  email     String?
+  name      String?
+  rating    Int      // 1-5 star rating
+  message   String
+  page      String?  // which page the feedback was submitted from
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 }

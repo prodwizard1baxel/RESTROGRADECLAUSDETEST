@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       where: { paymentId },
     })
     if (existingSub) {
-      return NextResponse.json({ error: "This payment has already been applied to an account" }, { status: 400 })
+      return NextResponse.json({ error: "Payment already processed", alreadyApplied: true }, { status: 400 })
     }
 
     // Verify with Razorpay API
