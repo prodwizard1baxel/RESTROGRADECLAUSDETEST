@@ -169,7 +169,7 @@ export default function AdminDashboard() {
             {/* Secondary Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <StatCard label="Reports Generated" value={data.period.reportsGenerated} subtitle="In this period" color="slate" />
-              <StatCard label="Starter Plans" value={data.period.starterPayments} subtitle={`\u20B9499 each`} color="slate" />
+              <StatCard label="Starter Plans" value={data.period.starterPayments} subtitle={`\u20B91 each`} color="slate" />
               <StatCard label="Growth Plans" value={data.period.growthPayments} subtitle={`\u20B91,299 each`} color="slate" />
               <StatCard label="Avg Revenue/User" value={data.period.payments > 0 ? Math.round(data.period.revenue / data.period.payments) : 0} subtitle={`\u20B9 per paying user`} color="slate" prefix="\u20B9" />
             </div>

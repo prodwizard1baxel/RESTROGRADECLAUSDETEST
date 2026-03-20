@@ -4,7 +4,7 @@ import crypto from "crypto"
 
 // Plan mapping based on Razorpay payment amount (in paise)
 const PLAN_MAP: Record<number, { plan: string; totalReports: number; label: string }> = {
-  49900: { plan: "starter", totalReports: 1, label: "Starter (1 Report)" },
+  100: { plan: "starter", totalReports: 1, label: "Starter (1 Report)" },
   129900: { plan: "growth", totalReports: 6, label: "Growth Pack (6 Reports)" },
 }
 
