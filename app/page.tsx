@@ -503,7 +503,7 @@ export default function Home() {
                 <div className="mb-6">
                   <p className="text-xs uppercase tracking-[0.15em] text-slate-400 font-semibold mb-2">Starter</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">&#8377;499</span>
+                    <span className="text-4xl font-bold text-slate-900">&#8377;1</span>
                     <span className="text-slate-400 text-sm">/one-time</span>
                   </div>
                 </div>

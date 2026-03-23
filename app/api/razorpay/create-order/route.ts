@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 const PLANS: Record<string, { amount: number; description: string }> = {
-  starter: { amount: 49900, description: "RestoRank Starter — 1 Report" },
+  starter: { amount: 100, description: "RestoRank Starter — 1 Report" },
   growth: { amount: 129900, description: "RestoRank Growth Pack — 6 Reports" },
 }
 

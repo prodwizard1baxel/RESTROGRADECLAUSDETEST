@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     let plan: string
     let totalReports: number
 
-    if (amountPaise === 49900) {
+    if (amountPaise === 100) {
       plan = "starter"
       totalReports = 1
     } else if (amountPaise === 129900) {
