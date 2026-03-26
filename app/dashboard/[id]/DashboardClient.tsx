@@ -773,6 +773,38 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
                     <p className="text-emerald-900 text-sm leading-relaxed font-medium">{execSummary.recommendation}</p>
                   </div>
                 )}
+
+                {execSummary.actionPlan?.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+                      </svg>
+                      Action Plan
+                    </h3>
+                    <div className="space-y-3">
+                      {execSummary.actionPlan.map((item: any, i: number) => (
+                        <div key={i} className="flex gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                          <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 shrink-0 mt-0.5">
+                            {item.priority}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <p className="text-sm font-semibold text-slate-800">{item.action}</p>
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                item.impact === "High" ? "bg-red-50 text-red-600 border border-red-200" :
+                                item.impact === "Medium" ? "bg-amber-50 text-amber-600 border border-amber-200" :
+                                "bg-slate-100 text-slate-500 border border-slate-200"
+                              }`}>{item.impact} Impact</span>
+                              <span className="text-xs text-slate-400 border border-slate-200 px-2 py-0.5 rounded-full">{item.timeframe}</span>
+                            </div>
+                            <p className="text-xs text-slate-500 leading-relaxed">{item.detail}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-slate-600 leading-relaxed">{execSummary}</p>
@@ -1194,6 +1226,18 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
                         ))}
                       </ul>
                     </div>
+                    {comp.pricingInsight && (
+                      <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                        <p className="font-semibold text-xs text-amber-600 uppercase tracking-wider mb-1">Pricing</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">{comp.pricingInsight}</p>
+                      </div>
+                    )}
+                    {comp.marketingEdge && (
+                      <div className="bg-violet-50 border border-violet-100 rounded-xl p-3">
+                        <p className="font-semibold text-xs text-violet-600 uppercase tracking-wider mb-1">Marketing Edge</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">{comp.marketingEdge}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Reveal>

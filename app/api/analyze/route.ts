@@ -536,13 +536,13 @@ export async function POST(req: Request) {
     // ==============================
     const ai = await getAnthropic().messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 4096,
-      system: "You are a senior restaurant competitive intelligence strategist. You write detailed, actionable, and easy-to-understand analyses. Your executive summaries are structured with clear sections that any restaurant owner can follow. Always respond with valid JSON only.",
+      max_tokens: 8192,
+      system: "You are a senior restaurant competitive intelligence strategist with 15+ years of experience in the Indian food & beverage market. You write detailed, highly specific, and actionable analyses that restaurant owners can immediately act on. Every insight must be tied to actual data provided. Always respond with valid JSON only.",
       messages: [
         {
           role: "user",
           content: `
-Analyze the competitive landscape for a restaurant.
+Analyze the competitive landscape for a restaurant and produce a comprehensive intelligence report.
 
 Restaurant: ${name}
 City: ${city}
@@ -558,36 +558,47 @@ Return STRICT JSON with these fields:
 {
   "baseRestaurantCuisine": "The PRIMARY food cuisine type of ${name} - e.g. Biryani, North Indian, South Indian, Chinese, Pizza, Italian, Cafe, Fast Food, etc.",
   "executiveSummary": {
-    "overview": "A 2-3 sentence high-level overview of the competitive landscape. What is the overall situation?",
-    "keyFindings": ["Finding 1", "Finding 2", "Finding 3", "Finding 4"],
-    "immediateThreats": "1-2 sentences about the most urgent competitive threats to address right now.",
-    "growthOpportunities": "1-2 sentences about the biggest opportunities for growth based on competitor weaknesses.",
-    "recommendation": "A clear, actionable 1-2 sentence recommendation for what the restaurant owner should do first."
+    "overview": "A 3-4 sentence high-level overview of the competitive landscape. Cover the overall market situation, intensity of competition, and ${name}'s current standing.",
+    "keyFindings": ["6 specific data-backed findings — e.g. 'X has 3x more reviews than ${name}, indicating stronger brand recall', 'Gap in late-night delivery exists as top 3 competitors close before 11pm'"],
+    "immediateThreats": "2-3 sentences about the most urgent competitive threats. Name specific competitors and explain exactly why they are a threat right now.",
+    "growthOpportunities": "2-3 sentences about the biggest untapped opportunities. Be specific — mention gaps in competitor offerings, underserved customer needs, or time/occasion gaps.",
+    "recommendation": "A clear, prioritized 2-3 sentence recommendation covering what to do first, second, and why.",
+    "actionPlan": [
+      {
+        "priority": 1,
+        "action": "Specific action title",
+        "detail": "2-3 sentences explaining exactly what to do and how",
+        "impact": "High/Medium/Low",
+        "timeframe": "Immediate/1-2 weeks/1 month/3 months"
+      }
+    ]
   },
-  "finalStrategicVerdict": "",
+  "finalStrategicVerdict": "3-4 paragraphs. Para 1: ${name}'s current market position and biggest competitive risks. Para 2: The single biggest opportunity and exactly how to capture it. Para 3: Specific operational improvements to outperform the top competitor. Para 4: A 90-day roadmap with 3 milestones.",
   "yourKeywordCluster": {
-    "primary": ["5-8 primary SEO/brand keywords that define this restaurant - terms people search when looking for this type of food"],
-    "positive": ["5-8 positive sentiment keywords - words customers associate with great experiences at this type of restaurant"],
-    "negative": ["5-8 negative sentiment keywords - words customers use when leaving bad reviews for this type of restaurant, things to avoid"],
-    "longTail": ["5-8 long-tail keyword phrases (3-5 words each) that a customer might type into Google/Zomato/Swiggy when searching for this type of restaurant - e.g. 'best butter chicken near me', 'affordable family dinner Hyderabad'"],
-    "trending": ["4-6 trending/seasonal keywords relevant to this restaurant's cuisine and location - e.g. 'weekend brunch spots', 'late night delivery', 'party orders bulk food'"],
-    "competitor": ["4-6 keywords your top competitors rank for that you should also target"]
+    "primary": ["8-10 primary SEO/brand keywords specific to ${name}'s cuisine and ${city}"],
+    "positive": ["8-10 positive sentiment keywords customers use for great experiences at this type of restaurant in India"],
+    "negative": ["6-8 negative keywords to monitor and avoid — things customers complain about for this cuisine type"],
+    "longTail": ["8-10 long-tail phrases (4-6 words) a customer would type into Google/Zomato/Swiggy for this restaurant type in ${city}"],
+    "trending": ["6-8 trending keywords relevant to this cuisine in ${city} right now — delivery, occasions, dietary trends"],
+    "competitor": ["6-8 keywords your top competitors rank for that ${name} should also target"]
   },
   "competitorKeywordClusters": [
     {
       "restaurant": "competitor name",
-      "keywords": ["their top keywords"]
+      "keywords": ["8-10 keywords this specific competitor likely ranks for based on their ratings and review volume"]
     }
   ],
   "competitorEnhancements": [
     {
       "restaurant": "competitor name",
-      "strengths": ["strength 1", "strength 2", "strength 3"],
-      "weaknesses": ["weakness 1", "weakness 2", "weakness 3"],
+      "strengths": ["5 specific strengths based on their rating/review data — be precise, e.g. 'Highest review count in area (X reviews) = strong word-of-mouth engine'"],
+      "weaknesses": ["5 specific weaknesses or vulnerabilities ${name} can exploit"],
       "sentimentLabel": "Positive/Negative/Mixed",
       "sentimentScore": 0.0,
-      "whatTheyDoBetter": ["specific thing this competitor does better than ${name}", "another thing"],
-      "whereYouWin": ["specific area where ${name} has an advantage over this competitor", "another area"]
+      "whatTheyDoBetter": ["4-5 specific things this competitor outperforms ${name} on, with context"],
+      "whereYouWin": ["4-5 specific areas where ${name} has or can build an advantage over this competitor"],
+      "pricingInsight": "1-2 sentences on their likely pricing tier and how it compares to ${name}",
+      "marketingEdge": "1-2 sentences on what marketing angle or customer segment this competitor seems to own"
     }
   ],
   "cuisineClassification": {
@@ -600,17 +611,16 @@ Return STRICT JSON with these fields:
 CRITICAL RULES for cuisineClassification:
 - You MUST classify EVERY single restaurant from the "nearby restaurants within 5km" list above
 - Use the EXACT restaurant name as the key (copy it precisely, character for character)
-- Classify into SPECIFIC food cuisine types. Use these categories:
-  Biryani, North Indian, South Indian, Chinese, Pizza, Italian, Continental, Mughlai, Tandoori, Cafe/Coffee, Fast Food, Burger, Street Food, Seafood, Bakery/Desserts, Japanese, Thai, Korean, Mexican, Arabian/Lebanese, Ice Cream, Multi-cuisine, Vegetarian, BBQ/Grill, Kebab
-- Do NOT use generic labels like "Restaurant" or "Food" - always pick the most specific cuisine
-- For restaurants with multiple cuisines, pick the PRIMARY one they are most known for
+- Classify into SPECIFIC food cuisine types: Biryani, North Indian, South Indian, Chinese, Pizza, Italian, Continental, Mughlai, Tandoori, Cafe/Coffee, Fast Food, Burger, Street Food, Seafood, Bakery/Desserts, Japanese, Thai, Korean, Mexican, Arabian/Lebanese, Ice Cream, Multi-cuisine, Vegetarian, BBQ/Grill, Kebab
+- Do NOT use generic labels like "Restaurant" or "Food" — always pick the most specific cuisine
 - "baseRestaurantCuisine" must be the specific food type of ${name} (e.g. "Biryani" not "Indian")
 
 OTHER RULES:
-- Make executiveSummary.keyFindings exactly 4 items, each a specific insight (not generic)
-- Make yourKeywordCluster.primary, .positive, .negative each have 5-8 keywords, .longTail 5-8 phrases, .trending 4-6 keywords, .competitor 4-6 keywords
-- For each competitor in competitorEnhancements, include 2-3 items in whatTheyDoBetter and whereYouWin
-- Be specific to the actual restaurants, not generic advice
+- actionPlan must have exactly 5 items ordered by priority (1=most urgent)
+- keyFindings must be exactly 6 items — each must reference actual data from the competitor list
+- Every insight must name actual restaurants from the data — no generic statements
+- finalStrategicVerdict must be 3-4 detailed paragraphs, not a single sentence
+- pricingInsight and marketingEdge must be specific to that competitor's data, not generic
 `
         },
       ],
