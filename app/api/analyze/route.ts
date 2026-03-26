@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import OpenAI from "openai"
+import Anthropic from "@anthropic-ai/sdk"
 
 type Restaurant = {
   name: string
@@ -25,8 +25,8 @@ type Restaurant = {
   whereYouWin?: string[]
 }
 
-function getOpenAI() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+function getAnthropic() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 }
 
 function getGoogleKey() {
@@ -534,15 +534,12 @@ export async function POST(req: Request) {
     // ==============================
     // AI ANALYSIS
     // ==============================
-    const ai = await getOpenAI().chat.completions.create({
-      model: "gpt-4o-mini",
-      response_format: { type: "json_object" },
+    const ai = await getAnthropic().messages.create({
+      model: "claude-opus-4-6",
+      max_tokens: 4096,
+      thinking: { type: "adaptive" },
+      system: "You are a senior restaurant competitive intelligence strategist. You write detailed, actionable, and easy-to-understand analyses. Your executive summaries are structured with clear sections that any restaurant owner can follow. Always respond with valid JSON only.",
       messages: [
-        {
-          role: "system",
-          content:
-            "You are a senior restaurant competitive intelligence strategist. You write detailed, actionable, and easy-to-understand analyses. Your executive summaries are structured with clear sections that any restaurant owner can follow.",
-        },
         {
           role: "user",
           content: `
@@ -618,13 +615,13 @@ OTHER RULES:
 `
         },
       ],
-      temperature: 0.7,
     })
 
-    const aiParsed = JSON.parse(ai.choices[0].message.content!)
+    const aiText = ai.content.find((b) => b.type === "text")?.text ?? "{}"
+    const aiParsed = JSON.parse(aiText)
 
     // ==============================
-    // Apply GPT cuisine classification to all restaurants
+    // Apply Claude cuisine classification to all restaurants
     // ==============================
     const cuisineMap = aiParsed.cuisineClassification || {}
     const baseRestaurantCuisine: string = aiParsed.baseRestaurantCuisine || "Multi-cuisine"
@@ -904,14 +901,11 @@ OTHER RULES:
 
     const [deliveryResult, seoChecks] = await Promise.all([
       // Delivery benchmark GPT call
-      getOpenAI().chat.completions.create({
-        model: "gpt-4o-mini",
-        response_format: { type: "json_object" },
+      getAnthropic().messages.create({
+        model: "claude-opus-4-6",
+        max_tokens: 2048,
+        system: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume. Always respond with valid JSON only.",
         messages: [
-          {
-            role: "system",
-            content: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume.",
-          },
           {
             role: "user",
             content: `
@@ -950,14 +944,14 @@ RULES:
 `
           },
         ],
-        temperature: 0.6,
       }).catch(() => null),
 
       // SEO fetch (runs in parallel)
       fetchWebsiteSEO(baseDetails?.website || null, name, city),
     ])
 
-    const deliveryParsed = deliveryResult ? JSON.parse(deliveryResult.choices[0].message.content!) : { deliveryBenchmarks: [] }
+    const deliveryText = deliveryResult ? (deliveryResult.content.find((b: Anthropic.ContentBlock) => b.type === "text") as Anthropic.TextBlock | undefined)?.text ?? "{}" : "{}"
+    const deliveryParsed = deliveryText !== "{}" ? JSON.parse(deliveryText) : { deliveryBenchmarks: [] }
     const deliveryBenchmarks = (deliveryParsed.deliveryBenchmarks || []).map((b: any) => {
       if (b.isBase) {
         return { ...b, address: baseDetails?.location ? `${city}` : city }
