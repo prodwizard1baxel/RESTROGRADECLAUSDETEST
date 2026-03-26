@@ -535,9 +535,8 @@ export async function POST(req: Request) {
     // AI ANALYSIS
     // ==============================
     const ai = await getAnthropic().messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-haiku-4-5",
       max_tokens: 4096,
-      thinking: { type: "adaptive" },
       system: "You are a senior restaurant competitive intelligence strategist. You write detailed, actionable, and easy-to-understand analyses. Your executive summaries are structured with clear sections that any restaurant owner can follow. Always respond with valid JSON only.",
       messages: [
         {
@@ -902,7 +901,7 @@ OTHER RULES:
     const [deliveryResult, seoChecks] = await Promise.all([
       // Delivery benchmark GPT call
       getAnthropic().messages.create({
-        model: "claude-opus-4-6",
+        model: "claude-haiku-4-5",
         max_tokens: 2048,
         system: "You are a food delivery platform analyst with deep knowledge of Swiggy and Zomato restaurant listings in India. Provide realistic benchmark estimates based on restaurant name, cuisine, city, rating, and review volume. Always respond with valid JSON only.",
         messages: [
