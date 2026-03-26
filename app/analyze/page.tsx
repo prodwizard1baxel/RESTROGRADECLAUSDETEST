@@ -96,6 +96,23 @@ export default function Analyze() {
     }
   }
 
+  /* ─── Subscription / credits state ─────────────────────────────── */
+  const [credits, setCredits] = useState<{ reportsRemaining: number; plan: string } | null>(null)
+  const [creditsLoading, setCreditsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!session?.user) return
+    setCreditsLoading(true)
+    fetch("/api/subscription")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.hasCredits) setCredits({ reportsRemaining: data.reportsRemaining, plan: data.plan })
+        else setCredits(null)
+      })
+      .catch(() => setCredits(null))
+      .finally(() => setCreditsLoading(false))
+  }, [session])
+
   /* ─── Promo code state ───────────────────────────────────────────── */
   const [showPromo, setShowPromo] = useState(false)
   const [promoCode, setPromoCode] = useState("")
@@ -118,6 +135,11 @@ export default function Analyze() {
       if (res.ok && data.success) {
         setPromoSuccess(data.message)
         setShowPromo(false)
+        // Refresh credits after promo applied
+        fetch("/api/subscription").then(r => r.json()).then(d => {
+          if (d.hasCredits) setCredits({ reportsRemaining: d.reportsRemaining, plan: d.plan })
+          else setCredits(null)
+        }).catch(() => {})
       } else {
         setPromoError(data.error || "Invalid promo code")
       }
@@ -572,6 +594,42 @@ export default function Analyze() {
           {error && (
             <div className="mb-5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm">
               {error}
+            </div>
+          )}
+
+          {/* Credits counter */}
+          {session?.user && (
+            <div className="mb-5">
+              {creditsLoading ? (
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                  <div className="w-4 h-4 border-2 border-slate-300 border-t-emerald-500 rounded-full animate-spin" />
+                  <span className="text-xs text-slate-400">Checking credits...</span>
+                </div>
+              ) : credits ? (
+                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm text-emerald-800 font-medium">
+                      {credits.reportsRemaining} report credit{credits.reportsRemaining !== 1 ? "s" : ""} remaining
+                    </span>
+                  </div>
+                  <span className="text-xs text-emerald-600 capitalize bg-emerald-100 px-2 py-0.5 rounded-full font-medium">
+                    {credits.plan}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <span className="text-sm text-amber-800">No report credits — purchase a plan to continue</span>
+                  </div>
+                  <a href="/#pricing" className="text-xs text-amber-700 font-semibold hover:underline shrink-0 ml-2">Buy now</a>
+                </div>
+              )}
             </div>
           )}
 

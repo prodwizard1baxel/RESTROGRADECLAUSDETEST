@@ -12,7 +12,10 @@ async function sendInvoiceEmail(email: string, data: {
   totalReports: number
 }) {
   const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) return
+  if (!apiKey) {
+    console.error("RESEND_API_KEY not configured — invoice email not sent for payment:", data.paymentId)
+    return
+  }
 
   const fromEmail = process.env.RESEND_FROM_EMAIL || "RestoRank <noreply@restorank.in>"
   const date = new Date().toLocaleDateString("en-IN", {
@@ -24,6 +27,7 @@ async function sendInvoiceEmail(email: string, data: {
     const { Resend } = await import("resend")
     const resend = new Resend(apiKey)
 
+    console.log(`Sending invoice email to ${email} for payment ${data.paymentId}`)
     await resend.emails.send({
       from: fromEmail,
       to: email,
@@ -55,8 +59,9 @@ async function sendInvoiceEmail(email: string, data: {
         </div>
       `,
     })
+    console.log(`Invoice email sent successfully to ${email}`)
   } catch (err) {
-    console.error("Failed to send invoice email:", err)
+    console.error("Failed to send invoice email to", email, ":", err)
   }
 }
 
@@ -152,7 +157,7 @@ export async function POST(req: Request) {
         amount: amountPaise / 100,
         paymentId,
         totalReports,
-      }).catch(console.error)
+      }).catch((err) => console.error("Invoice email promise rejected:", err))
     }
 
     return NextResponse.json({
