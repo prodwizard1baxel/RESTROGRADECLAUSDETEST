@@ -535,7 +535,7 @@ export async function POST(req: Request) {
     // AI ANALYSIS
     // ==============================
     const ai = await getAnthropic().messages.create({
-      model: "claude-haiku-4-5",
+      model: "claude-sonnet-4-6",
       max_tokens: 4096,
       system: "You are a senior restaurant competitive intelligence strategist. You write detailed, actionable, and easy-to-understand analyses. Your executive summaries are structured with clear sections that any restaurant owner can follow. Always respond with valid JSON only.",
       messages: [
