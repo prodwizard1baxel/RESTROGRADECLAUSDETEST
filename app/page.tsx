@@ -344,9 +344,9 @@ export default function Home() {
           </h1>
 
           <p className="animate-fade-in-up animation-delay-200 text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Competition analysed for historic 2 years data. Get a detailed
-            competitive intelligence report for your restaurant in minutes —
-            powered by real Google Maps data, review analysis, and market trends.
+            Most restaurant owners discover a competitor stole their customers <em>after</em> it happens.
+            RestoRank gives you a complete competitive intelligence report in under 2 minutes —
+            built from real Google Maps data, 2 years of market history, and AI-driven analysis.
           </p>
 
           <div className="animate-fade-in-up animation-delay-300 flex flex-col sm:flex-row gap-4 justify-center">
@@ -372,7 +372,7 @@ export default function Home() {
           </div>
 
           <p className="animate-fade-in animation-delay-500 mt-10 text-sm text-slate-400">
-            Based on 2 years of historic data &bull; Real Google Maps insights &bull; Results in under 2 minutes
+            Based on 2 years of historical data &bull; Real Google Maps insights &bull; Results in under 2 minutes
           </p>
         </div>
 
@@ -533,6 +533,10 @@ export default function Home() {
                 >
                   {paymentLoading === "starter" ? "Processing..." : "Get Started"}
                 </button>
+                <p className="text-center text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                  Secure payment via Razorpay &bull; Report in &lt;2 min
+                </p>
               </div>
             </Reveal>
 
@@ -581,6 +585,10 @@ export default function Home() {
                 >
                   {paymentLoading === "growth" ? "Processing..." : "Get Growth Pack"}
                 </button>
+                <p className="text-center text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                  Secure payment via Razorpay &bull; Credits never expire
+                </p>
               </div>
             </Reveal>
           </div>
@@ -674,6 +682,19 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── FAQ ─────────────────────────────────────────────────────── */}
+      <section className="py-20 md:py-32 bg-white relative">
+        <div className="max-w-3xl mx-auto px-6">
+          <Reveal className="text-center mb-16">
+            <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Got Questions?</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Frequently Asked <span className="gradient-text">Questions</span>
+            </h2>
+          </Reveal>
+          <FAQAccordion />
+        </div>
+      </section>
+
       {/* ── Final CTA ───────────────────────────────────────────────── */}
       <section className="py-24 md:py-36 bg-slate-50 relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
@@ -706,7 +727,7 @@ export default function Home() {
                 <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
                 <span className="font-semibold text-lg tracking-tight text-slate-800">Resto<span className="text-emerald-600">Rank</span></span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">Data-driven competitive intelligence for restaurants. Competition analysed for historic 2 years data to help you outperform every competitor.</p>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">Data-driven competitive intelligence for restaurants. Built on 2 years of real market data to help you understand, outmaneuver, and outperform your competition.</p>
             </div>
             <div>
               <p className="text-sm font-semibold mb-4 text-slate-700">Product</p>
@@ -734,6 +755,63 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+/* ─── FAQ Accordion ──────────────────────────────────────────────────── */
+const FAQ_ITEMS = [
+  {
+    q: "What data does RestoRank actually use?",
+    a: "We pull live data from the Google Maps Places API — real ratings, review counts, photos, business hours, and location data for every restaurant within 7km of yours. Our AI then analyzes 2 years of market trends, delivery platform benchmarks (Swiggy & Zomato), and SEO signals to build your report.",
+  },
+  {
+    q: "How long does it take to generate a report?",
+    a: "Under 2 minutes in most cases. We fetch live competitor data, run it through our AI analysis engine, and build your dashboard — all in a single pass. Larger cities with 60+ nearby restaurants may take slightly longer.",
+  },
+  {
+    q: "Is my restaurant data stored anywhere?",
+    a: "Yes — your report is saved securely in our database so you can revisit it anytime from your dashboard. We only store publicly available Google Maps data about restaurants. We never collect private business information.",
+  },
+  {
+    q: "What does the 'Threat Score' mean?",
+    a: "The Threat Score (0–100) rates how competitive a nearby restaurant is relative to yours. It's a weighted formula: 40% rating quality, 30% review volume (social proof), and 30% proximity. A score above 70 means that competitor is a serious threat and warrants direct action.",
+  },
+  {
+    q: "Can I use the Growth Pack for multiple restaurants?",
+    a: "Yes. The 6 credits can be used for any restaurant name + city combination — track 6 different locations, or rerun the same restaurant over several months to monitor how competition evolves. Credits never expire.",
+  },
+  {
+    q: "What if I'm not satisfied with the report?",
+    a: "Reach out to us at support@restorank.in within 7 days of purchase and we'll make it right — either a replacement report or a full refund. We want the data to be genuinely useful to you.",
+  },
+]
+
+function FAQAccordion() {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <div className="space-y-3">
+      {FAQ_ITEMS.map((item, i) => (
+        <Reveal key={i} delay={i * 60}>
+          <div className={`border rounded-2xl overflow-hidden transition-all duration-300 ${open === i ? "border-emerald-300 bg-emerald-50/40" : "border-slate-200 bg-white hover:border-emerald-200"}`}>
+            <button
+              onClick={() => setOpen(open === i ? null : i)}
+              className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
+            >
+              <span className={`text-sm font-semibold transition-colors duration-200 ${open === i ? "text-emerald-700" : "text-slate-800"}`}>{item.q}</span>
+              <svg
+                className={`w-5 h-5 shrink-0 text-emerald-600 transition-transform duration-300 ${open === i ? "rotate-45" : ""}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${open === i ? "max-h-48" : "max-h-0"}`}>
+              <p className="px-6 pb-5 text-sm text-slate-600 leading-relaxed">{item.a}</p>
+            </div>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+  )
 }
 
 /* ─── Preview Bars ─────────────────────────────────────────────────── */

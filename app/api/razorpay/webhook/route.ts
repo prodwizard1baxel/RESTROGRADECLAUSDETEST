@@ -280,8 +280,9 @@ export async function POST(req: Request) {
       const result = await processPayment({
         amountPaise: payment.amount,
         paymentId: payment.id,
-        email: payment.email || payment.notes?.email || null,
-        phone: payment.contact || payment.notes?.phone || null,
+        // Prefer notes.email (stamped at order creation from session) over the checkout form email
+        email: payment.notes?.email || payment.email || null,
+        phone: payment.notes?.phone || payment.contact || null,
         name: payment.notes?.name || null,
       })
 

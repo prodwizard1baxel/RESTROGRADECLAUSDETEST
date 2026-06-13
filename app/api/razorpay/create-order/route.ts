@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 const PLANS: Record<string, { amount: number; description: string }> = {
   starter: { amount: 100, description: "RestoRank Starter — 1 Report" },
@@ -21,6 +23,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Payment configuration missing" }, { status: 500 })
     }
 
+    // Stamp session user info into order notes so the webhook can match the right account
+    const session = await getServerSession(authOptions)
+    const sessionEmail = session?.user?.email || null
+    const sessionPhone = (session?.user as any)?.phone || null
+
     // Create Razorpay order via API
     const res = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
@@ -31,7 +38,11 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         amount: planInfo.amount,
         currency: "INR",
-        notes: { plan },
+        notes: {
+          plan,
+          ...(sessionEmail ? { email: sessionEmail } : {}),
+          ...(sessionPhone ? { phone: sessionPhone } : {}),
+        },
       }),
     })
 
