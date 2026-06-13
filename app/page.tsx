@@ -416,6 +416,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Restaurant Marquee ───────────────────────────────────────── */}
+      <RestaurantMarquee />
+
       {/* ── How It Works ────────────────────────────────────────────── */}
       <section id="how-it-works" className="py-20 md:py-32 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-6 relative">
@@ -455,6 +458,44 @@ export default function Home() {
               <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </a>
           </Reveal>
+        </div>
+      </section>
+
+      {/* ── Radar + Live Feed ───────────────────────────────────────── */}
+      <section className="py-20 md:py-28 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-50/60 rounded-full blur-[120px] pointer-events-none" />
+        <div className="max-w-6xl mx-auto px-6 relative">
+          <Reveal className="text-center mb-16">
+            <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">See It In Action</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Your Competitive Landscape,<br /><span className="gradient-text">Mapped In Real Time</span>
+            </h2>
+            <p className="text-slate-500 mt-5 max-w-xl mx-auto">
+              We locate every competitor within 7km, score them by threat level, and show you exactly what to do next.
+            </p>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-2 gap-10 items-center max-w-4xl mx-auto">
+            <Reveal delay={0}>
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Threat Radar · Live</span>
+                </div>
+                <CompetitorRadar />
+              </div>
+            </Reveal>
+
+            <Reveal delay={150}>
+              <div className="space-y-4">
+                <LiveActivityFeed />
+                <p className="text-xs text-slate-400 text-center">
+                  Activity across 500+ restaurants using RestoRank
+                </p>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
@@ -764,6 +805,180 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+/* ─── RestaurantMarquee — scrolling live data strip ─────────────────── */
+function RestaurantMarquee() {
+  const row1 = [
+    "Biryani Blues · Bangalore", "The Bombay Canteen · Mumbai",
+    "Pali Village Cafe · Mumbai", "Spice Garden · Pune",
+    "Mainland China · Kolkata", "Barbeque Nation · Hyderabad",
+    "Copper Chimney · Mumbai", "Karavalli · Bangalore",
+    "Chai Point · Hyderabad", "Toit Brewpub · Bangalore",
+  ]
+  const row2 = [
+    "Indian Accent · Delhi", "SodaBottleOpenerWala · Mumbai",
+    "AB's Barbecues · Chennai", "Moti Mahal Delux · Delhi",
+    "Behrouz Biryani · Pune", "Truffles · Bangalore",
+    "Zaffran · Mumbai", "Andhra Bhavan · Delhi",
+    "The Great Kebab Factory · Delhi", "Bukhara · Delhi",
+  ]
+  return (
+    <div className="py-5 overflow-hidden bg-slate-50 border-y border-slate-100 select-none">
+      <div className="flex animate-marquee whitespace-nowrap mb-2">
+        {[...row1, ...row1].map((name, i) => (
+          <span key={i} className="mx-8 text-sm text-slate-500 font-medium tracking-wide">
+            <span className="text-emerald-400 mr-2">●</span>{name}
+          </span>
+        ))}
+      </div>
+      <div className="flex animate-marquee-reverse whitespace-nowrap">
+        {[...row2, ...row2].map((name, i) => (
+          <span key={i} className="mx-8 text-xs text-slate-300 font-medium tracking-wide">
+            <span className="text-slate-200 mr-2">○</span>{name}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ─── CompetitorRadar — animated SVG threat radar ────────────────────── */
+function CompetitorRadar() {
+  const competitors = [
+    { cx: 64, cy: 34, threat: "high",   label: "The Bombay Canteen" },
+    { cx: 80, cy: 58, threat: "high",   label: "Pali Village Cafe"  },
+    { cx: 68, cy: 76, threat: "medium", label: "The Coastal Kitchen" },
+    { cx: 38, cy: 74, threat: "medium", label: "Bandra Blues"        },
+    { cx: 24, cy: 50, threat: "low",    label: "Spice Route"         },
+    { cx: 30, cy: 28, threat: "low",    label: "Chai Garden"         },
+    { cx: 54, cy: 18, threat: "medium", label: "Biryani House"       },
+  ]
+  const color = (t: string) =>
+    t === "high" ? "#EF4444" : t === "medium" ? "#F59E0B" : "#10B981"
+
+  return (
+    <div className="relative w-full max-w-[280px] mx-auto">
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
+        {/* Rings */}
+        {[38, 28, 18, 8].map((r, i) => (
+          <circle key={i} cx="50" cy="50" r={r} fill="none"
+            stroke={i === 0 ? "#E2E8F0" : "#F1F5F9"} strokeWidth="0.5" />
+        ))}
+        {/* Cross hairs */}
+        <line x1="50" y1="12" x2="50" y2="88" stroke="#E2E8F0" strokeWidth="0.3" strokeDasharray="1,2" />
+        <line x1="12" y1="50" x2="88" y2="50" stroke="#E2E8F0" strokeWidth="0.3" strokeDasharray="1,2" />
+        <line x1="22" y1="22" x2="78" y2="78" stroke="#F1F5F9" strokeWidth="0.3" strokeDasharray="1,3" />
+        <line x1="78" y1="22" x2="22" y2="78" stroke="#F1F5F9" strokeWidth="0.3" strokeDasharray="1,3" />
+
+        {/* Rotating sweep */}
+        <g className="animate-radar-sweep" style={{ transformOrigin: "50px 50px" }}>
+          <path d="M 50 50 L 50 12 A 38 38 0 0 1 87 62 Z"
+            fill="url(#sweepGrad)" opacity="0.35" />
+        </g>
+        <defs>
+          <radialGradient id="sweepGrad" cx="0%" cy="50%" r="100%">
+            <stop offset="0%" stopColor="#059669" stopOpacity="0" />
+            <stop offset="100%" stopColor="#059669" stopOpacity="0.5" />
+          </radialGradient>
+        </defs>
+
+        {/* Competitor dots */}
+        {competitors.map((c, i) => (
+          <g key={i}>
+            {c.threat !== "low" && (
+              <circle cx={c.cx} cy={c.cy} r="4" fill={color(c.threat)} opacity="0.15">
+                <animate attributeName="r" values="2;6;2" dur={`${2 + i * 0.3}s`} repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.2;0;0.2" dur={`${2 + i * 0.3}s`} repeatCount="indefinite" />
+              </circle>
+            )}
+            <circle cx={c.cx} cy={c.cy} r="2" fill={color(c.threat)} opacity="0.9" />
+          </g>
+        ))}
+
+        {/* Center — "Your Restaurant" */}
+        <circle cx="50" cy="50" r="6" fill="#059669" opacity="0.12">
+          <animate attributeName="r" values="4;9;4" dur="2.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.2;0;0.2" dur="2.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="50" cy="50" r="3.5" fill="#059669" />
+        <circle cx="50" cy="50" r="2" fill="white" />
+      </svg>
+
+      {/* Legend */}
+      <div className="flex justify-center gap-5 mt-3 text-xs text-slate-500">
+        {[["#EF4444","High"],["#F59E0B","Medium"],["#10B981","Low"]].map(([c,l]) => (
+          <span key={l} className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: c }} />{l}
+          </span>
+        ))}
+      </div>
+      <p className="text-center text-xs text-slate-400 mt-1.5">Your restaurant · 7km radius</p>
+    </div>
+  )
+}
+
+/* ─── LiveActivityFeed — rotating real-time alerts ───────────────────── */
+function LiveActivityFeed() {
+  const events = [
+    { initials: "PM", name: "Priya M.", restaurant: "Tandoor Tales", city: "Bangalore", action: "identified 14 new competitors", dot: "#EF4444" },
+    { initials: "AS", name: "Arjun S.", restaurant: "Biryani Blues", city: "Hyderabad", action: "improved profile score to 7/8", dot: "#10B981" },
+    { initials: "RK", name: "Ravi K.", restaurant: "Spice Garden", city: "Pune", action: "now ranking #3 for 'best biryani'", dot: "#8B5CF6" },
+    { initials: "DN", name: "Deepa N.", restaurant: "The Coastal Kitchen", city: "Mumbai", action: "spotted 2 new openings nearby", dot: "#F59E0B" },
+    { initials: "SP", name: "Sanjay P.", restaurant: "Chai & Co.", city: "Delhi", action: "generated competitive report", dot: "#10B981" },
+    { initials: "MK", name: "Meera K.", restaurant: "Pizza Di Roma", city: "Chennai", action: "found 9 competitors in 5km radius", dot: "#EF4444" },
+    { initials: "VR", name: "Vikram R.", restaurant: "Dosa Delight", city: "Bangalore", action: "profile views jumped 40% this week", dot: "#10B981" },
+    { initials: "AJ", name: "Anita J.", restaurant: "The Curry Leaf", city: "Kochi", action: "threat score dropped from 78 → 41", dot: "#8B5CF6" },
+  ]
+  const [top, setTop] = useState(0)
+  const [key, setKey] = useState(0)
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTop((i) => (i + 1) % events.length)
+      setKey((k) => k + 1)
+    }, 2800)
+    return () => clearInterval(iv)
+  }, [])
+
+  const visible = [0, 1, 2, 3].map((o) => events[(top + o) % events.length])
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+      <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="text-xs font-semibold text-slate-600">Live Activity</span>
+        </div>
+        <span className="text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-full px-2.5 py-0.5">
+          Across India
+        </span>
+      </div>
+      <div className="divide-y divide-slate-50">
+        {visible.map((ev, i) => (
+          <div
+            key={`${key}-${i}`}
+            className={`px-5 py-3.5 flex items-start gap-3 ${i === 0 ? "animate-slide-up-fade" : ""}`}
+          >
+            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
+              {ev.initials}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-slate-700 leading-relaxed">
+                <span className="font-semibold">{ev.name}</span>
+                <span className="text-slate-400"> ({ev.restaurant}, {ev.city})</span>{" "}
+                <span className="font-medium" style={{ color: ev.dot }}>{ev.action}</span>
+              </p>
+            </div>
+            <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: ev.dot }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 /* ─── CyclingWord — cycles cuisine names in the hero headline ───────── */
