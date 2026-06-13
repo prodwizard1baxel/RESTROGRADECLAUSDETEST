@@ -407,13 +407,21 @@ export async function POST(req: Request) {
       )
     }
 
-    // Resolve user from session (if signed in)
-    let userId: string | null = null
-    let activeSub: any = null
-
+    // Require sign-in to generate a report
     const { getServerSession } = await import("next-auth")
     const { authOptions } = await import("@/lib/auth")
     const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Please sign in to generate a report." },
+        { status: 401 }
+      )
+    }
+
+    // Resolve user from session
+    let userId: string | null = null
+    let activeSub: any = null
 
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({
