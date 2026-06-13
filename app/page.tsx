@@ -326,6 +326,10 @@ export default function Home() {
         <div className="absolute top-40 right-[5%] w-96 h-96 bg-teal-100/40 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
         <div className="absolute bottom-0 left-[40%] w-80 h-80 bg-slate-100/50 rounded-full blur-[100px] animate-float-slow pointer-events-none" />
 
+        {/* Floating competitor cards — visible on 2xl screens only */}
+        <FloatingThreatCard />
+        <FloatingKeywordCard />
+
         <div className="relative max-w-5xl mx-auto px-6 text-center">
           <div className="animate-fade-in-up inline-flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-full px-5 py-2 mb-8 hover:bg-emerald-100 transition-colors duration-300 cursor-default">
             <span className="relative flex h-2.5 w-2.5">
@@ -338,7 +342,7 @@ export default function Home() {
           </div>
 
           <h1 className="animate-fade-in-up animation-delay-100 text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-7 text-slate-900">
-            Know Your Competition
+            Know Your <CyclingWord /> Competition
             <br />
             <span className="gradient-text-animated">Before They Know You</span>
           </h1>
@@ -371,7 +375,12 @@ export default function Home() {
             </a>
           </div>
 
-          <p className="animate-fade-in animation-delay-500 mt-10 text-sm text-slate-400">
+          {/* Live analysis ticker */}
+          <div className="animate-fade-in animation-delay-500 mt-8 flex justify-center">
+            <LiveAnalysisTicker />
+          </div>
+
+          <p className="animate-fade-in animation-delay-500 mt-5 text-sm text-slate-400">
             Based on 2 years of historical data &bull; Real Google Maps insights &bull; Results in under 2 minutes
           </p>
         </div>
@@ -755,6 +764,199 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+/* ─── CyclingWord — cycles cuisine names in the hero headline ───────── */
+function CyclingWord() {
+  const words = ["Biryani", "Pizza", "Cafe", "North Indian", "Chinese", "Burger"]
+  const [index, setIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % words.length)
+        setVisible(true)
+      }, 350)
+    }, 2800)
+    return () => clearInterval(iv)
+  }, [])
+
+  return (
+    <span
+      className="inline-block text-emerald-600"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(-10px)",
+        transition: "opacity 0.35s ease, transform 0.35s ease",
+      }}
+    >
+      {words[index]}
+    </span>
+  )
+}
+
+/* ─── LiveAnalysisTicker — scrolling real-time feel ─────────────────── */
+function LiveAnalysisTicker() {
+  const examples = [
+    { name: "Biryani Blues", city: "Bangalore", count: 14 },
+    { name: "Spice Garden", city: "Mumbai", count: 23 },
+    { name: "The Coastal Kitchen", city: "Pune", count: 9 },
+    { name: "Pizza Di Roma", city: "Hyderabad", count: 17 },
+    { name: "Chai & Co.", city: "Delhi", count: 31 },
+    { name: "Tandoor Tales", city: "Chennai", count: 11 },
+  ]
+  const [index, setIndex] = useState(0)
+  const [show, setShow] = useState(true)
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setShow(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % examples.length)
+        setShow(true)
+      }, 400)
+    }, 3200)
+    return () => clearInterval(iv)
+  }, [])
+
+  const ex = examples[index]
+  return (
+    <div
+      className="inline-flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-500"
+      style={{ opacity: show ? 1 : 0, transition: "opacity 0.4s ease" }}
+    >
+      <span className="relative flex h-1.5 w-1.5 shrink-0">
+        <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative rounded-full h-1.5 w-1.5 bg-emerald-500" />
+      </span>
+      <span>
+        Analyzing <strong className="text-slate-700">{ex.name}</strong>, {ex.city} —{" "}
+        <strong className="text-emerald-600">{ex.count} competitors</strong> found
+      </span>
+    </div>
+  )
+}
+
+/* ─── FloatingThreatCard — right side hero decoration (2xl only) ─────── */
+function FloatingThreatCard() {
+  const [mounted, setMounted] = useState(false)
+  const [score, setScore] = useState(0)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 700)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    let n = 0
+    const iv = setInterval(() => {
+      n += 3
+      setScore(Math.min(n, 82))
+      if (n >= 82) clearInterval(iv)
+    }, 18)
+    return () => clearInterval(iv)
+  }, [mounted])
+
+  return (
+    <div
+      className="hidden 2xl:block absolute right-10 top-1/2 -translate-y-1/2 space-y-3 w-56 pointer-events-none"
+      style={{
+        opacity: mounted ? 1 : 0,
+        transform: `translateY(-50%) translateX(${mounted ? "0" : "24px"})`,
+        transition: "opacity 0.7s ease 0.7s, transform 0.7s cubic-bezier(0.16,1,0.3,1) 0.7s",
+      }}
+    >
+      <div className="bg-white rounded-2xl border border-red-100 shadow-2xl shadow-red-50/60 p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          <span className="text-xs font-semibold text-red-500">High Threat</span>
+        </div>
+        <p className="text-sm font-bold text-slate-800">The Bombay Canteen</p>
+        <p className="text-xs text-slate-400 mb-3">0.8km · 4.5★ · 2,406 reviews</p>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-slate-500">Threat Score</span>
+          <span className="text-sm font-bold text-red-500 tabular-nums">{score}</span>
+        </div>
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full transition-all duration-75"
+            style={{ width: `${score}%` }}
+          />
+        </div>
+      </div>
+
+      <div
+        className="bg-white rounded-2xl border border-amber-100 shadow-xl shadow-amber-50/60 p-4"
+        style={{ opacity: mounted ? 1 : 0, transition: "opacity 0.7s ease 1.3s" }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          <span className="text-xs font-semibold text-amber-600">New Opening</span>
+        </div>
+        <p className="text-sm font-bold text-slate-800">Pali Village Cafe</p>
+        <p className="text-xs text-slate-400">1.2km · 4.3★ · 892 reviews</p>
+      </div>
+
+      <div
+        className="bg-white rounded-2xl border border-emerald-100 shadow-xl shadow-emerald-50/60 p-4"
+        style={{ opacity: mounted ? 1 : 0, transition: "opacity 0.7s ease 1.9s" }}
+      >
+        <p className="text-xs font-semibold text-emerald-600 mb-1">Your Profile Score</p>
+        <p className="text-2xl font-bold text-slate-900">
+          6<span className="text-sm text-slate-400 font-normal">/8</span>
+        </p>
+        <p className="text-xs text-slate-400 mt-0.5">2 quick fixes to rank #1</p>
+      </div>
+    </div>
+  )
+}
+
+/* ─── FloatingKeywordCard — left side hero decoration (2xl only) ─────── */
+function FloatingKeywordCard() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 1200)
+    return () => clearTimeout(t)
+  }, [])
+
+  return (
+    <div
+      className="hidden 2xl:block absolute left-10 top-1/2 -translate-y-1/2 w-52 pointer-events-none"
+      style={{
+        opacity: mounted ? 1 : 0,
+        transform: `translateY(-50%) translateX(${mounted ? "0" : "-24px"})`,
+        transition: "opacity 0.7s ease 1.2s, transform 0.7s cubic-bezier(0.16,1,0.3,1) 1.2s",
+      }}
+    >
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-slate-100/60 p-5">
+        <p className="text-xs font-semibold text-slate-500 mb-3">Top Keywords to Target</p>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            "best biryani near me",
+            "biryani delivery mumbai",
+            "top restaurants bandra",
+            "late night delivery",
+            "family restaurant mumbai",
+          ].map((kw, i) => (
+            <span
+              key={i}
+              className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-2.5 py-1 font-medium"
+              style={{ opacity: mounted ? 1 : 0, transition: `opacity 0.4s ease ${1.4 + i * 0.15}s` }}
+            >
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /* ─── FAQ Accordion ──────────────────────────────────────────────────── */
