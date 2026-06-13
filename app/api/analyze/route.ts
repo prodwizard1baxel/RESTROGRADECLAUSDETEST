@@ -29,6 +29,18 @@ function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 }
 
+/* Stage-labeled error: carries a user-safe message and HTTP status so the
+   outer handler can report exactly which step failed instead of a generic
+   "server configuration" message. */
+class StageError extends Error {
+  status: number
+  constructor(message: string, status = 502) {
+    super(message)
+    this.name = "StageError"
+    this.status = status
+  }
+}
+
 function getGoogleKey() {
   return process.env.GOOGLE_MAPS_API_KEY!
 }
@@ -126,7 +138,10 @@ async function getCoordinates(address: string) {
   const data = await res.json()
 
   if (data.status !== "OK") {
-    throw new Error("Geocode failed: " + data.status)
+    if (data.status === "REQUEST_DENIED") {
+      throw new StageError("Maps API request denied — the GOOGLE_MAPS_API_KEY is missing, invalid, or lacks Geocoding API access.", 503)
+    }
+    throw new StageError(`Could not locate that restaurant/city (Maps geocode: ${data.status}).`, 502)
   }
 
   return data.results[0].geometry.location
@@ -150,7 +165,10 @@ async function getNearbyRestaurants(lat: number, lng: number) {
   }
 
   if (data.status !== "OK") {
-    throw new Error("Places API failed: " + data.status)
+    if (data.status === "REQUEST_DENIED") {
+      throw new StageError("Maps API request denied — the GOOGLE_MAPS_API_KEY is missing, invalid, or lacks Places API access.", 503)
+    }
+    throw new StageError(`Nearby restaurant search failed (Maps Places: ${data.status}).`, 502)
   }
 
   allResults.push(...data.results)
@@ -398,6 +416,21 @@ export async function POST(req: Request) {
       )
     }
 
+    // Validate the external service keys this route depends on, up front,
+    // so failures return a specific message instead of a generic one.
+    if (!process.env.GOOGLE_MAPS_API_KEY) {
+      return NextResponse.json(
+        { error: "Maps service not configured. Set GOOGLE_MAPS_API_KEY in this environment's Vercel settings, then redeploy." },
+        { status: 503 }
+      )
+    }
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: "AI service not configured. Set ANTHROPIC_API_KEY in this environment's Vercel settings, then redeploy." },
+        { status: 503 }
+      )
+    }
+
     const { name, city } = await req.json()
 
     if (!name || !city) {
@@ -407,32 +440,39 @@ export async function POST(req: Request) {
       )
     }
 
-    // Resolve session for credit deduction (not required to generate)
-    const { getServerSession } = await import("next-auth")
-    const { authOptions } = await import("@/lib/auth")
-    const session = await getServerSession(authOptions)
-
+    // Resolve session for credit deduction (not required to generate).
+    // Wrapped so an auth/config issue (e.g. missing NEXTAUTH_SECRET) never
+    // blocks report generation — guests simply proceed without credits.
     let userId: string | null = null
     let activeSub: any = null
 
-    if (session?.user?.email) {
-      const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
-      })
-      if (user) {
-        userId = user.id
-        activeSub = user.subscriptions.find((s: any) => s.reportsUsed < s.totalReports) || null
+    try {
+      const { getServerSession } = await import("next-auth")
+      const { authOptions } = await import("@/lib/auth")
+      const session = await getServerSession(authOptions)
+
+      if (session?.user?.email) {
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+        })
+        if (user) {
+          userId = user.id
+          activeSub = user.subscriptions.find((s: any) => s.reportsUsed < s.totalReports) || null
+        }
+      } else if ((session?.user as any)?.phone) {
+        const user = await prisma.user.findUnique({
+          where: { phone: (session!.user as any).phone },
+          include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
+        })
+        if (user) {
+          userId = user.id
+          activeSub = user.subscriptions.find((s: any) => s.reportsUsed < s.totalReports) || null
+        }
       }
-    } else if ((session?.user as any)?.phone) {
-      const user = await prisma.user.findUnique({
-        where: { phone: (session!.user as any).phone },
-        include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
-      })
-      if (user) {
-        userId = user.id
-        activeSub = user.subscriptions.find((s: any) => s.reportsUsed < s.totalReports) || null
-      }
+    } catch (authErr) {
+      // Non-fatal: continue as an anonymous report
+      console.error("Session resolution failed (continuing as guest):", authErr)
     }
 
     // Get real details for the base restaurant via Places API
@@ -1037,6 +1077,23 @@ RULES:
     })
   } catch (error: any) {
     console.error("FULL ERROR:", error)
+
+    // Stage-labeled errors carry their own safe message + status
+    if (error instanceof StageError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
+    }
+
+    // Anthropic SDK errors → clear, AI-specific message
+    if (error instanceof Anthropic.APIError) {
+      const status = error.status ?? 502
+      const aiMessage =
+        status === 401
+          ? "AI service authentication failed — ANTHROPIC_API_KEY is invalid or missing."
+          : status === 429
+          ? "AI service is rate-limited right now. Please try again in a moment."
+          : "AI analysis failed while generating the report. Please try again."
+      return NextResponse.json({ error: aiMessage }, { status })
+    }
 
     const message = error?.message || "Unknown error"
     return NextResponse.json(
