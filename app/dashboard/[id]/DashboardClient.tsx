@@ -245,17 +245,18 @@ function BlurredSection({
         <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-2xl shadow-slate-200/60 px-8 py-7 max-w-sm mx-4 text-center">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-1">Premium Insight</h3>
-          <p className="text-sm text-slate-500 mb-5">Unlock full report with a promo code or subscription</p>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Sign In to View</h3>
+          <p className="text-sm text-slate-500 mb-5">Create a free account or sign in to unlock your full competitive report</p>
           <button
             onClick={onUnlock}
             className="w-full bg-emerald-600 text-white rounded-xl px-5 py-3 text-sm font-semibold hover:bg-emerald-700 transition-all duration-200"
           >
-            Unlock Full Report
+            Sign In &amp; View Full Report
           </button>
+          <p className="text-xs text-slate-400 mt-3">Free to sign up &bull; No credit card needed</p>
         </div>
       </div>
     </div>
@@ -516,11 +517,7 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
   }
 
   const handleUnlockClick = () => {
-    if (!session) {
-      window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
-    } else {
-      setShowPromoModal(true)
-    }
+    window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
   }
 
   return (

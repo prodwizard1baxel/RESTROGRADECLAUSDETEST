@@ -30,22 +30,9 @@ export default async function Page({
     data.restaurantCity = report.restaurant.city
   }
 
-  // Check if user is signed in and has an active subscription
-  let hasFullAccess = false
+  // Full access for any logged-in user; guests see blurred preview
   const session = await getServerSession(authOptions)
-
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { subscriptions: { where: { status: "active" }, orderBy: { createdAt: "desc" } } },
-    })
-    if (user && user.subscriptions.length > 0) {
-      const activeSub = user.subscriptions.find(s => s.reportsUsed < s.totalReports)
-      if (activeSub) {
-        hasFullAccess = true
-      }
-    }
-  }
+  const hasFullAccess = !!(session?.user)
 
   return <DashboardClient data={data} hasFullAccess={hasFullAccess} />
 }

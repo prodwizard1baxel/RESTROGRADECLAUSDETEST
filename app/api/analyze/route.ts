@@ -407,19 +407,11 @@ export async function POST(req: Request) {
       )
     }
 
-    // Require sign-in to generate a report
+    // Resolve session for credit deduction (not required to generate)
     const { getServerSession } = await import("next-auth")
     const { authOptions } = await import("@/lib/auth")
     const session = await getServerSession(authOptions)
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: "Please sign in to generate a report." },
-        { status: 401 }
-      )
-    }
-
-    // Resolve user from session
     let userId: string | null = null
     let activeSub: any = null
 
