@@ -326,6 +326,10 @@ export default function Home() {
         <div className="absolute top-40 right-[5%] w-96 h-96 bg-teal-100/40 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
         <div className="absolute bottom-0 left-[40%] w-80 h-80 bg-slate-100/50 rounded-full blur-[100px] animate-float-slow pointer-events-none" />
 
+        {/* Floating competitor cards — visible on 2xl screens only */}
+        <FloatingThreatCard />
+        <FloatingKeywordCard />
+
         <div className="relative max-w-5xl mx-auto px-6 text-center">
           <div className="animate-fade-in-up inline-flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-full px-5 py-2 mb-8 hover:bg-emerald-100 transition-colors duration-300 cursor-default">
             <span className="relative flex h-2.5 w-2.5">
@@ -338,15 +342,15 @@ export default function Home() {
           </div>
 
           <h1 className="animate-fade-in-up animation-delay-100 text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-7 text-slate-900">
-            Know Your Competition
+            Know Your <CyclingWord /> Competition
             <br />
             <span className="gradient-text-animated">Before They Know You</span>
           </h1>
 
           <p className="animate-fade-in-up animation-delay-200 text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Competition analysed for historic 2 years data. Get a detailed
-            competitive intelligence report for your restaurant in minutes —
-            powered by real Google Maps data, review analysis, and market trends.
+            Most restaurant owners discover a competitor stole their customers <em>after</em> it happens.
+            RestoRank gives you a complete competitive intelligence report in under 2 minutes —
+            built from real Google Maps data, 2 years of market history, and AI-driven analysis.
           </p>
 
           <div className="animate-fade-in-up animation-delay-300 flex flex-col sm:flex-row gap-4 justify-center">
@@ -371,8 +375,13 @@ export default function Home() {
             </a>
           </div>
 
-          <p className="animate-fade-in animation-delay-500 mt-10 text-sm text-slate-400">
-            Based on 2 years of historic data &bull; Real Google Maps insights &bull; Results in under 2 minutes
+          {/* Live analysis ticker */}
+          <div className="animate-fade-in animation-delay-500 mt-8 flex justify-center">
+            <LiveAnalysisTicker />
+          </div>
+
+          <p className="animate-fade-in animation-delay-500 mt-5 text-sm text-slate-400">
+            Based on 2 years of historical data &bull; Real Google Maps insights &bull; Results in under 2 minutes
           </p>
         </div>
 
@@ -533,6 +542,10 @@ export default function Home() {
                 >
                   {paymentLoading === "starter" ? "Processing..." : "Get Started"}
                 </button>
+                <p className="text-center text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                  Secure payment via Razorpay &bull; Report in &lt;2 min
+                </p>
               </div>
             </Reveal>
 
@@ -581,6 +594,10 @@ export default function Home() {
                 >
                   {paymentLoading === "growth" ? "Processing..." : "Get Growth Pack"}
                 </button>
+                <p className="text-center text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                  Secure payment via Razorpay &bull; Credits never expire
+                </p>
               </div>
             </Reveal>
           </div>
@@ -674,6 +691,19 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── FAQ ─────────────────────────────────────────────────────── */}
+      <section className="py-20 md:py-32 bg-white relative">
+        <div className="max-w-3xl mx-auto px-6">
+          <Reveal className="text-center mb-16">
+            <p className="text-sm uppercase tracking-[0.2em] text-emerald-600 font-semibold mb-4">Got Questions?</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Frequently Asked <span className="gradient-text">Questions</span>
+            </h2>
+          </Reveal>
+          <FAQAccordion />
+        </div>
+      </section>
+
       {/* ── Final CTA ───────────────────────────────────────────────── */}
       <section className="py-24 md:py-36 bg-slate-50 relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
@@ -706,7 +736,7 @@ export default function Home() {
                 <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">R</div>
                 <span className="font-semibold text-lg tracking-tight text-slate-800">Resto<span className="text-emerald-600">Rank</span></span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">Data-driven competitive intelligence for restaurants. Competition analysed for historic 2 years data to help you outperform every competitor.</p>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">Data-driven competitive intelligence for restaurants. Built on 2 years of real market data to help you understand, outmaneuver, and outperform your competition.</p>
             </div>
             <div>
               <p className="text-sm font-semibold mb-4 text-slate-700">Product</p>
@@ -734,6 +764,256 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+/* ─── CyclingWord — cycles cuisine names in the hero headline ───────── */
+function CyclingWord() {
+  const words = ["Biryani", "Pizza", "Cafe", "North Indian", "Chinese", "Burger"]
+  const [index, setIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % words.length)
+        setVisible(true)
+      }, 350)
+    }, 2800)
+    return () => clearInterval(iv)
+  }, [])
+
+  return (
+    <span
+      className="inline-block text-emerald-600"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(-10px)",
+        transition: "opacity 0.35s ease, transform 0.35s ease",
+      }}
+    >
+      {words[index]}
+    </span>
+  )
+}
+
+/* ─── LiveAnalysisTicker — scrolling real-time feel ─────────────────── */
+function LiveAnalysisTicker() {
+  const examples = [
+    { name: "Biryani Blues", city: "Bangalore", count: 14 },
+    { name: "Spice Garden", city: "Mumbai", count: 23 },
+    { name: "The Coastal Kitchen", city: "Pune", count: 9 },
+    { name: "Pizza Di Roma", city: "Hyderabad", count: 17 },
+    { name: "Chai & Co.", city: "Delhi", count: 31 },
+    { name: "Tandoor Tales", city: "Chennai", count: 11 },
+  ]
+  const [index, setIndex] = useState(0)
+  const [show, setShow] = useState(true)
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setShow(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % examples.length)
+        setShow(true)
+      }, 400)
+    }, 3200)
+    return () => clearInterval(iv)
+  }, [])
+
+  const ex = examples[index]
+  return (
+    <div
+      className="inline-flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-500"
+      style={{ opacity: show ? 1 : 0, transition: "opacity 0.4s ease" }}
+    >
+      <span className="relative flex h-1.5 w-1.5 shrink-0">
+        <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative rounded-full h-1.5 w-1.5 bg-emerald-500" />
+      </span>
+      <span>
+        Analyzing <strong className="text-slate-700">{ex.name}</strong>, {ex.city} —{" "}
+        <strong className="text-emerald-600">{ex.count} competitors</strong> found
+      </span>
+    </div>
+  )
+}
+
+/* ─── FloatingThreatCard — right side hero decoration (2xl only) ─────── */
+function FloatingThreatCard() {
+  const [mounted, setMounted] = useState(false)
+  const [score, setScore] = useState(0)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 700)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    let n = 0
+    const iv = setInterval(() => {
+      n += 3
+      setScore(Math.min(n, 82))
+      if (n >= 82) clearInterval(iv)
+    }, 18)
+    return () => clearInterval(iv)
+  }, [mounted])
+
+  return (
+    <div
+      className="hidden 2xl:block absolute right-10 top-1/2 -translate-y-1/2 space-y-3 w-56 pointer-events-none"
+      style={{
+        opacity: mounted ? 1 : 0,
+        transform: `translateY(-50%) translateX(${mounted ? "0" : "24px"})`,
+        transition: "opacity 0.7s ease 0.7s, transform 0.7s cubic-bezier(0.16,1,0.3,1) 0.7s",
+      }}
+    >
+      <div className="bg-white rounded-2xl border border-red-100 shadow-2xl shadow-red-50/60 p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          <span className="text-xs font-semibold text-red-500">High Threat</span>
+        </div>
+        <p className="text-sm font-bold text-slate-800">The Bombay Canteen</p>
+        <p className="text-xs text-slate-400 mb-3">0.8km · 4.5★ · 2,406 reviews</p>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-slate-500">Threat Score</span>
+          <span className="text-sm font-bold text-red-500 tabular-nums">{score}</span>
+        </div>
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full transition-all duration-75"
+            style={{ width: `${score}%` }}
+          />
+        </div>
+      </div>
+
+      <div
+        className="bg-white rounded-2xl border border-amber-100 shadow-xl shadow-amber-50/60 p-4"
+        style={{ opacity: mounted ? 1 : 0, transition: "opacity 0.7s ease 1.3s" }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          <span className="text-xs font-semibold text-amber-600">New Opening</span>
+        </div>
+        <p className="text-sm font-bold text-slate-800">Pali Village Cafe</p>
+        <p className="text-xs text-slate-400">1.2km · 4.3★ · 892 reviews</p>
+      </div>
+
+      <div
+        className="bg-white rounded-2xl border border-emerald-100 shadow-xl shadow-emerald-50/60 p-4"
+        style={{ opacity: mounted ? 1 : 0, transition: "opacity 0.7s ease 1.9s" }}
+      >
+        <p className="text-xs font-semibold text-emerald-600 mb-1">Your Profile Score</p>
+        <p className="text-2xl font-bold text-slate-900">
+          6<span className="text-sm text-slate-400 font-normal">/8</span>
+        </p>
+        <p className="text-xs text-slate-400 mt-0.5">2 quick fixes to rank #1</p>
+      </div>
+    </div>
+  )
+}
+
+/* ─── FloatingKeywordCard — left side hero decoration (2xl only) ─────── */
+function FloatingKeywordCard() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 1200)
+    return () => clearTimeout(t)
+  }, [])
+
+  return (
+    <div
+      className="hidden 2xl:block absolute left-10 top-1/2 -translate-y-1/2 w-52 pointer-events-none"
+      style={{
+        opacity: mounted ? 1 : 0,
+        transform: `translateY(-50%) translateX(${mounted ? "0" : "-24px"})`,
+        transition: "opacity 0.7s ease 1.2s, transform 0.7s cubic-bezier(0.16,1,0.3,1) 1.2s",
+      }}
+    >
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl shadow-slate-100/60 p-5">
+        <p className="text-xs font-semibold text-slate-500 mb-3">Top Keywords to Target</p>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            "best biryani near me",
+            "biryani delivery mumbai",
+            "top restaurants bandra",
+            "late night delivery",
+            "family restaurant mumbai",
+          ].map((kw, i) => (
+            <span
+              key={i}
+              className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-2.5 py-1 font-medium"
+              style={{ opacity: mounted ? 1 : 0, transition: `opacity 0.4s ease ${1.4 + i * 0.15}s` }}
+            >
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── FAQ Accordion ──────────────────────────────────────────────────── */
+const FAQ_ITEMS = [
+  {
+    q: "What data does RestoRank actually use?",
+    a: "We pull live data from the Google Maps Places API — real ratings, review counts, photos, business hours, and location data for every restaurant within 7km of yours. Our AI then analyzes 2 years of market trends, delivery platform benchmarks (Swiggy & Zomato), and SEO signals to build your report.",
+  },
+  {
+    q: "How long does it take to generate a report?",
+    a: "Under 2 minutes in most cases. We fetch live competitor data, run it through our AI analysis engine, and build your dashboard — all in a single pass. Larger cities with 60+ nearby restaurants may take slightly longer.",
+  },
+  {
+    q: "Is my restaurant data stored anywhere?",
+    a: "Yes — your report is saved securely in our database so you can revisit it anytime from your dashboard. We only store publicly available Google Maps data about restaurants. We never collect private business information.",
+  },
+  {
+    q: "What does the 'Threat Score' mean?",
+    a: "The Threat Score (0–100) rates how competitive a nearby restaurant is relative to yours. It's a weighted formula: 40% rating quality, 30% review volume (social proof), and 30% proximity. A score above 70 means that competitor is a serious threat and warrants direct action.",
+  },
+  {
+    q: "Can I use the Growth Pack for multiple restaurants?",
+    a: "Yes. The 6 credits can be used for any restaurant name + city combination — track 6 different locations, or rerun the same restaurant over several months to monitor how competition evolves. Credits never expire.",
+  },
+  {
+    q: "What if I'm not satisfied with the report?",
+    a: "Reach out to us at support@restorank.in within 7 days of purchase and we'll make it right — either a replacement report or a full refund. We want the data to be genuinely useful to you.",
+  },
+]
+
+function FAQAccordion() {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <div className="space-y-3">
+      {FAQ_ITEMS.map((item, i) => (
+        <Reveal key={i} delay={i * 60}>
+          <div className={`border rounded-2xl overflow-hidden transition-all duration-300 ${open === i ? "border-emerald-300 bg-emerald-50/40" : "border-slate-200 bg-white hover:border-emerald-200"}`}>
+            <button
+              onClick={() => setOpen(open === i ? null : i)}
+              className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
+            >
+              <span className={`text-sm font-semibold transition-colors duration-200 ${open === i ? "text-emerald-700" : "text-slate-800"}`}>{item.q}</span>
+              <svg
+                className={`w-5 h-5 shrink-0 text-emerald-600 transition-transform duration-300 ${open === i ? "rotate-45" : ""}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${open === i ? "max-h-48" : "max-h-0"}`}>
+              <p className="px-6 pb-5 text-sm text-slate-600 leading-relaxed">{item.a}</p>
+            </div>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+  )
 }
 
 /* ─── Preview Bars ─────────────────────────────────────────────────── */
