@@ -429,7 +429,7 @@ async function fetchWebsiteSEO(websiteUrl: string | null, restaurantName: string
 // ==============================
 // Vercel function config - extend timeout for external API calls
 // ==============================
-export const maxDuration = 120
+export const maxDuration = 300
 
 // ==============================
 // MAIN API
@@ -599,6 +599,10 @@ export async function POST(req: Request) {
     // All restaurants within 5km (for cuisine classification + same cuisine filtering)
     const within5km = mapped.filter((r) => r.distanceKm <= 5)
 
+
+    // Start the website SEO fetch now — it only needs baseDetails, so it can
+    // run concurrently with the main AI analysis below
+    const seoPromise = fetchWebsiteSEO(baseDetails?.website || null, name, city)
 
     // ==============================
     // AI ANALYSIS
@@ -1024,8 +1028,8 @@ RULES:
         ],
       }).catch(() => null),
 
-      // SEO fetch (runs in parallel)
-      fetchWebsiteSEO(baseDetails?.website || null, name, city),
+      // SEO fetch (started before the main AI call — already in flight)
+      seoPromise,
     ])
 
     const deliveryText = deliveryResult ? (deliveryResult.content.find((b: Anthropic.ContentBlock) => b.type === "text") as Anthropic.TextBlock | undefined)?.text ?? "{}" : "{}"

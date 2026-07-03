@@ -311,7 +311,8 @@ export default function Analyze() {
       setError("")
 
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 90000)
+      // Must exceed the API route's maxDuration — report generation can take ~2 min
+      const timeout = setTimeout(() => controller.abort(), 150000)
 
       const res = await fetch("/api/analyze", {
         method: "POST",
