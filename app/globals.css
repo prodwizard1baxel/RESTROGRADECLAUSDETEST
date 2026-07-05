@@ -28,7 +28,7 @@
   --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
 }
 
-/* ── Base ───────────────────────────────────────────────────────────── */
+/* -- Base ------------------------------------------------------------- */
 html {
   scroll-behavior: smooth;
 }
@@ -39,7 +39,7 @@ body {
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
-/* ── Keyframes ──────────────────────────────────────────────────────── */
+/* -- Keyframes -------------------------------------------------------- */
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -118,7 +118,7 @@ body {
   to   { transform: rotate(360deg); }
 }
 
-/* ── Animation utilities ────────────────────────────────────────────── */
+/* -- Animation utilities ---------------------------------------------- */
 .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-fade-in { animation: fade-in 0.6s ease-out both; }
 .animate-float { animation: float 8s ease-in-out infinite; }
@@ -137,7 +137,7 @@ body {
 .animation-delay-400 { animation-delay: 0.4s; }
 .animation-delay-500 { animation-delay: 0.5s; }
 
-/* ── Gradient text (muted emerald) ───────────────────────────────────── */
+/* -- Gradient text (muted emerald) ------------------------------------- */
 .gradient-text {
   background: linear-gradient(135deg, #059669, #6EE7B7, #10B981);
   -webkit-background-clip: text;
@@ -145,7 +145,7 @@ body {
   background-clip: text;
 }
 
-/* ── Gradient text animated ─────────────────────────────────────────── */
+/* -- Gradient text animated ------------------------------------------- */
 .gradient-text-animated {
   background: linear-gradient(
     90deg,
@@ -162,7 +162,7 @@ body {
   animation: gradient-shift 4s linear infinite;
 }
 
-/* ── Gradient CTA (muted emerald) ────────────────────────────────────── */
+/* -- Gradient CTA (muted emerald) -------------------------------------- */
 .cta-gradient {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   box-shadow: 0 4px 20px rgba(5, 150, 105, 0.30);
@@ -174,7 +174,7 @@ body {
   transform: translateY(-1px);
 }
 
-/* ── Card styles ────────────────────────────────────────────────────── */
+/* -- Card styles ------------------------------------------------------ */
 .card {
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -199,7 +199,7 @@ body {
   border-color: var(--border);
 }
 
-/* ── Glass card (for hero sections) ────────────────────────────────── */
+/* -- Glass card (for hero sections) ---------------------------------- */
 .glass-card {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
@@ -208,7 +208,7 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
-/* ── CTA hover effects ──────────────────────────────────────────────── */
+/* -- CTA hover effects ------------------------------------------------ */
 .cta-hero {
   position: relative;
   overflow: hidden;
@@ -249,25 +249,25 @@ body {
   left: 100%;
 }
 
-/* ── Dot grid pattern ──────────────────────────────────────────────── */
+/* -- Dot grid pattern ------------------------------------------------ */
 .bg-dot-pattern {
   background-image: radial-gradient(circle, #E2E8F0 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
-/* ── Selection ──────────────────────────────────────────────────────── */
+/* -- Selection -------------------------------------------------------- */
 ::selection {
   background: rgba(5, 150, 105, 0.15);
   color: #1E293B;
 }
 
-/* ── Scrollbar (webkit) ─────────────────────────────────────────────── */
+/* -- Scrollbar (webkit) ----------------------------------------------- */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #F8FAFC; }
 ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-/* ── Print styles (for PDF download) ──────────────────────────────── */
+/* -- Print styles (for PDF download) -------------------------------- */
 @media print {
   * {
     opacity: 1 !important;

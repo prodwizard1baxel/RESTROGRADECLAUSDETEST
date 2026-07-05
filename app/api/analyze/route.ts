@@ -45,6 +45,44 @@ function getGoogleKey() {
   return process.env.GOOGLE_MAPS_API_KEY!
 }
 
+/* Robust LLM-JSON parser: strips markdown fences, extracts the outermost
+   {...} block, and escapes raw control characters inside string literals
+   (LLMs frequently emit unescaped newlines, which breaks JSON.parse). */
+function parseLlmJson(text: string): any {
+  const m = text.match(/\{[\s\S]*\}/)
+  if (!m) throw new StageError("AI returned no JSON — please try again.", 502)
+  const s = m[0]
+  let out = "", inStr = false, esc = false
+  for (const ch of s) {
+    if (inStr) {
+      if (esc) { esc = false; out += ch; continue }
+      if (ch === "\\") { esc = true; out += ch; continue }
+      if (ch === '"') { inStr = false; out += ch; continue }
+      if (ch === "\n") { out += "\\n"; continue }
+      if (ch === "\r") { out += "\\r"; continue }
+      if (ch === "\t") { out += "\\t"; continue }
+      out += ch
+    } else {
+      if (ch === '"') inStr = true
+      out += ch
+    }
+  }
+  try {
+    return JSON.parse(out)
+  } catch {
+    throw new StageError("AI response was malformed (possibly truncated) — please try again.", 502)
+  }
+}
+
+/* Tolerant name lookup for AI-returned maps keyed by restaurant name —
+   exact keys first, then normalized (lowercase, alphanumeric-only). */
+function buildNameLookup(map: Record<string, string>) {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "")
+  const normalized: Record<string, string> = {}
+  for (const [k, v] of Object.entries(map || {})) normalized[norm(k)] = v
+  return (name: string): string | undefined => map?.[name] ?? normalized[norm(name)]
+}
+
 // ==============================
 // Distance Formula
 // ==============================
@@ -610,7 +648,7 @@ export async function POST(req: Request) {
     const ai = await getAnthropic().messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 8192,
-      system: "You are a senior restaurant competitive intelligence strategist with 15+ years of experience in the Indian food & beverage market. You write detailed, highly specific, and actionable analyses that restaurant owners can immediately act on. Every insight must be tied to actual data provided. Always respond with valid JSON only.",
+      system: "You are a senior restaurant competitive intelligence strategist with 15+ years of experience in the Indian food & beverage market. You write detailed, highly specific, and actionable analyses that restaurant owners can immediately act on. Every insight must be tied to actual data provided. Respond with raw valid JSON only — no markdown fences, no commentary. Inside JSON string values, write line breaks as the two characters \\n, never raw line breaks.",
       messages: [
         {
           role: "user",
@@ -700,17 +738,18 @@ OTHER RULES:
     })
 
     const aiText = ai.content.find((b) => b.type === "text")?.text ?? "{}"
-    const aiParsed = JSON.parse(aiText)
+    const aiParsed = parseLlmJson(aiText)
 
     // ==============================
     // Apply Claude cuisine classification to all restaurants
     // ==============================
     const cuisineMap = aiParsed.cuisineClassification || {}
+    const lookupCuisine = buildNameLookup(cuisineMap)
     const baseRestaurantCuisine: string = aiParsed.baseRestaurantCuisine || "Multi-cuisine"
 
-    // Assign food cuisine to each mapped restaurant
+    // Assign food cuisine to each mapped restaurant (exact, then normalized match)
     mapped.forEach((r) => {
-      r.foodCuisine = cuisineMap[r.name] || "Multi-cuisine"
+      r.foodCuisine = lookupCuisine(r.name) || "Multi-cuisine"
     })
 
     // ==============================
@@ -1033,7 +1072,11 @@ RULES:
     ])
 
     const deliveryText = deliveryResult ? (deliveryResult.content.find((b: Anthropic.ContentBlock) => b.type === "text") as Anthropic.TextBlock | undefined)?.text ?? "{}" : "{}"
-    const deliveryParsed = deliveryText !== "{}" ? JSON.parse(deliveryText) : { deliveryBenchmarks: [] }
+    let deliveryParsed: any = { deliveryBenchmarks: [] }
+    if (deliveryText !== "{}") {
+      // Benchmarks are optional enrichment — never fail the whole report over them
+      try { deliveryParsed = parseLlmJson(deliveryText) } catch { /* keep empty */ }
+    }
     const deliveryBenchmarks = (deliveryParsed.deliveryBenchmarks || []).map((b: any) => {
       if (b.isBase) {
         return { ...b, address: baseDetails?.location ? `${city}` : city }
