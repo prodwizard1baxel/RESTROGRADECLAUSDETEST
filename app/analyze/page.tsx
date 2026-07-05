@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 
-/* ─── Indian cities list for autocomplete ───────────────────────────── */
+/* --- Indian cities list for autocomplete ----------------------------- */
 const INDIAN_CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai",
   "Kolkata", "Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur",
@@ -48,7 +48,7 @@ export default function Analyze() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  /* ─── Onboarding state ──────────────────────────────────────────── */
+  /* --- Onboarding state -------------------------------------------- */
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardName, setOnboardName] = useState("")
   const [onboardRestaurant, setOnboardRestaurant] = useState("")
@@ -96,7 +96,7 @@ export default function Analyze() {
     }
   }
 
-  /* ─── Subscription / credits state ─────────────────────────────── */
+  /* --- Subscription / credits state ------------------------------- */
   const [credits, setCredits] = useState<{ reportsRemaining: number; plan: string } | null>(null)
   const [creditsLoading, setCreditsLoading] = useState(false)
 
@@ -113,7 +113,7 @@ export default function Analyze() {
       .finally(() => setCreditsLoading(false))
   }, [session])
 
-  /* ─── Promo code state ───────────────────────────────────────────── */
+  /* --- Promo code state --------------------------------------------- */
   const [showPromo, setShowPromo] = useState(false)
   const [promoCode, setPromoCode] = useState("")
   const [promoLoading, setPromoLoading] = useState(false)
@@ -150,13 +150,13 @@ export default function Analyze() {
     }
   }
 
-  /* ─── City autocomplete state ──────────────────────────────────── */
+  /* --- City autocomplete state ------------------------------------ */
   const [cityQuery, setCityQuery] = useState("")
   const [citySuggestions, setCitySuggestions] = useState<string[]>([])
   const [showCityDropdown, setShowCityDropdown] = useState(false)
   const cityRef = useRef<HTMLDivElement>(null)
 
-  /* ─── Google Places autocomplete state ─────────────────────────── */
+  /* --- Google Places autocomplete state --------------------------- */
   const [placeSuggestions, setPlaceSuggestions] = useState<google.maps.places.AutocompletePrediction[]>([])
   const [showPlaceDropdown, setShowPlaceDropdown] = useState(false)
   const [nameQuery, setNameQuery] = useState("")
@@ -166,7 +166,7 @@ export default function Analyze() {
   const [mapsLoaded, setMapsLoaded] = useState(false)
   const [cityBounds, setCityBounds] = useState<google.maps.LatLngBounds | null>(null)
 
-  /* ─── Load Google Maps Places library ──────────────────────────── */
+  /* --- Load Google Maps Places library ---------------------------- */
   useEffect(() => {
     if (typeof window !== "undefined" && !window.google?.maps?.places) {
       const existing = document.querySelector('script[src*="maps.googleapis.com"]')
@@ -192,7 +192,7 @@ export default function Analyze() {
     }
   }, [])
 
-  /* ─── Geocode selected city to get bounds for location restriction ─ */
+  /* --- Geocode selected city to get bounds for location restriction - */
   useEffect(() => {
     if (!geocoder.current || !city || !mapsLoaded) {
       setCityBounds(null)
@@ -228,7 +228,7 @@ export default function Analyze() {
     )
   }, [city, mapsLoaded])
 
-  /* ─── Restaurant name autocomplete via Google Places ───────────── */
+  /* --- Restaurant name autocomplete via Google Places ------------- */
   const searchPlaces = useCallback((input: string) => {
     if (!autocompleteService.current || input.length < 2) {
       setPlaceSuggestions([])
@@ -272,7 +272,7 @@ export default function Analyze() {
     return () => clearTimeout(timer)
   }, [nameQuery, mapsLoaded, searchPlaces])
 
-  /* ─── City filter ──────────────────────────────────────────────── */
+  /* --- City filter ------------------------------------------------ */
   useEffect(() => {
     if (cityQuery.length > 0) {
       const filtered = INDIAN_CITIES.filter((c) =>
@@ -286,7 +286,7 @@ export default function Analyze() {
     }
   }, [cityQuery])
 
-  /* ─── Click outside handler ────────────────────────────────────── */
+  /* --- Click outside handler -------------------------------------- */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (cityRef.current && !cityRef.current.contains(e.target as Node)) {
@@ -311,7 +311,8 @@ export default function Analyze() {
       setError("")
 
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 90000)
+      // Must exceed the API route's maxDuration — report generation can take ~2 min
+      const timeout = setTimeout(() => controller.abort(), 150000)
 
       const res = await fetch("/api/analyze", {
         method: "POST",
