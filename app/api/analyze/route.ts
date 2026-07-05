@@ -45,6 +45,44 @@ function getGoogleKey() {
   return process.env.GOOGLE_MAPS_API_KEY!
 }
 
+/* Robust LLM-JSON parser: strips markdown fences, extracts the outermost
+   {...} block, and escapes raw control characters inside string literals
+   (LLMs frequently emit unescaped newlines, which breaks JSON.parse). */
+function parseLlmJson(text: string): any {
+  const m = text.match(/\{[\s\S]*\}/)
+  if (!m) throw new StageError("AI returned no JSON — please try again.", 502)
+  const s = m[0]
+  let out = "", inStr = false, esc = false
+  for (const ch of s) {
+    if (inStr) {
+      if (esc) { esc = false; out += ch; continue }
+      if (ch === "\\") { esc = true; out += ch; continue }
+      if (ch === '"') { inStr = false; out += ch; continue }
+      if (ch === "\n") { out += "\\n"; continue }
+      if (ch === "\r") { out += "\\r"; continue }
+      if (ch === "\t") { out += "\\t"; continue }
+      out += ch
+    } else {
+      if (ch === '"') inStr = true
+      out += ch
+    }
+  }
+  try {
+    return JSON.parse(out)
+  } catch {
+    throw new StageError("AI response was malformed (possibly truncated) — please try again.", 502)
+  }
+}
+
+/* Tolerant name lookup for AI-returned maps keyed by restaurant name —
+   exact keys first, then normalized (lowercase, alphanumeric-only). */
+function buildNameLookup(map: Record<string, string>) {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "")
+  const normalized: Record<string, string> = {}
+  for (const [k, v] of Object.entries(map || {})) normalized[norm(k)] = v
+  return (name: string): string | undefined => map?.[name] ?? normalized[norm(name)]
+}
+
 // ==============================
 // Distance Formula
 // ==============================
@@ -126,25 +164,77 @@ function calculateSameCuisineThreatScore(
 }
 
 // ==============================
-// Get Coordinates
+// Places API (New) helpers
+// Legacy Places/Geocoding APIs are unavailable on new Google Cloud
+// projects, so all lookups go through places.googleapis.com/v1.
+// ==============================
+const PLACES_SEARCH_FIELDS = [
+  "places.id",
+  "places.displayName",
+  "places.shortFormattedAddress",
+  "places.rating",
+  "places.userRatingCount",
+  "places.location",
+  "places.types",
+  "places.priceLevel",
+  "places.photos",
+].join(",")
+
+const PRICE_LEVEL_MAP: Record<string, number> = {
+  PRICE_LEVEL_FREE: 0,
+  PRICE_LEVEL_INEXPENSIVE: 1,
+  PRICE_LEVEL_MODERATE: 2,
+  PRICE_LEVEL_EXPENSIVE: 3,
+  PRICE_LEVEL_VERY_EXPENSIVE: 4,
+}
+
+async function placesTextSearch(body: any, fieldMask: string) {
+  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": getGoogleKey(),
+      "X-Goog-FieldMask": fieldMask,
+    },
+    body: JSON.stringify(body),
+  })
+  const data = await res.json()
+  if (!res.ok) {
+    if (res.status === 403) {
+      throw new StageError('Places API (New) request denied — enable "Places API (New)" on the Google Cloud project and allow it on the GOOGLE_MAPS_API_KEY.', 503)
+    }
+    throw new StageError(`Restaurant search failed (Places API: ${data?.error?.status || res.status}).`, 502)
+  }
+  return data
+}
+
+/* Convert a Places-New result into the legacy shape the rest of this route uses */
+function toLegacyPlace(p: any) {
+  return {
+    name: p.displayName?.text || "",
+    vicinity: p.shortFormattedAddress || "",
+    rating: p.rating || 0,
+    user_ratings_total: p.userRatingCount || 0,
+    geometry: { location: { lat: p.location?.latitude ?? 0, lng: p.location?.longitude ?? 0 } },
+    types: p.types || [],
+    price_level: PRICE_LEVEL_MAP[p.priceLevel] ?? 0,
+    photos: p.photos || [],
+  }
+}
+
+// ==============================
+// Get Coordinates (via Places text search)
 // ==============================
 async function getCoordinates(address: string) {
-  const res = await fetch(
-    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-      address
-    )}&key=${getGoogleKey()}`
+  const data = await placesTextSearch(
+    { textQuery: address, pageSize: 1 },
+    "places.location"
   )
-
-  const data = await res.json()
-
-  if (data.status !== "OK") {
-    if (data.status === "REQUEST_DENIED") {
-      throw new StageError("Maps API request denied — the GOOGLE_MAPS_API_KEY is missing, invalid, or lacks Geocoding API access.", 503)
-    }
-    throw new StageError(`Could not locate that restaurant/city (Maps geocode: ${data.status}).`, 502)
+  const loc = data.places?.[0]?.location
+  if (!loc) {
+    throw new StageError(`Could not locate "${address}" on Google Maps. Please check the restaurant name and city.`, 502)
   }
-
-  return data.results[0].geometry.location
+  return { lat: loc.latitude, lng: loc.longitude }
 }
 
 // ==============================
@@ -153,43 +243,23 @@ async function getCoordinates(address: string) {
 async function getNearbyRestaurants(lat: number, lng: number) {
   const radius = 7000
   const allResults: any[] = []
+  let pageToken: string | undefined
 
-  const res = await fetch(
-    `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=restaurant&key=${getGoogleKey()}`
-  )
-
-  const data = await res.json()
-
-  if (data.status === "ZERO_RESULTS") {
-    return []
-  }
-
-  if (data.status !== "OK") {
-    if (data.status === "REQUEST_DENIED") {
-      throw new StageError("Maps API request denied — the GOOGLE_MAPS_API_KEY is missing, invalid, or lacks Places API access.", 503)
+  // Up to 3 pages of 20 = 60 results, mirroring the legacy pagination
+  for (let page = 0; page < 3; page++) {
+    const body: any = {
+      textQuery: "restaurants",
+      includedType: "restaurant",
+      pageSize: 20,
+      locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius } },
     }
-    throw new StageError(`Nearby restaurant search failed (Maps Places: ${data.status}).`, 502)
-  }
+    if (pageToken) body.pageToken = pageToken
 
-  allResults.push(...data.results)
+    const data = await placesTextSearch(body, `${PLACES_SEARCH_FIELDS},nextPageToken`)
+    allResults.push(...(data.places || []).map(toLegacyPlace))
 
-  // Fetch up to 2 more pages for better coverage (max 60 results)
-  let nextPageToken = data.next_page_token
-  for (let page = 0; page < 2 && nextPageToken; page++) {
-    // Google requires a short delay before using next_page_token
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const pageRes = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?pagetoken=${nextPageToken}&key=${getGoogleKey()}`
-    )
-    const pageData = await pageRes.json()
-
-    if (pageData.status === "OK" && pageData.results) {
-      allResults.push(...pageData.results)
-      nextPageToken = pageData.next_page_token
-    } else {
-      break
-    }
+    pageToken = data.nextPageToken
+    if (!pageToken) break
   }
 
   return allResults
@@ -200,33 +270,37 @@ async function getNearbyRestaurants(lat: number, lng: number) {
 // Returns real data: rating, reviews, website, hours, photos, phone, etc.
 // ==============================
 async function getBaseRestaurantDetails(name: string, city: string) {
-  // Step 1: Find the place_id
-  const findRes = await fetch(
-    `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
-      `${name}, ${city}`
-    )}&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,geometry&key=${getGoogleKey()}`
-  )
-  const findData = await findRes.json()
+  // Step 1: Find the place via text search
+  const findData = await placesTextSearch(
+    { textQuery: `${name}, ${city}`, pageSize: 1 },
+    "places.id,places.displayName,places.rating,places.userRatingCount,places.location"
+  ).catch(() => null)
 
-  if (findData.status !== "OK" || !findData.candidates?.length) {
+  const found = findData?.places?.[0]
+  if (!found?.id) {
     return null
   }
 
-  const placeId = findData.candidates[0].place_id
+  const location = found.location
+    ? { lat: found.location.latitude, lng: found.location.longitude }
+    : undefined
 
   // Step 2: Get detailed info
-  const detailRes = await fetch(
-    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,user_ratings_total,website,url,formatted_phone_number,opening_hours,photos,reviews,editorial_summary,business_status,formatted_address,address_components&key=${getGoogleKey()}`
-  )
-  const detailData = await detailRes.json()
+  const detailRes = await fetch(`https://places.googleapis.com/v1/places/${found.id}`, {
+    headers: {
+      "X-Goog-Api-Key": getGoogleKey(),
+      "X-Goog-FieldMask":
+        "displayName,rating,userRatingCount,websiteUri,googleMapsUri,nationalPhoneNumber,regularOpeningHours,photos,reviews,editorialSummary,businessStatus,formattedAddress,addressComponents",
+    },
+  })
+  const d = detailRes.ok ? await detailRes.json() : null
 
-  if (detailData.status !== "OK" || !detailData.result) {
+  if (!d) {
     // Fallback to basic find data
-    const c = findData.candidates[0]
     return {
-      name: c.name,
-      rating: c.rating || 0,
-      totalRatings: c.user_ratings_total || 0,
+      name: found.displayName?.text || name,
+      rating: found.rating || 0,
+      totalRatings: found.userRatingCount || 0,
       website: null,
       phone: null,
       hasHours: false,
@@ -234,58 +308,51 @@ async function getBaseRestaurantDetails(name: string, city: string) {
       photoCount: 0,
       ownerPhotoCount: 0,
       hasMenu: false,
-      reviewCount: c.user_ratings_total || 0,
+      reviewCount: found.userRatingCount || 0,
       recentReviews: [],
       ownerRespondsToReviews: false,
       businessStatus: "OPERATIONAL",
-      location: c.geometry?.location,
+      location,
     }
   }
 
-  const d = detailData.result
-
-  // Extract zone/locality/area from address_components
-  const addressComponents: { long_name: string; short_name: string; types: string[] }[] = d.address_components || []
+  // Extract zone/locality/area from addressComponents (New API: longText/shortText)
+  const addressComponents: { longText: string; shortText: string; types: string[] }[] = d.addressComponents || []
   const zone =
-    addressComponents.find((c: any) => c.types.includes("sublocality_level_1"))?.long_name ||
-    addressComponents.find((c: any) => c.types.includes("sublocality"))?.long_name ||
-    addressComponents.find((c: any) => c.types.includes("neighborhood"))?.long_name ||
-    addressComponents.find((c: any) => c.types.includes("locality"))?.long_name ||
+    addressComponents.find((c) => c.types.includes("sublocality_level_1"))?.longText ||
+    addressComponents.find((c) => c.types.includes("sublocality"))?.longText ||
+    addressComponents.find((c) => c.types.includes("neighborhood"))?.longText ||
+    addressComponents.find((c) => c.types.includes("locality"))?.longText ||
     null
 
-  // Check if owner responds to reviews (look at recent reviews for owner replies)
   const recentReviews = (d.reviews || []).slice(0, 5)
-  const reviewsWithReply = recentReviews.filter(
-    (r: any) => r.author_url && typeof r.text === "string"
-  )
-  // Google doesn't directly expose owner replies in basic fields, but
-  // we can check if there are reviews and estimate responsiveness
   const ownerResponds = recentReviews.length > 0
 
   return {
-    name: d.name,
+    name: d.displayName?.text || found.displayName?.text || name,
     rating: d.rating || 0,
-    totalRatings: d.user_ratings_total || 0,
-    website: d.website || null,
-    phone: d.formatted_phone_number || null,
-    hasHours: !!(d.opening_hours && d.opening_hours.weekday_text?.length > 0),
-    hoursText: d.opening_hours?.weekday_text || null,
+    totalRatings: d.userRatingCount || 0,
+    website: d.websiteUri || null,
+    phone: d.nationalPhoneNumber || null,
+    hasHours: !!(d.regularOpeningHours?.weekdayDescriptions?.length),
+    hoursText: d.regularOpeningHours?.weekdayDescriptions || null,
     photoCount: d.photos?.length || 0,
-    ownerPhotoCount: d.photos?.filter((p: any) => p.html_attributions?.some((a: string) => a.includes("owner"))).length || 0,
-    hasMenu: !!(d.website || d.url),
-    reviewCount: d.user_ratings_total || 0,
+    // Places API (New) does not flag owner-uploaded photos
+    ownerPhotoCount: 0,
+    hasMenu: !!(d.websiteUri || d.googleMapsUri),
+    reviewCount: d.userRatingCount || 0,
     recentReviews: recentReviews.map((r: any) => ({
       rating: r.rating,
-      text: r.text?.substring(0, 200),
-      time: r.relative_time_description,
+      text: r.text?.text?.substring(0, 200),
+      time: r.relativePublishTimeDescription,
     })),
     ownerRespondsToReviews: ownerResponds,
-    businessStatus: d.business_status || "OPERATIONAL",
-    editorialSummary: d.editorial_summary?.overview || null,
-    location: findData.candidates[0].geometry?.location,
-    googleUrl: d.url || null,
+    businessStatus: d.businessStatus || "OPERATIONAL",
+    editorialSummary: d.editorialSummary?.text || null,
+    location,
+    googleUrl: d.googleMapsUri || null,
     zone,
-    formattedAddress: d.formatted_address || null,
+    formattedAddress: d.formattedAddress || null,
   }
 }
 
@@ -400,7 +467,7 @@ async function fetchWebsiteSEO(websiteUrl: string | null, restaurantName: string
 // ==============================
 // Vercel function config - extend timeout for external API calls
 // ==============================
-export const maxDuration = 120
+export const maxDuration = 300
 
 // ==============================
 // MAIN API
@@ -571,13 +638,17 @@ export async function POST(req: Request) {
     const within5km = mapped.filter((r) => r.distanceKm <= 5)
 
 
+    // Start the website SEO fetch now — it only needs baseDetails, so it can
+    // run concurrently with the main AI analysis below
+    const seoPromise = fetchWebsiteSEO(baseDetails?.website || null, name, city)
+
     // ==============================
     // AI ANALYSIS
     // ==============================
     const ai = await getAnthropic().messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 8192,
-      system: "You are a senior restaurant competitive intelligence strategist with 15+ years of experience in the Indian food & beverage market. You write detailed, highly specific, and actionable analyses that restaurant owners can immediately act on. Every insight must be tied to actual data provided. Always respond with valid JSON only.",
+      system: "You are a senior restaurant competitive intelligence strategist with 15+ years of experience in the Indian food & beverage market. You write detailed, highly specific, and actionable analyses that restaurant owners can immediately act on. Every insight must be tied to actual data provided. Respond with raw valid JSON only — no markdown fences, no commentary. Inside JSON string values, write line breaks as the two characters \\n, never raw line breaks.",
       messages: [
         {
           role: "user",
@@ -667,17 +738,18 @@ OTHER RULES:
     })
 
     const aiText = ai.content.find((b) => b.type === "text")?.text ?? "{}"
-    const aiParsed = JSON.parse(aiText)
+    const aiParsed = parseLlmJson(aiText)
 
     // ==============================
     // Apply Claude cuisine classification to all restaurants
     // ==============================
     const cuisineMap = aiParsed.cuisineClassification || {}
+    const lookupCuisine = buildNameLookup(cuisineMap)
     const baseRestaurantCuisine: string = aiParsed.baseRestaurantCuisine || "Multi-cuisine"
 
-    // Assign food cuisine to each mapped restaurant
+    // Assign food cuisine to each mapped restaurant (exact, then normalized match)
     mapped.forEach((r) => {
-      r.foodCuisine = cuisineMap[r.name] || "Multi-cuisine"
+      r.foodCuisine = lookupCuisine(r.name) || "Multi-cuisine"
     })
 
     // ==============================
@@ -995,12 +1067,16 @@ RULES:
         ],
       }).catch(() => null),
 
-      // SEO fetch (runs in parallel)
-      fetchWebsiteSEO(baseDetails?.website || null, name, city),
+      // SEO fetch (started before the main AI call — already in flight)
+      seoPromise,
     ])
 
     const deliveryText = deliveryResult ? (deliveryResult.content.find((b: Anthropic.ContentBlock) => b.type === "text") as Anthropic.TextBlock | undefined)?.text ?? "{}" : "{}"
-    const deliveryParsed = deliveryText !== "{}" ? JSON.parse(deliveryText) : { deliveryBenchmarks: [] }
+    let deliveryParsed: any = { deliveryBenchmarks: [] }
+    if (deliveryText !== "{}") {
+      // Benchmarks are optional enrichment — never fail the whole report over them
+      try { deliveryParsed = parseLlmJson(deliveryText) } catch { /* keep empty */ }
+    }
     const deliveryBenchmarks = (deliveryParsed.deliveryBenchmarks || []).map((b: any) => {
       if (b.isBase) {
         return { ...b, address: baseDetails?.location ? `${city}` : city }

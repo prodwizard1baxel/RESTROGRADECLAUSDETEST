@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import ThreatRadar from "./ThreatRadar"
 
-/* ─── Scroll-reveal hook ────────────────────────────────────────────── */
+/* --- Scroll-reveal hook ---------------------------------------------- */
 function useReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -28,7 +28,7 @@ function useReveal(threshold = 0.15) {
   return { ref, visible }
 }
 
-/* ─── Animated counter ──────────────────────────────────────────────── */
+/* --- Animated counter ------------------------------------------------ */
 function useCounter(target: number, duration = 1800, start = false) {
   const [count, setCount] = useState(0)
   useEffect(() => {
@@ -48,7 +48,7 @@ function useCounter(target: number, duration = 1800, start = false) {
   return count
 }
 
-/* ─── Reveal wrapper ────────────────────────────────────────────────── */
+/* --- Reveal wrapper -------------------------------------------------- */
 function Reveal({
   children,
   className = "",
@@ -76,7 +76,7 @@ function Reveal({
   )
 }
 
-/* ─── Metric Card ──────────────────────────────────────────────────── */
+/* --- Metric Card ---------------------------------------------------- */
 function MetricCard({
   label,
   value,
@@ -118,7 +118,7 @@ function MetricCard({
   )
 }
 
-/* ─── Keyword Tag ───────────────────────────────────────────────────── */
+/* --- Keyword Tag ----------------------------------------------------- */
 function KeywordTag({
   keyword,
   variant = "default",
@@ -150,7 +150,7 @@ function KeywordTag({
   )
 }
 
-/* ─── Cuisine Card (expandable) ─────────────────────────────────────── */
+/* --- Cuisine Card (expandable) --------------------------------------- */
 function CuisineCard({ cuisine: c }: { cuisine: any }) {
   const [expanded, setExpanded] = useState(false)
   const restaurants: { name: string; rating: number; reviews: number; distanceKm: number }[] = c.restaurants || []
@@ -224,7 +224,7 @@ function CuisineCard({ cuisine: c }: { cuisine: any }) {
   )
 }
 
-/* ─── Blurred Section Wrapper ───────────────────────────────────────── */
+/* --- Blurred Section Wrapper ----------------------------------------- */
 function BlurredSection({
   children,
   locked,
@@ -263,7 +263,7 @@ function BlurredSection({
   )
 }
 
-/* ─── Feedback Form ────────────────────────────────────────────────── */
+/* --- Feedback Form -------------------------------------------------- */
 function FeedbackForm() {
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
@@ -390,11 +390,11 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
 
   const reviewMetrics = data?.reviewMetrics || {}
 
-  /* ─── Handle both old (string) and new (object) executiveSummary format ── */
+  /* --- Handle both old (string) and new (object) executiveSummary format -- */
   const execSummary = data?.executiveSummary
   const isStructuredSummary = typeof execSummary === "object" && execSummary !== null
 
-  /* ─── Handle both old (array) and new (object) keyword format ── */
+  /* --- Handle both old (array) and new (object) keyword format -- */
   const keywords = data?.yourKeywordCluster
   const isStructuredKeywords = typeof keywords === "object" && !Array.isArray(keywords) && keywords !== null
 
@@ -410,17 +410,17 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
     ? generatedAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
     : null
 
-  /* ─── Compute overall rank label ── */
+  /* --- Compute overall rank label -- */
   const avgThreat = data?.competitorAnalysis?.averageThreatScore || 0
   const overallRank = avgThreat >= 70 ? "Needs Attention" : avgThreat >= 45 ? "Doing Well" : "Excellent"
   const rankColor = avgThreat >= 70 ? "text-red-600" : avgThreat >= 45 ? "text-amber-600" : "text-emerald-600"
   const rankBg = avgThreat >= 70 ? "bg-red-50 border-red-200" : avgThreat >= 45 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"
 
-  /* ─── Competitor Ranking data ── */
+  /* --- Competitor Ranking data -- */
   const competitorRanking = data?.competitorRanking || {}
   const topRanked: { rank: number; name: string; rating: number; reviews: number; isBase: boolean }[] = competitorRanking.topRanked || []
 
-  /* ─── SEO checks ── */
+  /* --- SEO checks -- */
   const seoChecks = data?.seoChecks || {}
   const seoSections = [
     {
@@ -452,10 +452,10 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
     },
   ]
 
-  /* ─── Search Rankings ── */
+  /* --- Search Rankings -- */
   const searchRankings: { query: string; topResult: any; baseRanked: boolean; basePosition: number | null; totalResults: number; inMapPack: boolean }[] = data?.searchRankings || []
 
-  /* ─── PDF Download & WhatsApp Share ── */
+  /* --- PDF Download & WhatsApp Share -- */
   const handleDownloadPdf = useCallback(() => {
     window.print()
   }, [])
@@ -477,10 +477,10 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
     window.open(whatsappUrl, "_blank")
   }, [restaurantName, reviewMetrics, competitors.length, overallRank, avgThreat])
 
-  /* ─── Delivery Platform Benchmarks ── */
+  /* --- Delivery Platform Benchmarks -- */
   const deliveryBenchmarks: { name: string; isBase: boolean; address?: string; images: number; zomatoRating: number; swiggyRating: number; topDishes: string[]; totalItems: number; itemsAbove4Rating: number }[] = data?.deliveryBenchmarks || []
 
-  /* ─── Access control ── */
+  /* --- Access control -- */
   const { data: session } = useSession()
   const [hasFullAccess, setHasFullAccess] = useState(initialAccess)
   const [showPromoModal, setShowPromoModal] = useState(false)
@@ -522,7 +522,7 @@ function DashboardClientInner({ data, hasFullAccess: initialAccess = false }: an
 
   return (
     <>
-    {/* ─── Promo Code Modal ── */}
+    {/* --- Promo Code Modal -- */}
     {showPromoModal && (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setShowPromoModal(false)}>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-8" onClick={(e) => e.stopPropagation()}>

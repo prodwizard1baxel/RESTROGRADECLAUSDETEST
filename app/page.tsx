@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 
-/* ─── Scroll-reveal hook ────────────────────────────────────────────── */
+/* --- Scroll-reveal hook ---------------------------------------------- */
 function useReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -27,7 +27,7 @@ function useReveal(threshold = 0.15) {
   return { ref, visible };
 }
 
-/* ─── Animated counter hook ─────────────────────────────────────────── */
+/* --- Animated counter hook ------------------------------------------- */
 function useCounter(target: number, duration = 1800, start = false) {
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -47,7 +47,7 @@ function useCounter(target: number, duration = 1800, start = false) {
   return count;
 }
 
-/* ─── Reveal wrapper ────────────────────────────────────────────────── */
+/* --- Reveal wrapper -------------------------------------------------- */
 function Reveal({
   children,
   className = "",
@@ -75,7 +75,7 @@ function Reveal({
   );
 }
 
-/* ─── Stat card ──────────────────────────────────────────────────────── */
+/* --- Stat card -------------------------------------------------------- */
 function StatCard({
   value,
   suffix,
@@ -192,7 +192,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white text-slate-800 overflow-hidden">
-      {/* ── Navigation ──────────────────────────────────────────────── */}
+      {/* -- Navigation ------------------------------------------------ */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
@@ -318,7 +318,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────────────────────── */}
+      {/* -- Hero ------------------------------------------------------ */}
       <section className="relative pt-28 pb-20 md:pt-44 md:pb-32 overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-40 pointer-events-none" />
 
@@ -388,7 +388,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none" />
       </section>
 
-      {/* ── Trusted By ──────────────────────────────────────────────── */}
+      {/* -- Trusted By ------------------------------------------------ */}
       <section className="border-y border-slate-100 bg-slate-50 py-10">
         <Reveal>
           <div className="max-w-6xl mx-auto px-6">
@@ -406,7 +406,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* ── Stats ─────────────────────────────────────────────────── */}
+      {/* -- Stats --------------------------------------------------- */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
           <StatCard value={500} suffix="+" label="Restaurants Analyzed" delay={0} />
@@ -416,10 +416,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Restaurant Marquee ───────────────────────────────────────── */}
+      {/* -- Restaurant Marquee ----------------------------------------- */}
       <RestaurantMarquee />
 
-      {/* ── How It Works ────────────────────────────────────────────── */}
+      {/* -- How It Works ---------------------------------------------- */}
       <section id="how-it-works" className="py-20 md:py-32 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-6 relative">
           <Reveal className="text-center mb-20">
@@ -461,7 +461,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Radar + Live Feed ───────────────────────────────────────── */}
+      {/* -- Radar + Live Feed ----------------------------------------- */}
       <section className="py-20 md:py-28 bg-white relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-50/60 rounded-full blur-[120px] pointer-events-none" />
@@ -499,7 +499,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Features ────────────────────────────────────────────────── */}
+      {/* -- Features -------------------------------------------------- */}
       <section id="features" className="py-20 md:py-32 bg-white relative">
         <div className="max-w-6xl mx-auto px-6">
           <Reveal className="text-center mb-16">
@@ -533,7 +533,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Pricing ──────────────────────────────────────────────────── */}
+      {/* -- Pricing ---------------------------------------------------- */}
       <section id="pricing" className="py-20 md:py-32 bg-slate-50 relative">
         <div className="max-w-5xl mx-auto px-6">
           <Reveal className="text-center mb-16">
@@ -645,7 +645,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Report Preview ──────────────────────────────────────────── */}
+      {/* -- Report Preview -------------------------------------------- */}
       <section id="preview" className="py-20 md:py-32 bg-white relative">
         <div className="max-w-6xl mx-auto px-6">
           <Reveal className="text-center mb-16">
@@ -696,7 +696,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Testimonials ─────────────────────────────────────────────── */}
+      {/* -- Testimonials ----------------------------------------------- */}
       <section id="testimonials" className="py-20 md:py-32 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <Reveal className="text-center mb-16">
@@ -732,7 +732,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── FAQ ─────────────────────────────────────────────────────── */}
+      {/* -- FAQ ------------------------------------------------------- */}
       <section className="py-20 md:py-32 bg-white relative">
         <div className="max-w-3xl mx-auto px-6">
           <Reveal className="text-center mb-16">
@@ -745,7 +745,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Final CTA ───────────────────────────────────────────────── */}
+      {/* -- Final CTA ------------------------------------------------- */}
       <section className="py-24 md:py-36 bg-slate-50 relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-100/40 rounded-full blur-[120px] pointer-events-none" />
@@ -768,7 +768,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────── */}
+      {/* -- Footer ---------------------------------------------------- */}
       <footer className="border-t border-slate-200 py-14 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-10 mb-12">
@@ -807,7 +807,7 @@ export default function Home() {
   );
 }
 
-/* ─── RestaurantMarquee — scrolling live data strip ─────────────────── */
+/* --- RestaurantMarquee — scrolling live data strip ------------------- */
 function RestaurantMarquee() {
   const row1 = [
     "Biryani Blues · Bangalore", "The Bombay Canteen · Mumbai",
@@ -843,7 +843,7 @@ function RestaurantMarquee() {
   )
 }
 
-/* ─── CompetitorRadar — animated SVG threat radar ────────────────────── */
+/* --- CompetitorRadar — animated SVG threat radar ---------------------- */
 function CompetitorRadar() {
   const competitors = [
     { cx: 64, cy: 34, threat: "high",   label: "The Bombay Canteen" },
@@ -918,7 +918,7 @@ function CompetitorRadar() {
   )
 }
 
-/* ─── LiveActivityFeed — rotating real-time alerts ───────────────────── */
+/* --- LiveActivityFeed — rotating real-time alerts --------------------- */
 function LiveActivityFeed() {
   const events = [
     { initials: "PM", name: "Priya M.", restaurant: "Tandoor Tales", city: "Bangalore", action: "identified 14 new competitors", dot: "#EF4444" },
@@ -981,7 +981,7 @@ function LiveActivityFeed() {
   )
 }
 
-/* ─── CyclingWord — cycles cuisine names in the hero headline ───────── */
+/* --- CyclingWord — cycles cuisine names in the hero headline --------- */
 function CyclingWord() {
   const words = ["Biryani", "Pizza", "Cafe", "North Indian", "Chinese", "Burger"]
   const [index, setIndex] = useState(0)
@@ -1012,7 +1012,7 @@ function CyclingWord() {
   )
 }
 
-/* ─── LiveAnalysisTicker — scrolling real-time feel ─────────────────── */
+/* --- LiveAnalysisTicker — scrolling real-time feel ------------------- */
 function LiveAnalysisTicker() {
   const examples = [
     { name: "Biryani Blues", city: "Bangalore", count: 14 },
@@ -1054,7 +1054,7 @@ function LiveAnalysisTicker() {
   )
 }
 
-/* ─── FloatingThreatCard — right side hero decoration (2xl only) ─────── */
+/* --- FloatingThreatCard — right side hero decoration (2xl only) ------- */
 function FloatingThreatCard() {
   const [mounted, setMounted] = useState(false)
   const [score, setScore] = useState(0)
@@ -1132,7 +1132,7 @@ function FloatingThreatCard() {
   )
 }
 
-/* ─── FloatingKeywordCard — left side hero decoration (2xl only) ─────── */
+/* --- FloatingKeywordCard — left side hero decoration (2xl only) ------- */
 function FloatingKeywordCard() {
   const [mounted, setMounted] = useState(false)
 
@@ -1174,7 +1174,7 @@ function FloatingKeywordCard() {
   )
 }
 
-/* ─── FAQ Accordion ──────────────────────────────────────────────────── */
+/* --- FAQ Accordion ---------------------------------------------------- */
 const FAQ_ITEMS = [
   {
     q: "What data does RestoRank actually use?",
@@ -1231,7 +1231,7 @@ function FAQAccordion() {
   )
 }
 
-/* ─── Preview Bars ─────────────────────────────────────────────────── */
+/* --- Preview Bars --------------------------------------------------- */
 function PreviewBars() {
   const { ref, visible } = useReveal(0.3);
   const competitors = [

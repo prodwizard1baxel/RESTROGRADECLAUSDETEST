@@ -2,7 +2,7 @@
 
 import ThreatRadar from "../dashboard/[id]/ThreatRadar"
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
+// --- Mock Data ----------------------------------------------------------------
 
 const RESTAURANT = { name: "Spice Garden", city: "Bandra West, Mumbai" }
 
@@ -80,7 +80,7 @@ const DELIVERY_BENCHMARKS = [
 
 const STRATEGIC_VERDICT = "Spice Garden faces moderate-to-high competitive pressure. The primary threat comes from well-established restaurant brands with strong digital footprints. To counter this, prioritise Google Business Profile optimisation, invest in content marketing around regional cuisine keywords, and launch a weekday lunch deal to capture the underserved office crowd. Your cuisine niche is defensible — lean into it."
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function CheckItem({ label, pass, note }: { label: string; pass: boolean; note: string }) {
   return (
@@ -100,7 +100,7 @@ function CheckItem({ label, pass, note }: { label: string; pass: boolean; note: 
   )
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// --- Page ---------------------------------------------------------------------
 
 export default function DemoPage() {
   const passCount = Object.values(GOOGLE_CHECKS).filter(c => c.pass).length
